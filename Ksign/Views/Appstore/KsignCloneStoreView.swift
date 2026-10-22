@@ -260,7 +260,6 @@ struct KsignCloneAppSectionView: View {
                 }
                 .padding(.horizontal, 20)
             }
-            .scrollTargetBehavior(.viewAligned)
         }
     }
 }
