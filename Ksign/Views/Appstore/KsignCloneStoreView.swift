@@ -135,6 +135,8 @@ struct KsignCloneStoreView: View {
             KsignCloneSearchView(data: data)
                 .tabItem { Label("Search", systemImage: "magnifyingglass") }
         }
+        // Hide Ksign's outer tab bar while this App Store-style screen is active.
+        .toolbar(.hidden, for: .tabBar)
     }
 }
 
@@ -677,7 +679,7 @@ struct KsignCloneAccountView: View {
                     }
                 }
                 
-                Section {
+                Section("Account") {
                     NavigationLink("Purchased") {}
                     NavigationLink {
                         KsignCloneInstalledAppsView()
@@ -687,13 +689,30 @@ struct KsignCloneAccountView: View {
                     NavigationLink("Subscriptions") {}
                     NavigationLink("Notifications") {}
                 }
-                
-                Section {
-                    NavigationLink("Redeem Gift Card or Code") {}
-                    NavigationLink("Send Gift Card by Email") {}
-                    NavigationLink("Add Funds to Apple ID") {}
+
+                Section("Ksign") {
+                    NavigationLink {
+                        FilesView()
+                    } label: {
+                        Label("Files", systemImage: "folder.fill")
+                    }
+                    NavigationLink {
+                        LibraryView()
+                    } label: {
+                        Label("Library", systemImage: "square.grid.2x2")
+                    }
+                    NavigationLink {
+                        DownloaderView()
+                    } label: {
+                        Label("Downloads", systemImage: "square.and.arrow.down.fill")
+                    }
+                    NavigationLink {
+                        SettingsView()
+                    } label: {
+                        Label("Settings", systemImage: "gearshape.2")
+                    }
                 }
-                
+
                 Section {
                     Button("Sign Out") { dismiss() }.foregroundStyle(.blue)
                 }
