@@ -373,15 +373,86 @@ struct KsignCloneAppSectionView: View {
     }
 }
 
+// Loads the real app artwork from Apple's public iTunes Search API.
+// If a match or network connection is unavailable, the existing SF Symbol remains as a fallback.
+struct KsignCloneAppIcon: View {
+    let name: String
+    let fallbackColor: Color
+    let fallbackSymbol: String
+    let size: CGFloat
+    let cornerRadius: CGFloat
+
+    @State private var artworkURL: URL?
+
+    private struct SearchResponse: Decodable {
+        let results: [AppResult]
+    }
+
+    private struct AppResult: Decodable {
+        let trackName: String?
+        let artworkUrl512: URL?
+        let artworkUrl100: URL?
+    }
+
+    var body: some View {
+        Group {
+            if let artworkURL {
+                AsyncImage(url: artworkURL) { phase in
+                    if let image = phase.image {
+                        image.resizable().scaledToFit()
+                    } else if phase.error != nil {
+                        fallbackIcon
+                    } else {
+                        fallbackIcon.overlay(ProgressView().tint(.white))
+                    }
+                }
+            } else {
+                fallbackIcon
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .task(id: name) {
+            await loadArtwork()
+        }
+    }
+
+    private var fallbackIcon: some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .fill(fallbackColor.gradient)
+            .overlay(Image(systemName: fallbackSymbol).font(.system(size: size * 0.42)).foregroundStyle(.white))
+    }
+
+    @MainActor
+    private func loadArtwork() async {
+        var components = URLComponents(string: "https://itunes.apple.com/search")
+        components?.queryItems = [
+            URLQueryItem(name: "term", value: name),
+            URLQueryItem(name: "entity", value: "software"),
+            URLQueryItem(name: "limit", value: "5"),
+            URLQueryItem(name: "country", value: "us")
+        ]
+        guard let url = components?.url else { return }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(SearchResponse.self, from: data)
+            let exactMatch = response.results.first {
+                $0.trackName?.localizedCaseInsensitiveCompare(name) == .orderedSame
+            }
+            let result = exactMatch ?? response.results.first
+            artworkURL = result?.artworkUrl512 ?? result?.artworkUrl100
+        } catch {
+            // Keep the fallback icon when offline or when Apple's catalog is unavailable.
+        }
+    }
+}
+
 struct KsignCloneSmallAppRow: View {
     let app: KsignCloneAppItem
     
     var body: some View {
         HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(app.iconColor)
-                .frame(width: 60, height: 60)
-                .overlay(Image(systemName: app.iconSymbol).foregroundStyle(.white).font(.title2))
+            KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 60, cornerRadius: 12)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(app.name)
@@ -439,10 +510,7 @@ struct KsignCloneAppDetailView: View {
             VStack(spacing: 20) {
                 // Header
                 HStack(spacing: 16) {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .fill(app.iconColor)
-                        .frame(width: 110, height: 110)
-                        .overlay(Image(systemName: app.iconSymbol).font(.system(size: 50)).foregroundStyle(.white))
+                    KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 110, cornerRadius: 22)
                     
                     VStack(alignment: .leading, spacing: 6) {
                         Text(app.name)
