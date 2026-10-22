@@ -134,8 +134,6 @@ struct KsignCloneStoreView: View {
             
             KsignCloneSearchView(data: data)
                 .tabItem { Label("Search", systemImage: "magnifyingglass") }
-            KsignCloneInstalledAppsView()
-                .tabItem { Label("My Apps", systemImage: "square.grid.2x2.fill") }
         }
     }
 }
@@ -681,6 +679,11 @@ struct KsignCloneAccountView: View {
                 
                 Section {
                     NavigationLink("Purchased") {}
+                    NavigationLink {
+                        KsignCloneInstalledAppsView()
+                    } label: {
+                        Label("My Apps", systemImage: "square.grid.2x2.fill")
+                    }
                     NavigationLink("Subscriptions") {}
                     NavigationLink("Notifications") {}
                 }
