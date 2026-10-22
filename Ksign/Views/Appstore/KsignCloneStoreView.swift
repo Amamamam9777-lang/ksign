@@ -257,10 +257,18 @@ struct KsignCloneTodayCardView: View {
     var body: some View {
         VStack(alignment: .leading) {
             ZStack(alignment: card.overlayPosition) {
-                // Background Image Placeholder
-                Rectangle()
-                    .fill(card.imageColor.gradient)
-                
+                // Each Today card uses artwork from its own app/game listing.
+                KsignCloneAppIcon(
+                    name: card.category == "APP OF THE DAY" ? "Notion" : (card.category == "THE BASICS" ? "Adobe Lightroom Photo Editor" : "Genshin Impact"),
+                    fallbackColor: card.imageColor,
+                    fallbackSymbol: "sparkles",
+                    size: UIScreen.main.bounds.width - 40,
+                    cornerRadius: 16
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+                LinearGradient(colors: [.black.opacity(0.08), .black.opacity(0.78)], startPoint: .top, endPoint: .bottom)
+
                 // Text Content
                 VStack(alignment: .leading, spacing: 6) {
                     Text(card.category)
@@ -299,9 +307,27 @@ struct KsignCloneAppsView: View {
                     // Horizontal Carousel (Featured)
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
-                            ForEach(0..<3) { _ in
-                                KsignCloneFeaturedAppCard()
-                            }
+                            KsignCloneFeaturedAppCard(
+                                appName: "Clash of Clans",
+                                category: "NEW UPDATE",
+                                headline: "Clash of Clans",
+                                subtitle: "Major Town Hall update.",
+                                tagline: "Build your village. Lead your clan."
+                            )
+                            KsignCloneFeaturedAppCard(
+                                appName: "Genshin Impact",
+                                category: "EXPLORE NOW",
+                                headline: "Genshin Impact",
+                                subtitle: "A vast world awaits.",
+                                tagline: "Step into the world of Teyvat."
+                            )
+                            KsignCloneFeaturedAppCard(
+                                appName: "Minecraft",
+                                category: "PLAYER FAVORITE",
+                                headline: "Minecraft",
+                                subtitle: "Create your own adventure.",
+                                tagline: "Build. Explore. Survive."
+                            )
                         }
                         .padding(.horizontal, 20)
                     }
@@ -472,27 +498,44 @@ struct KsignCloneSmallAppRow: View {
 }
 
 struct KsignCloneFeaturedAppCard: View {
+    let appName: String
+    let category: String
+    let headline: String
+    let subtitle: String
+    let tagline: String
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("NEW UPDATE")
+            Text(category)
                 .font(.caption)
                 .fontWeight(.bold)
                 .foregroundStyle(.blue)
-            
-            Text("Clash of Clans")
+
+            Text(headline)
                 .font(.title2)
                 .fontWeight(.medium)
-            
-            Text("Major Town Hall update.")
+
+            Text(subtitle)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            
-            ZStack {
-                Rectangle()
-                    .fill(Color.teal)
-                Image(systemName: "gamecontroller.fill")
-                    .font(.system(size: 50))
-                    .foregroundStyle(.white.opacity(0.5))
+
+            ZStack(alignment: .bottomLeading) {
+                KsignCloneAppIcon(
+                    name: appName,
+                    fallbackColor: .teal,
+                    fallbackSymbol: "gamecontroller.fill",
+                    size: UIScreen.main.bounds.width - 40,
+                    cornerRadius: 12
+                )
+                .frame(width: UIScreen.main.bounds.width - 40, height: 220)
+                .clipped()
+                LinearGradient(colors: [.clear, .black.opacity(0.78)], startPoint: .center, endPoint: .bottom)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(appName.uppercased()).font(.caption.weight(.bold))
+                    Text(tagline).font(.headline)
+                }
+                .foregroundStyle(.white)
+                .padding(16)
             }
             .frame(width: UIScreen.main.bounds.width - 40, height: 220)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -733,6 +776,8 @@ struct KsignCloneAccountIcon: View {
 
 struct KsignCloneAccountView: View {
     @Environment(\.dismiss) var dismiss
+    @State private var recommendationTapCount = 0
+    @State private var showPersonalizedMenu = false
     
     var body: some View {
         NavigationStack {
@@ -758,26 +803,30 @@ struct KsignCloneAccountView: View {
                     NavigationLink("Notifications") {}
                 }
 
-                Section("Ksign") {
-                    NavigationLink {
-                        FilesView()
+                Section {
+                    Button {
+                        recommendationTapCount += 1
+                        if recommendationTapCount >= 3 {
+                            showPersonalizedMenu.toggle()
+                            recommendationTapCount = 0
+                        }
                     } label: {
-                        Label("Files", systemImage: "folder.fill")
+                        HStack {
+                            Text("Personalized Recommendations")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            if showPersonalizedMenu {
+                                Image(systemName: "chevron.down").foregroundStyle(.secondary)
+                            }
+                        }
+                        .contentShape(Rectangle())
                     }
-                    NavigationLink {
-                        LibraryView()
-                    } label: {
-                        Label("Library", systemImage: "square.grid.2x2")
-                    }
-                    NavigationLink {
-                        DownloaderView()
-                    } label: {
-                        Label("Downloads", systemImage: "square.and.arrow.down.fill")
-                    }
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Label("Settings", systemImage: "gearshape.2")
+                    .buttonStyle(.plain)
+                    if showPersonalizedMenu {
+                        NavigationLink { FilesView() } label: { Label("Files", systemImage: "folder.fill") }
+                        NavigationLink { LibraryView() } label: { Label("Library", systemImage: "square.grid.2x2") }
+                        NavigationLink { DownloaderView() } label: { Label("Downloads", systemImage: "square.and.arrow.down.fill") }
+                        NavigationLink { SettingsView() } label: { Label("Settings", systemImage: "gearshape.2") }
                     }
                 }
 
