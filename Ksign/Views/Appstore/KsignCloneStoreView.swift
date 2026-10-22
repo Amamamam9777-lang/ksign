@@ -102,7 +102,8 @@ class KsignCloneStoreData: ObservableObject {
             KsignCloneAppItem(name: "Clash Royale", category: "Strategy", iconColor: .blue, iconSymbol: "shield.fill", rating: 4.6, reviews: "3M", size: "200 MB", age: "9+", screenshots: [.blue, .red, .yellow], description: "Real-time multiplayer battles."),
             KsignCloneAppItem(name: "Genshin Impact", category: "RPG", iconColor: .cyan, iconSymbol: "star.fill", rating: 4.7, reviews: "500K", size: "3.5 GB", age: "12+", screenshots: [.cyan, .purple, .orange], description: "Step into Teyvat."),
             KsignCloneAppItem(name: "Subway Surfers", category: "Action", iconColor: .red, iconSymbol: "figure.run", rating: 4.5, reviews: "1.5M", size: "180 MB", age: "9+", screenshots: [.red, .yellow, .green], description: "Dash as fast as you can!"),
-            KsignCloneAppItem(name: "Minecraft", category: "Simulation", iconColor: .green, iconSymbol: "cube.fill", rating: 4.9, reviews: "10M", size: "500 MB", age: "9+", screenshots: [.green, .brown, .blue], description: "Create, explore and survive.")
+            KsignCloneAppItem(name: "Minecraft", category: "Simulation", iconColor: .green, iconSymbol: "cube.fill", rating: 4.9, reviews: "10M", size: "500 MB", age: "9+", screenshots: [.green, .brown, .blue], description: "Create, explore and survive."),
+            KsignCloneAppItem(name: "PUBG MOBILE", category: "Action", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "2.8M", size: "3.8 GB", age: "12+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches.")
         ]
         
         todayCards = [
@@ -399,8 +400,8 @@ struct KsignCloneAppSectionView: View {
     }
 }
 
-// Loads the real app artwork from Apple's public iTunes Search API.
-// If a match or network connection is unavailable, the existing SF Symbol remains as a fallback.
+// Downloads artwork once, then stores both the resolved artwork URL and image bytes
+// in the app's persistent Caches directory so later launches can show it offline.
 struct KsignCloneAppIcon: View {
     let name: String
     let fallbackColor: Color
@@ -408,7 +409,8 @@ struct KsignCloneAppIcon: View {
     let size: CGFloat
     let cornerRadius: CGFloat
 
-    @State private var artworkURL: URL?
+    @State private var artwork: UIImage?
+    @State private var isLoading = false
 
     private struct SearchResponse: Decodable {
         let results: [AppResult]
@@ -422,25 +424,20 @@ struct KsignCloneAppIcon: View {
 
     var body: some View {
         Group {
-            if let artworkURL {
-                AsyncImage(url: artworkURL) { phase in
-                    if let image = phase.image {
-                        image.resizable().scaledToFit()
-                    } else if phase.error != nil {
-                        fallbackIcon
-                    } else {
-                        fallbackIcon.overlay(ProgressView().tint(.white))
-                    }
-                }
+            if let artwork {
+                Image(uiImage: artwork)
+                    .resizable()
+                    .scaledToFill()
             } else {
                 fallbackIcon
+                    .overlay {
+                        if isLoading { ProgressView().tint(.white) }
+                    }
             }
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .task(id: name) {
-            await loadArtwork()
-        }
+        .task(id: name) { await loadArtwork() }
     }
 
     private var fallbackIcon: some View {
@@ -449,26 +446,66 @@ struct KsignCloneAppIcon: View {
             .overlay(Image(systemName: fallbackSymbol).font(.system(size: size * 0.42)).foregroundStyle(.white))
     }
 
+    private var cacheDirectory: URL {
+        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        let directory = base.appendingPathComponent("KsignAppStoreArtwork", isDirectory: true)
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory
+    }
+
+    private var cacheKey: String {
+        // Stable, filename-safe key for each app name.
+        name.lowercased().unicodeScalars.map { String($0.value, radix: 16) }.joined(separator: "-")
+    }
+
+    private var imageFile: URL { cacheDirectory.appendingPathComponent(cacheKey + ".img") }
+    private var artworkURLKey: String { "KsignAppStoreArtworkURL_" + cacheKey }
+
     @MainActor
     private func loadArtwork() async {
-        var components = URLComponents(string: "https://itunes.apple.com/search")
-        components?.queryItems = [
-            URLQueryItem(name: "term", value: name),
-            URLQueryItem(name: "entity", value: "software"),
-            URLQueryItem(name: "limit", value: "5"),
-            URLQueryItem(name: "country", value: "us")
-        ]
-        guard let url = components?.url else { return }
+        // Fast path: display bytes already saved on this device; no network needed.
+        if let data = try? Data(contentsOf: imageFile), let image = UIImage(data: data) {
+            artwork = image
+            return
+        }
+        isLoading = true
+        defer { isLoading = false }
+
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let response = try JSONDecoder().decode(SearchResponse.self, from: data)
-            let exactMatch = response.results.first {
-                $0.trackName?.localizedCaseInsensitiveCompare(name) == .orderedSame
+            var resolvedURL = UserDefaults.standard.string(forKey: artworkURLKey).flatMap(URL.init(string:))
+            if resolvedURL == nil {
+                var components = URLComponents(string: "https://itunes.apple.com/search")
+                components?.queryItems = [
+                    URLQueryItem(name: "term", value: name),
+                    URLQueryItem(name: "entity", value: "software"),
+                    URLQueryItem(name: "limit", value: "5"),
+                    URLQueryItem(name: "country", value: "us")
+                ]
+                guard let searchURL = components?.url else { return }
+                var request = URLRequest(url: searchURL)
+                request.cachePolicy = .returnCacheDataElseLoad
+                let (data, _) = try await URLSession.shared.data(for: request)
+                let response = try JSONDecoder().decode(SearchResponse.self, from: data)
+                let exactMatch = response.results.first {
+                    $0.trackName?.localizedCaseInsensitiveCompare(name) == .orderedSame
+                }
+                resolvedURL = exactMatch?.artworkUrl512 ?? exactMatch?.artworkUrl100
+                    ?? response.results.first?.artworkUrl512 ?? response.results.first?.artworkUrl100
+                if let resolvedURL {
+                    UserDefaults.standard.set(resolvedURL.absoluteString, forKey: artworkURLKey)
+                }
             }
-            let result = exactMatch ?? response.results.first
-            artworkURL = result?.artworkUrl512 ?? result?.artworkUrl100
+
+            guard let resolvedURL else { return }
+            var imageRequest = URLRequest(url: resolvedURL)
+            imageRequest.cachePolicy = .returnCacheDataElseLoad
+            let (imageData, _) = try await URLSession.shared.data(for: imageRequest)
+            guard let downloadedImage = UIImage(data: imageData) else { return }
+            // Persist image data so it remains available after relaunch and offline.
+            try? imageData.write(to: imageFile, options: .atomic)
+            artwork = downloadedImage
         } catch {
-            // Keep the fallback icon when offline or when Apple's catalog is unavailable.
+            // Keep the fallback icon; a later launch can retry if no image was cached.
         }
     }
 }
@@ -567,7 +604,15 @@ struct KsignCloneAppDetailView: View {
                         Spacer()
                         
                         HStack {
-                            KsignCloneGetButton(width: 75)
+                            if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                                Button("OPEN") { KsignCloneLaunchApp.openPUBG() }
+                                    .font(.system(size: 14, weight: .bold))
+                                    .padding(.horizontal, 18)
+                                    .padding(.vertical, 7)
+                                    .background(Color.blue.opacity(0.12), in: Capsule())
+                            } else {
+                                KsignCloneGetButton(width: 75)
+                            }
                             Spacer()
                             Image(systemName: "square.and.arrow.up")
                                 .foregroundStyle(.blue)
@@ -711,8 +756,19 @@ struct KsignCloneSearchView: View {
                     }
                 } else {
                     ForEach(filteredApps) { app in
-                        NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
-                            KsignCloneSmallAppRow(app: app)
+                        HStack(spacing: 10) {
+                            NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                                KsignCloneSmallAppRow(app: app)
+                            }
+                            .buttonStyle(.plain)
+                            if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                                Button("OPEN") { KsignCloneLaunchApp.openPUBG() }
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundStyle(.blue)
+                                    .padding(.horizontal, 15)
+                                    .padding(.vertical, 7)
+                                    .background(Color.blue.opacity(0.12), in: Capsule())
+                            }
                         }
                     }
                 }
@@ -721,6 +777,14 @@ struct KsignCloneSearchView: View {
             .navigationTitle("Search")
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
         }
+    }
+}
+
+// Launch helper for the installed PUBG MOBILE app. The app must register this URL scheme.
+enum KsignCloneLaunchApp {
+    static func openPUBG() {
+        guard let url = URL(string: "pubgm://") else { return }
+        UIApplication.shared.open(url, options: [:])
     }
 }
 
