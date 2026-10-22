@@ -14,6 +14,46 @@
 
 import SwiftUI
 import Combine
+import UIKit
+
+// Local history of apps whose installation was initiated through Ksign.
+// This is not a system-wide inventory of every app installed on the device.
+struct KsignInstalledApp: Codable, Identifiable, Equatable {
+    var id: String { bundleID }
+    let name: String
+    let bundleID: String
+}
+
+final class KsignInstalledAppsStore: ObservableObject {
+    static let shared = KsignInstalledAppsStore()
+    @Published private(set) var apps: [KsignInstalledApp] = []
+    private let key = "Ksign.installedAppsHistory.v1"
+
+    private init() { load() }
+
+    func record(name: String, bundleID: String) {
+        guard !bundleID.isEmpty else { return }
+        apps.removeAll { $0.bundleID == bundleID }
+        apps.insert(KsignInstalledApp(name: name.isEmpty ? bundleID : name, bundleID: bundleID), at: 0)
+        save()
+    }
+
+    func remove(bundleID: String) {
+        apps.removeAll { $0.bundleID == bundleID }
+        save()
+    }
+
+    private func load() {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let decoded = try? JSONDecoder().decode([KsignInstalledApp].self, from: data) else { return }
+        apps = decoded
+    }
+
+    private func save() {
+        guard let data = try? JSONEncoder().encode(apps) else { return }
+        UserDefaults.standard.set(data, forKey: key)
+    }
+}
 
 // MARK: - Data Models
 
@@ -94,6 +134,75 @@ struct KsignCloneStoreView: View {
             
             KsignCloneSearchView(data: data)
                 .tabItem { Label("Search", systemImage: "magnifyingglass") }
+            KsignCloneInstalledAppsView()
+                .tabItem { Label("My Apps", systemImage: "square.grid.2x2.fill") }
+        }
+    }
+}
+
+struct KsignCloneInstalledAppsView: View {
+    @StateObject private var store = KsignInstalledAppsStore.shared
+    @State private var failedToOpenName: String?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if store.apps.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "square.grid.2x2").font(.system(size: 42)).foregroundStyle(.secondary)
+                        Text("No Installed Apps Yet").font(.title3.weight(.semibold))
+                        Text("Apps installed through Ksign will appear here when installation completes.")
+                            .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    }
+                    .padding(32)
+                } else {
+                    List {
+                        ForEach(store.apps) { app in
+                            HStack(spacing: 12) {
+                                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                    .fill(Color.blue)
+                                    .frame(width: 54, height: 54)
+                                    .overlay(Image(systemName: "app.fill").font(.title2).foregroundStyle(.white))
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(app.name).font(.headline).lineLimit(1)
+                                    Text(app.bundleID).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                }
+                                Spacer(minLength: 4)
+                                Button("Open") { open(app) }
+                                    .buttonStyle(.borderedProminent)
+                                    .controlSize(.small)
+                            }
+                            .padding(.vertical, 4)
+                            .swipeActions {
+                                Button(role: .destructive) { store.remove(bundleID: app.bundleID) } label: {
+                                    Label("Remove", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
+                    .listStyle(.insetGrouped)
+                }
+            }
+            .navigationTitle("My Apps")
+            .alert("Can't Open App", isPresented: Binding(
+                get: { failedToOpenName != nil },
+                set: { if !$0 { failedToOpenName = nil } }
+            )) {
+                Button("OK", role: .cancel) { failedToOpenName = nil }
+            } message: {
+                Text("\(failedToOpenName ?? "This app") may not support a URL scheme that Ksign can use to launch it. Try opening it from the Home Screen.")
+            }
+        }
+    }
+
+    private func open(_ app: KsignInstalledApp) {
+        // A bundle identifier is not automatically a URL scheme, so this is best-effort.
+        guard let url = URL(string: "\(app.bundleID)://") else {
+            failedToOpenName = app.name
+            return
+        }
+        UIApplication.shared.open(url, options: [:]) { success in
+            if !success { failedToOpenName = app.name }
         }
     }
 }
