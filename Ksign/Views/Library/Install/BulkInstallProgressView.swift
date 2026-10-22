@@ -57,6 +57,10 @@ struct BulkInstallProgressView: View {
                 _isWebviewPresenting = false
             }
             
+            if case .completed = newStatus, let bundleID = app.identifier {
+                KsignInstalledAppsStore.shared.record(name: app.name ?? bundleID, bundleID: bundleID)
+            }
+
             switch newStatus {
             case .completed, .broken(_):
                 progressTask?.cancel()
