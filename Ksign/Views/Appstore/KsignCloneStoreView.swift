@@ -468,7 +468,7 @@ struct KsignCloneAppIcon: View {
 
     private var fallbackIcon: some View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .fill(fallbackColor.gradient)
+            .fill(Rectangle().fill(fallbackColor))
             .overlay(Image(systemName: fallbackSymbol).font(.system(size: size * 0.42)).foregroundStyle(.white))
     }
 
@@ -635,12 +635,12 @@ struct KsignCloneAppBanner: View {
     private var cacheFile: URL { cacheDirectory.appendingPathComponent(cacheKey + ".img") }
 
     var body: some View {
-        ZStack {
+        Group {
             if let image {
                 Image(uiImage: image).resizable().scaledToFill()
             } else {
                 ZStack {
-                    fallbackColor.gradient
+                    Rectangle().fill(fallbackColor)
                     Image(systemName: fallbackSymbol).font(.system(size: 64)).foregroundStyle(.white.opacity(0.85))
                 }
             }
