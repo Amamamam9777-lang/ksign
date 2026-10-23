@@ -612,112 +612,113 @@ struct KsignCloneFeaturedAppCard: View {
 
 struct KsignCloneAppDetailView: View {
     let app: KsignCloneAppItem
-    
+
+    private var isPUBG: Bool { app.name.localizedCaseInsensitiveContains("PUBG MOBILE") }
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                // Header
-                HStack(spacing: 16) {
-                    KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 110, cornerRadius: 22)
-                    
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(app.name)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        
-                        Text(app.category)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        
-                        Spacer()
-                        
+            VStack(alignment: .leading, spacing: 0) {
+                // Wide hero artwork, similar to the App Store product page.
+                ZStack(alignment: .bottomLeading) {
+                    KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor,
+                                      fallbackSymbol: app.iconSymbol,
+                                      size: UIScreen.main.bounds.width, cornerRadius: 0)
+                        .frame(width: UIScreen.main.bounds.width, height: 310)
+                        .clipped()
+                    LinearGradient(colors: [.clear, .black.opacity(0.18)], startPoint: .center, endPoint: .bottom)
+                    if isPUBG {
+                        Text("PUBG MOBILE")
+                            .font(.system(size: 24, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.7), radius: 5)
+                            .padding(20)
+                    }
+                }
+                .frame(height: 310)
+                .clipped()
+
+                HStack(spacing: 14) {
+                    KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor,
+                                      fallbackSymbol: app.iconSymbol, size: 96, cornerRadius: 21)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(app.name).font(.system(size: 22, weight: .semibold)).lineLimit(2)
+                        Text(isPUBG ? "Tencent Mobile International Limited" : app.category)
+                            .font(.system(size: 14)).foregroundStyle(.secondary).lineLimit(2)
                         HStack {
-                            if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                            if isPUBG {
                                 KsignCloneOpenButton { KsignCloneLaunchApp.openPUBG() }
                             } else {
-                                KsignCloneGetButton(width: 75)
+                                KsignCloneGetButton(width: 76)
                             }
                             Spacer()
-                            Image(systemName: "square.and.arrow.up")
-                                .foregroundStyle(.blue)
-                        }
+                        }.padding(.top, 4)
                     }
-                    .frame(height: 110)
+                    Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-                
+                .padding(.horizontal, 20).padding(.vertical, 18)
+
                 Divider().padding(.horizontal, 20)
-                
-                // Stats Row
-                HStack(alignment: .top) {
-                    KsignCloneStatItem(top: "\(app.rating)", bottom: "★★★★★", caption: "\(app.reviews) Ratings")
-                    Divider().frame(height: 30)
-                    KsignCloneStatItem(top: "#1", bottom: "Chart", caption: app.category)
-                    Divider().frame(height: 30)
-                    KsignCloneStatItem(top: app.age, bottom: "Years", caption: "Age")
+
+                HStack(spacing: 0) {
+                    VStack(spacing: 5) {
+                        Text(isPUBG ? "4.3" : String(app.rating)).font(.system(size: 23, weight: .bold)).foregroundStyle(.secondary)
+                        Text("★★★★★").font(.system(size: 12)).foregroundStyle(.secondary)
+                        Text(isPUBG ? "1.6M RATINGS" : "\(app.reviews) RATINGS").font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary).lineLimit(1)
+                    }.frame(maxWidth: .infinity)
+                    Divider().frame(height: 62)
+                    VStack(spacing: 5) {
+                        Text(isPUBG ? "13+" : app.age).font(.system(size: 23, weight: .bold)).foregroundStyle(.secondary)
+                        Text("Years").font(.system(size: 12)).foregroundStyle(.secondary)
+                        Text("AGE RATING").font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity)
+                    Divider().frame(height: 62)
+                    VStack(spacing: 5) {
+                        Text(isPUBG ? "#12" : "#1").font(.system(size: 23, weight: .bold)).foregroundStyle(.secondary)
+                        Text(app.category).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1)
+                        Text("CHART").font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 20)
-                
-                // What's New
+                .padding(.vertical, 16).padding(.horizontal, 10)
+
+                Divider().padding(.horizontal, 20)
+
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("What's New")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                    
-                    HStack {
-                        Text("Version 4.2.1")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text("2d ago")
-                            .foregroundStyle(.secondary)
-                    }
-                    .font(.subheadline)
-                    
-                    Text("Bug fixes and performance improvements. Enjoy the latest update!")
+                    Text("What's New").font(.title3.bold())
+                    HStack { Text(isPUBG ? "Version 3.9.0" : "Version 4.2.1").foregroundStyle(.secondary); Spacer(); Text("Recently Updated").foregroundStyle(.secondary) }.font(.subheadline)
+                    Text(isPUBG ? "New content, events and gameplay improvements. Update to experience the latest features." : "Bug fixes and performance improvements. Enjoy the latest update!")
                         .font(.body)
-                        .lineLimit(3)
-                }
-                .padding(.horizontal, 20)
-                
-                // Screenshots
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 15) {
-                        ForEach(app.screenshots, id: \.self) { color in
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .fill(color.opacity(0.3))
-                                .frame(width: 240, height: 440)
-                                .overlay(
-                                    VStack {
-                                        Spacer()
-                                        Image(systemName: app.iconSymbol)
-                                            .font(.largeTitle)
-                                            .foregroundStyle(color)
-                                        Spacer()
-                                    }
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                                )
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                }
-                
-                // Description
+                }.padding(20)
+
                 VStack(alignment: .leading, spacing: 10) {
+                    Text("Preview").font(.title3.bold()).padding(.horizontal, 20)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(Array(app.screenshots.enumerated()), id: \.offset) { index, color in
+                                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(LinearGradient(colors: [color.opacity(0.95), .black], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                    .frame(width: 220, height: 390)
+                                    .overlay(alignment: .center) {
+                                        VStack(spacing: 12) {
+                                            KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 84, cornerRadius: 18)
+                                            Text(isPUBG ? ["BATTLE ROYALE", "TEAM UP", "SURVIVE"] [index % 3] : app.name.uppercased())
+                                                .font(.headline.bold()).foregroundStyle(.white).multilineTextAlignment(.center)
+                                        }.padding()
+                                    }
+                            }
+                        }.padding(.horizontal, 20)
+                    }
+                }.padding(.top, 8)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Description").font(.title3.bold())
                     Text(app.description)
-                    Text("Size: \(app.size)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 10)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 40)
+                    Text("Developer: \(isPUBG ? "Tencent Mobile International Limited" : app.category)").font(.subheadline).foregroundStyle(.secondary)
+                    Text("Size: \(app.size)").font(.caption).foregroundStyle(.secondary).padding(.top, 4)
+                }.padding(20).padding(.bottom, 35)
             }
         }
+        .background(Color.black.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
