@@ -635,7 +635,7 @@ struct KsignCloneAppBanner: View {
     private var cacheFile: URL { cacheDirectory.appendingPathComponent(cacheKey + ".img") }
 
     var body: some View {
-        Group {
+        ZStack {
             if let image {
                 Image(uiImage: image).resizable().scaledToFill()
             } else {
