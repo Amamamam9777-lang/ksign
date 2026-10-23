@@ -103,7 +103,7 @@ class KsignCloneStoreData: ObservableObject {
             KsignCloneAppItem(name: "Genshin Impact", category: "RPG", iconColor: .cyan, iconSymbol: "star.fill", rating: 4.7, reviews: "500K", size: "3.5 GB", age: "12+", screenshots: [.cyan, .purple, .orange], description: "Step into Teyvat."),
             KsignCloneAppItem(name: "Subway Surfers", category: "Action", iconColor: .red, iconSymbol: "figure.run", rating: 4.5, reviews: "1.5M", size: "180 MB", age: "9+", screenshots: [.red, .yellow, .green], description: "Dash as fast as you can!"),
             KsignCloneAppItem(name: "Minecraft", category: "Simulation", iconColor: .green, iconSymbol: "cube.fill", rating: 4.9, reviews: "10M", size: "500 MB", age: "9+", screenshots: [.green, .brown, .blue], description: "Create, explore and survive."),
-            KsignCloneAppItem(name: "PUBG MOBILE", category: "Action", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "2.8M", size: "3.8 GB", age: "12+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches."),
+            KsignCloneAppItem(name: "PUBG MOBILE", category: "Top Battle Royale Mobile", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "2.8M", size: "3.8 GB", age: "12+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches."),
             KsignCloneAppItem(name: "Call of Duty: Mobile", category: "Action", iconColor: .black, iconSymbol: "scope", rating: 4.7, reviews: "1.8M", size: "3.1 GB", age: "17+", screenshots: [.black, .gray, .red], description: "Multiplayer action and battle royale."),
             KsignCloneAppItem(name: "Brawl Stars", category: "Action", iconColor: .orange, iconSymbol: "star.fill", rating: 4.7, reviews: "2M", size: "1.2 GB", age: "9+", screenshots: [.orange, .yellow, .purple], description: "Fast-paced multiplayer battles."),
             KsignCloneAppItem(name: "Roblox", category: "Adventure", iconColor: .gray, iconSymbol: "cube.fill", rating: 4.5, reviews: "5M", size: "300 MB", age: "12+", screenshots: [.gray, .blue, .green], description: "Play, create, and explore experiences."),
@@ -608,6 +608,70 @@ struct KsignCloneFeaturedAppCard: View {
     }
 }
 
+// Loads a real App Store screenshot for the hero banner and persists it on-device.
+// Uses the app icon only as a fallback if screenshots are unavailable.
+struct KsignCloneAppBanner: View {
+    let name: String
+    let fallbackColor: Color
+    let fallbackSymbol: String
+    let width: CGFloat
+    let height: CGFloat
+    @State private var image: UIImage?
+
+    private struct SearchResponse: Decodable { let results: [AppResult] }
+    private struct AppResult: Decodable {
+        let trackName: String?
+        let screenshotUrls: [URL]?
+        let ipadScreenshotUrls: [URL]?
+    }
+
+    private var cacheDirectory: URL {
+        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        let dir = base.appendingPathComponent("KsignAppStoreArtwork", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+    private var cacheKey: String { "banner-" + name.lowercased().unicodeScalars.map { String($0.value, radix: 16) }.joined(separator: "-") }
+    private var cacheFile: URL { cacheDirectory.appendingPathComponent(cacheKey + ".img") }
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image).resizable().scaledToFill()
+            } else {
+                ZStack {
+                    fallbackColor.gradient
+                    Image(systemName: fallbackSymbol).font(.system(size: 64)).foregroundStyle(.white.opacity(0.85))
+                }
+            }
+        }
+        .frame(width: width, height: height)
+        .clipped()
+        .task(id: name) { await loadBanner() }
+    }
+
+    @MainActor private func loadBanner() async {
+        if let data = try? Data(contentsOf: cacheFile), let cached = UIImage(data: data) {
+            image = cached
+            return
+        }
+        do {
+            var parts = URLComponents(string: "https://itunes.apple.com/search")
+            parts?.queryItems = [URLQueryItem(name: "term", value: name), URLQueryItem(name: "entity", value: "software"), URLQueryItem(name: "limit", value: "8"), URLQueryItem(name: "country", value: "us")]
+            guard let url = parts?.url else { return }
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(SearchResponse.self, from: data)
+            let result = response.results.first { $0.trackName?.localizedCaseInsensitiveCompare(name) == .orderedSame } ?? response.results.first
+            // Prefer iPad screenshots where available; otherwise use the app's first App Store screenshot.
+            guard let screenshot = result?.ipadScreenshotUrls?.first ?? result?.screenshotUrls?.first else { return }
+            let (imageData, _) = try await URLSession.shared.data(from: screenshot)
+            guard let downloaded = UIImage(data: imageData) else { return }
+            try? imageData.write(to: cacheFile, options: .atomic)
+            image = downloaded
+        } catch { /* Leave fallback visible; retry on a later visit. */ }
+    }
+}
+
 // MARK: - 3. App Detail View (Product Page)
 
 struct KsignCloneAppDetailView: View {
@@ -620,11 +684,11 @@ struct KsignCloneAppDetailView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Wide hero artwork, similar to the App Store product page.
                 ZStack(alignment: .bottomLeading) {
-                    KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor,
-                                      fallbackSymbol: app.iconSymbol,
-                                      size: UIScreen.main.bounds.width, cornerRadius: 0)
-                        .frame(width: UIScreen.main.bounds.width, height: 310)
-                        .clipped()
+                    KsignCloneAppBanner(name: app.name,
+                                        fallbackColor: app.iconColor,
+                                        fallbackSymbol: app.iconSymbol,
+                                        width: UIScreen.main.bounds.width,
+                                        height: 310)
                     LinearGradient(colors: [.clear, .black.opacity(0.18)], startPoint: .center, endPoint: .bottom)
                     if isPUBG {
                         Text("PUBG MOBILE")
@@ -797,7 +861,16 @@ struct KsignCloneSearchView: View {
                                             Text(app.category)
                                                 .font(.system(size: 13))
                                                 .lineLimit(1)
+                                                .truncationMode(.tail)
                                                 .foregroundStyle(.secondary)
+                                            HStack(spacing: 4) {
+                                                Text("★★★★☆")
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundStyle(.secondary)
+                                                Text("1.6M")
+                                                    .font(.system(size: 12))
+                                                    .foregroundStyle(.secondary)
+                                            }
                                         }
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .layoutPriority(1)
@@ -808,10 +881,31 @@ struct KsignCloneSearchView: View {
                                 .buttonStyle(.plain)
 
                                 Spacer(minLength: 4)
-                                KsignCloneOpenButton { KsignCloneLaunchApp.openPUBG() }
+                                Button { KsignCloneLaunchApp.openPUBG() } label: {
+                                    Text("Open")
+                                        .font(.system(size: 17, weight: .semibold))
+                                        .foregroundStyle(Color(red: 0.10, green: 0.58, blue: 1.0))
+                                        .frame(width: 112, height: 48)
+                                        .background(Color(red: 0.12, green: 0.12, blue: 0.13), in: Capsule())
+                                }
+                                .buttonStyle(.plain)
                             }
                             .padding(.vertical, 8)
                             .padding(.horizontal, 4)
+                            if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                                HStack(spacing: 10) {
+                                    Text("#12 in Action")
+                                    Text("|").foregroundStyle(.tertiary)
+                                    Text("Battle Royale")
+                                    Text("Multiplayer")
+                                }
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                                .padding(.top, 2)
+                                .padding(.bottom, 8)
+                            }
                         } else {
                             NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
                                 KsignCloneSmallAppRow(app: app)
