@@ -103,7 +103,12 @@ class KsignCloneStoreData: ObservableObject {
             KsignCloneAppItem(name: "Genshin Impact", category: "RPG", iconColor: .cyan, iconSymbol: "star.fill", rating: 4.7, reviews: "500K", size: "3.5 GB", age: "12+", screenshots: [.cyan, .purple, .orange], description: "Step into Teyvat."),
             KsignCloneAppItem(name: "Subway Surfers", category: "Action", iconColor: .red, iconSymbol: "figure.run", rating: 4.5, reviews: "1.5M", size: "180 MB", age: "9+", screenshots: [.red, .yellow, .green], description: "Dash as fast as you can!"),
             KsignCloneAppItem(name: "Minecraft", category: "Simulation", iconColor: .green, iconSymbol: "cube.fill", rating: 4.9, reviews: "10M", size: "500 MB", age: "9+", screenshots: [.green, .brown, .blue], description: "Create, explore and survive."),
-            KsignCloneAppItem(name: "PUBG MOBILE", category: "Action", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "2.8M", size: "3.8 GB", age: "12+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches.")
+            KsignCloneAppItem(name: "PUBG MOBILE", category: "Action", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "2.8M", size: "3.8 GB", age: "12+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches."),
+            KsignCloneAppItem(name: "Call of Duty: Mobile", category: "Action", iconColor: .black, iconSymbol: "scope", rating: 4.7, reviews: "1.8M", size: "3.1 GB", age: "17+", screenshots: [.black, .gray, .red], description: "Multiplayer action and battle royale."),
+            KsignCloneAppItem(name: "Brawl Stars", category: "Action", iconColor: .orange, iconSymbol: "star.fill", rating: 4.7, reviews: "2M", size: "1.2 GB", age: "9+", screenshots: [.orange, .yellow, .purple], description: "Fast-paced multiplayer battles."),
+            KsignCloneAppItem(name: "Roblox", category: "Adventure", iconColor: .gray, iconSymbol: "cube.fill", rating: 4.5, reviews: "5M", size: "300 MB", age: "12+", screenshots: [.gray, .blue, .green], description: "Play, create, and explore experiences."),
+            KsignCloneAppItem(name: "Free Fire", category: "Action", iconColor: .red, iconSymbol: "flame.fill", rating: 4.3, reviews: "1.5M", size: "1.1 GB", age: "17+", screenshots: [.red, .orange, .black], description: "Battle royale survival action."),
+            KsignCloneAppItem(name: "Among Us!", category: "Party", iconColor: .red, iconSymbol: "person.fill", rating: 4.1, reviews: "900K", size: "700 MB", age: "9+", screenshots: [.red, .blue, .purple], description: "Find the impostor with your crew.")
         ]
         
         todayCards = [
@@ -329,6 +334,27 @@ struct KsignCloneAppsView: View {
                                 subtitle: "Create your own adventure.",
                                 tagline: "Build. Explore. Survive."
                             )
+                            KsignCloneFeaturedAppCard(
+                                appName: "PUBG MOBILE",
+                                category: "BATTLE ROYALE",
+                                headline: "PUBG MOBILE",
+                                subtitle: "Drop in. Gear up. Survive.",
+                                tagline: "Be the last one standing."
+                            )
+                            KsignCloneFeaturedAppCard(
+                                appName: "Call of Duty: Mobile",
+                                category: "ACTION SPOTLIGHT",
+                                headline: "Call of Duty: Mobile",
+                                subtitle: "Jump into multiplayer action.",
+                                tagline: "Your next match starts here."
+                            )
+                            KsignCloneFeaturedAppCard(
+                                appName: "Brawl Stars",
+                                category: "QUICK MATCHES",
+                                headline: "Brawl Stars",
+                                subtitle: "Fast matches with friends.",
+                                tagline: "Team up and battle."
+                            )
                         }
                         .padding(.horizontal, 20)
                     }
@@ -526,9 +552,11 @@ struct KsignCloneSmallAppRow: View {
                     .foregroundStyle(.secondary)
             }
             
-            Spacer()
-            
-            KsignCloneGetButton()
+            Spacer(minLength: 4)
+
+            if !app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                KsignCloneGetButton()
+            }
         }
         .padding(.vertical, 8)
     }
@@ -605,11 +633,7 @@ struct KsignCloneAppDetailView: View {
                         
                         HStack {
                             if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
-                                Button("OPEN") { KsignCloneLaunchApp.openPUBG() }
-                                    .font(.system(size: 14, weight: .bold))
-                                    .padding(.horizontal, 18)
-                                    .padding(.vertical, 7)
-                                    .background(Color.blue.opacity(0.12), in: Capsule())
+                                KsignCloneOpenButton { KsignCloneLaunchApp.openPUBG() }
                             } else {
                                 KsignCloneGetButton(width: 75)
                             }
@@ -756,19 +780,42 @@ struct KsignCloneSearchView: View {
                     }
                 } else {
                     ForEach(filteredApps) { app in
-                        HStack(spacing: 10) {
+                        if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                            // Keep navigation and launching as separate hit targets: tapping the icon/title
+                            // opens the product page; only the blue OPEN button launches the installed game.
+                            HStack(spacing: 12) {
+                                NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                                    HStack(spacing: 12) {
+                                        KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 60, cornerRadius: 12)
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(app.name)
+                                                .font(.system(size: 16, weight: .medium))
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.8)
+                                                .foregroundStyle(.primary)
+                                            Text(app.category)
+                                                .font(.system(size: 13))
+                                                .lineLimit(1)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .layoutPriority(1)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+
+                                Spacer(minLength: 4)
+                                KsignCloneOpenButton { KsignCloneLaunchApp.openPUBG() }
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 4)
+                        } else {
                             NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
                                 KsignCloneSmallAppRow(app: app)
                             }
                             .buttonStyle(.plain)
-                            if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
-                                Button("OPEN") { KsignCloneLaunchApp.openPUBG() }
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundStyle(.blue)
-                                    .padding(.horizontal, 15)
-                                    .padding(.vertical, 7)
-                                    .background(Color.blue.opacity(0.12), in: Capsule())
-                            }
                         }
                     }
                 }
@@ -789,6 +836,23 @@ enum KsignCloneLaunchApp {
 }
 
 // MARK: - 5. Shared Components
+
+struct KsignCloneOpenButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text("OPEN")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 18)
+                .frame(height: 30)
+                .background(Color.blue, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .fixedSize()
+    }
+}
 
 struct KsignCloneGetButton: View {
     var width: CGFloat = 72
