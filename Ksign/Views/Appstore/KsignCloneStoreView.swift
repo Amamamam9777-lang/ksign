@@ -748,7 +748,7 @@ struct KsignCloneAppDetailView: View {
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text("What's New").font(.title3.bold())
-                    HStack { Text(isPUBG ? "Version 3.9.0" : "Version 4.2.1").foregroundStyle(.secondary); Spacer(); Text("Recently Updated").foregroundStyle(.secondary) }.font(.subheadline)
+                    HStack { Text(isPUBG ? "Version 4.6.0" : "Version 4.2.1").foregroundStyle(.secondary); Spacer(); Text("Recently Updated").foregroundStyle(.secondary) }.font(.subheadline)
                     Text(isPUBG ? "New content, events and gameplay improvements. Update to experience the latest features." : "Bug fixes and performance improvements. Enjoy the latest update!")
                         .font(.body)
                 }.padding(20)
