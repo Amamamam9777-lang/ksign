@@ -741,7 +741,7 @@ struct KsignCloneAppDetailView: View {
                                         fallbackColor: app.iconColor,
                                         fallbackSymbol: app.iconSymbol,
                                         width: UIScreen.main.bounds.width,
-                                        height: 310)
+                                        height: 250)
                     LinearGradient(colors: [.clear, .black.opacity(0.18)], startPoint: .center, endPoint: .bottom)
                     if isPUBG {
                         Text("PUBG MOBILE")
@@ -751,7 +751,7 @@ struct KsignCloneAppDetailView: View {
                             .padding(20)
                     }
                 }
-                .frame(height: 310)
+                .frame(height: 250)
                 .clipped()
 
                 HStack(spacing: 14) {
@@ -906,10 +906,10 @@ struct KsignCloneSearchView: View {
                         if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
                             // Keep navigation and launching as separate hit targets: tapping the icon/title
                             // opens the product page; only the blue OPEN button launches the installed game.
-                            HStack(spacing: 12) {
+                            HStack(spacing: 8) {
                                 NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
-                                    HStack(spacing: 12) {
-                                        KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 60, cornerRadius: 12)
+                                    HStack(spacing: 10) {
+                                        KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 56, cornerRadius: 12)
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(app.name)
                                                 .font(.system(size: 16, weight: .medium))
@@ -932,39 +932,43 @@ struct KsignCloneSearchView: View {
                                                     .fixedSize(horizontal: true, vertical: false)
                                             }
                                         }
-                                        .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
-                                        .layoutPriority(2)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .layoutPriority(1)
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
+                                .frame(maxWidth: .infinity)
 
-                                Spacer(minLength: 4)
                                 Button { KsignCloneLaunchApp.openPUBG() } label: {
                                     Text("Open")
-                                        .font(.system(size: 17, weight: .semibold))
+                                        .font(.system(size: 16, weight: .semibold))
                                         .foregroundStyle(Color(red: 0.10, green: 0.58, blue: 1.0))
-                                        .frame(width: 112, height: 48)
+                                        .frame(width: 82, height: 44)
                                         .background(Color(red: 0.12, green: 0.12, blue: 0.13), in: Capsule())
                                 }
                                 .buttonStyle(.plain)
+                                .fixedSize()
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
-                            .padding(.horizontal, 4)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
                             if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
-                                HStack(spacing: 10) {
+                                HStack(spacing: 8) {
                                     Text("#12 in Action")
                                     Text("|").foregroundStyle(.tertiary)
                                     Text("Battle Royale")
                                     Text("Multiplayer")
                                 }
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.75)
+                                .padding(.horizontal, 12)
                                 .padding(.top, 2)
                                 .padding(.bottom, 8)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 12, bottom: 8, trailing: 12))
                             }
                         } else {
                             NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
