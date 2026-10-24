@@ -811,13 +811,13 @@ struct KsignCloneAppDetailView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             if isPUBG {
-                                ForEach(0..<KsignClonePUBGPreviewArtwork.images.count, id: \\.self) { index in
+                                ForEach(0..<KsignClonePUBGPreviewArtwork.images.count, id: \.self) { index in
                                     KsignClonePUBGPreviewBanner(index: index)
                                         .frame(width: 320, height: 150)
                                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                                 }
                             } else {
-                                ForEach(Array(app.screenshots.enumerated()), id: \\.offset) { index, _ in
+                                ForEach(Array(app.screenshots.enumerated()), id: \.offset) { index, _ in
                                     ZStack(alignment: .bottomLeading) {
                                         KsignCloneAppBanner(name: app.name,
                                                             fallbackColor: app.iconColor,
