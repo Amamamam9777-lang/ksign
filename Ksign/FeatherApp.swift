@@ -29,11 +29,11 @@ struct FeatherApp: App {
 					.transition(.move(edge: .top).combined(with: .opacity))
 				VariedTabbarView()
 					.environment(\.managedObjectContext, storage.context)
-					.onOpenURL(perform: _handleURL)
 					.transition(.move(edge: .top).combined(with: .opacity))
 			}
 			.animation(.smooth, value: downloadManager.manualDownloads.description)
             .animation(.smooth, value: extractManager.extractItems.description)
+            .onOpenURL(perform: _handleURL)
 			.onReceive(accentColorManager.objectWillChange) { _ in
 				accentColorManager.updateGlobalTintColor()
 			}
