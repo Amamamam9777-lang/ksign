@@ -18,86 +18,113 @@ struct FeatherApp: App {
 	@StateObject var accentColorManager = AccentColorManager.shared
     @StateObject var extractManager = ExtractManager.shared
 	@StateObject var logsManager = LogsManager.shared
-    @State private var showPUBGProductPage = false
+	@State private var showPUBGProductPage = false
 
-    private var pubgProduct: KsignCloneAppItem {
-        KsignCloneAppItem(
-            name: "PUBG MOBILE",
-            category: "Top Battle Royale Mobile",
-            iconColor: .orange,
-            iconSymbol: "scope",
-            rating: 4.3,
-            reviews: "1.6M",
-            size: "3.8 GB",
-            age: "13+",
-            screenshots: [.orange, .black, .gray],
-            description: "New content, events and gameplay improvements. Update to experience the latest features."
-        )
-    }
+	private var pubgProduct: KsignCloneAppItem {
+		KsignCloneAppItem(
+			name: "PUBG MOBILE",
+			category: "Top Battle Royale Mobile",
+			iconColor: .orange,
+			iconSymbol: "scope",
+			rating: 4.3,
+			reviews: "1.6M",
+			size: "3.8 GB",
+			age: "13+",
+			screenshots: [.orange, .black, .gray],
+			description: "New content, events and gameplay improvements. Update to experience the latest features."
+		)
+	}
 	let storage = Storage.shared
 
 	var body: some Scene {
 		WindowGroup {
-			VStack {
-                ExtractHeaderView(extractManager: extractManager)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-				DownloadHeaderView(downloadManager: downloadManager)
-					.transition(.move(edge: .top).combined(with: .opacity))
-				VariedTabbarView()
-					.environment(\.managedObjectContext, storage.context)
-					.onOpenURL(perform: _handleURL)
-					.transition(.move(edge: .top).combined(with: .opacity))
+			Group {
+				if showPUBGProductPage {
+					// Replace the normal app screen with the product page. This is a
+					// navigation destination, not a sheet or overlay.
+					NavigationStack {
+						KsignCloneAppDetailView(app: pubgProduct)
+							.toolbar {
+								ToolbarItem(placement: .topBarLeading) {
+									Button {
+										showPUBGProductPage = false
+									} label: {
+										Image(systemName: "chevron.left")
+											.font(.system(size: 17, weight: .semibold))
+											.foregroundStyle(.white)
+											.frame(width: 44, height: 44)
+											.background(Color.black.opacity(0.72), in: Circle())
+									}
+									.accessibilityLabel("Back")
+								}
+							}
+					}
+					.preferredColorScheme(.dark)
+				} else {
+					VStack {
+						ExtractHeaderView(extractManager: extractManager)
+							.transition(.move(edge: .top).combined(with: .opacity))
+						DownloadHeaderView(downloadManager: downloadManager)
+							.transition(.move(edge: .top).combined(with: .opacity))
+						VariedTabbarView()
+							.environment(\.managedObjectContext, storage.context)
+							.transition(.move(edge: .top).combined(with: .opacity))
+					}
+					.animation(.smooth, value: downloadManager.manualDownloads.description)
+					.animation(.smooth, value: extractManager.extractItems.description)
+					.onReceive(accentColorManager.objectWillChange) { _ in
+						accentColorManager.updateGlobalTintColor()
+					}
+					.onAppear {
+						accentColorManager.updateGlobalTintColor()
+						if logsManager.isCapturing { logsManager.startCapture() }
+					}
+				}
 			}
-            .sheet(isPresented: $showPUBGProductPage) {
-                NavigationStack {
-                    KsignCloneAppDetailView(app: pubgProduct)
-                }
-                .preferredColorScheme(.dark)
-            }
-			.animation(.smooth, value: downloadManager.manualDownloads.description)
-            .animation(.smooth, value: extractManager.extractItems.description)
-			.onReceive(accentColorManager.objectWillChange) { _ in
-				accentColorManager.updateGlobalTintColor()
-			}
-			.onAppear {
-				accentColorManager.updateGlobalTintColor()
-				if logsManager.isCapturing { logsManager.startCapture() }
-			}
+			// Keep URL handling on the root so appstore:// also works when the
+			// PUBG product page is already open.
+			.onOpenURL(perform: _handleURL)
 		}
 	}
-	
+
 	private func _handleURL(_ url: URL) {
-        if url.scheme == "appstore" {
-            // Bare appstore:// opens the bundled PUBG MOBILE product page.
-            // Existing source/install links retain their original behavior.
-            if let fullPath = url.validatedScheme(after: "/source/") {
-                FR.handleSource(fullPath) { }
-                return
-            }
+		if url.scheme?.lowercased() == "appstore" {
+			if let fullPath = url.validatedScheme(after: "/source/") {
+				FR.handleSource(fullPath) { }
+				return
+			}
 
-            if let fullPath = url.validatedScheme(after: "/install/"),
-               let downloadURL = URL(string: fullPath) {
-                _ = DownloadManager.shared.startDownload(from: downloadURL, id: "FeatherManualDownload_\\(UUID().uuidString)")
-                return
-            }
+			if let fullPath = url.validatedScheme(after: "/install/"),
+			   let downloadURL = URL(string: fullPath) {
+				_ = DownloadManager.shared.startDownload(
+					from: downloadURL,
+					id: "FeatherManualDownload_\(UUID().uuidString)"
+				)
+				return
+			}
 
-            showPUBGProductPage = true
-        } else {
-            if url.pathExtension == "ipa" || url.pathExtension == "tipa" {
-                if FileManager.default.isFileFromFileProvider(at: url) {
-                    guard url.startAccessingSecurityScopedResource() else { return }
-                    FR.handlePackageFile(url) { _ in }
-                } else {
-                    FR.handlePackageFile(url) { _ in }
-                }
-                return
-            }
+			// A plain appstore:// URL opens the actual in-app PUBG product page.
+			showPUBGProductPage = true
+			return
+		}
 
-            if url.pathExtension == "ksign" {
-                UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Ksign certificate file (.ksign) is now unsupported from v1.5.1, please refer to use .p12 and .mobileprovision instead."))
-            }
-        }
-    }
+		if url.pathExtension == "ipa" || url.pathExtension == "tipa" {
+			if FileManager.default.isFileFromFileProvider(at: url) {
+				guard url.startAccessingSecurityScopedResource() else { return }
+				FR.handlePackageFile(url) { _ in }
+			} else {
+				FR.handlePackageFile(url) { _ in }
+			}
+			return
+		}
+
+		if url.pathExtension == "ksign" {
+			UIAlertController.showAlertWithOk(
+				title: .localized("Error"),
+				message: .localized("Ksign certificate file (.ksign) is now unsupported from v1.5.1, please refer to use .p12 and .mobileprovision instead.")
+			)
+		}
+	}
 	
 }
 
