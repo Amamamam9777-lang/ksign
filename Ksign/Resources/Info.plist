@@ -117,7 +117,7 @@
 			<string>nya.asami.ksign</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>ksign</string>
+				<string>appstore</string>
 			</array>
 		</dict>
 	</array>
