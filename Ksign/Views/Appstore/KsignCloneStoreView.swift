@@ -119,30 +119,63 @@ class KsignCloneStoreData: ObservableObject {
     }
 }
 
+// Shared deep-link state. appstore:// requests navigation through the same
+// App Store-style Search tab and product detail destination as an in-app tap.
+final class KsignCloneStoreNavigation: ObservableObject {
+    static let shared = KsignCloneStoreNavigation()
+    @Published var pendingPUBGProductPage = false
+
+    private init() {}
+
+    func requestPUBGProductPage() {
+        pendingPUBGProductPage = true
+    }
+}
+
 // MARK: - Main Tab View
 
 struct KsignCloneStoreView: View {
     @StateObject private var data = KsignCloneStoreData()
-    
+    @StateObject private var deepLinkNavigation = KsignCloneStoreNavigation.shared
+    @State private var selectedStoreTab = 0
+    @State private var showPUBGProductPage = false
+
+    private func handlePendingProductPageRequest() {
+        guard deepLinkNavigation.pendingPUBGProductPage else { return }
+        // Search is the fifth tab, matching the screen where this app is normally found.
+        selectedStoreTab = 4
+        showPUBGProductPage = true
+        deepLinkNavigation.pendingPUBGProductPage = false
+    }
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedStoreTab) {
             KsignCloneTodayView(data: data)
                 .tabItem { Label("Today", systemImage: "doc.text.image") }
-            
+                .tag(0)
+
             KsignCloneAppsView(title: "Games", apps: data.games)
                 .tabItem { Label("Games", systemImage: "gamecontroller.fill") }
-            
+                .tag(1)
+
             KsignCloneAppsView(title: "Apps", apps: data.featuredApps)
                 .tabItem { Label("Apps", systemImage: "square.stack.3d.up.fill") }
-            
+                .tag(2)
+
             Text("Arcade")
                 .tabItem { Label("Arcade", systemImage: "arcade.stick") }
-            
-            KsignCloneSearchView(data: data)
+                .tag(3)
+
+            KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
                 .tabItem { Label("Search", systemImage: "magnifyingglass") }
+                .tag(4)
         }
         // Hide Ksign's outer tab bar while this App Store-style screen is active.
         .toolbar(.hidden, for: .tabBar)
+        .onReceive(deepLinkNavigation.$pendingPUBGProductPage) { pending in
+            if pending { handlePendingProductPageRequest() }
+        }
+        .onAppear(perform: handlePendingProductPageRequest)
     }
 }
 
@@ -729,6 +762,7 @@ struct KsignCloneAppBanner: View {
 
 struct KsignCloneAppDetailView: View {
     let app: KsignCloneAppItem
+    @Environment(\.dismiss) private var dismiss
 
     private var isPUBG: Bool { app.name.localizedCaseInsensitiveContains("PUBG MOBILE") }
 
@@ -847,9 +881,26 @@ struct KsignCloneAppDetailView: View {
         }
         .background(Color.black.ignoresSafeArea())
         .preferredColorScheme(.dark)
-        // Keep the hero below the status bar and reserve space for the custom tab bar.
+        // Match the App Store product page: artwork extends behind the status bar,
+        // with a circular back control over the hero instead of a blank nav-bar row.
+        .toolbar(.hidden, for: .navigationBar)
+        .ignoresSafeArea(edges: .top)
+        .overlay(alignment: .topLeading) {
+            Button(action: { dismiss() }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 23, weight: .medium))
+                    .foregroundStyle(.white)
+                    .frame(width: 54, height: 54)
+                    .background(Color.black.opacity(0.68), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 48)
+            .padding(.leading, 20)
+            .accessibilityLabel("Back")
+        }
+        // Reserve room for the App Store-style bottom tab bar while allowing the
+        // full product page to scroll beneath it.
         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 84) }
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -878,7 +929,12 @@ struct KsignCloneStatItem: View {
 
 struct KsignCloneSearchView: View {
     @ObservedObject var data: KsignCloneStoreData
+    @Binding var showPUBGProductPage: Bool
     @State private var searchText = ""
+
+    private var pubgApp: KsignCloneAppItem? {
+        data.games.first { $0.name.localizedCaseInsensitiveContains("PUBG MOBILE") }
+    }
     
     var filteredApps: [KsignCloneAppItem] {
         if searchText.isEmpty { return [] }
@@ -990,6 +1046,18 @@ struct KsignCloneSearchView: View {
             .listStyle(.plain)
             .navigationTitle("Search")
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .navigationDestination(isPresented: $showPUBGProductPage) {
+                if let app = pubgApp {
+                    KsignCloneAppDetailView(app: app)
+                }
+            }
+            .onChange(of: showPUBGProductPage) { isShowing in
+                if isShowing {
+                    // So the page underneath the detail view is the same PUBG search result
+                    // users see when they type PUBG MOBILE in the Search tab.
+                    searchText = "PUBG MOBILE"
+                }
+            }
         }
     }
 }
