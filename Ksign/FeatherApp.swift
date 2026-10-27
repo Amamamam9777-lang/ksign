@@ -18,6 +18,22 @@ struct FeatherApp: App {
 	@StateObject var accentColorManager = AccentColorManager.shared
     @StateObject var extractManager = ExtractManager.shared
 	@StateObject var logsManager = LogsManager.shared
+    @State private var showPUBGProductPage = false
+
+    private var pubgProduct: KsignCloneAppItem {
+        KsignCloneAppItem(
+            name: "PUBG MOBILE",
+            category: "Top Battle Royale Mobile",
+            iconColor: .orange,
+            iconSymbol: "scope",
+            rating: 4.3,
+            reviews: "1.6M",
+            size: "3.8 GB",
+            age: "13+",
+            screenshots: [.orange, .black, .gray],
+            description: "New content, events and gameplay improvements. Update to experience the latest features."
+        )
+    }
 	let storage = Storage.shared
 
 	var body: some Scene {
@@ -32,6 +48,12 @@ struct FeatherApp: App {
 					.onOpenURL(perform: _handleURL)
 					.transition(.move(edge: .top).combined(with: .opacity))
 			}
+            .sheet(isPresented: $showPUBGProductPage) {
+                NavigationStack {
+                    KsignCloneAppDetailView(app: pubgProduct)
+                }
+                .preferredColorScheme(.dark)
+            }
 			.animation(.smooth, value: downloadManager.manualDownloads.description)
             .animation(.smooth, value: extractManager.extractItems.description)
 			.onReceive(accentColorManager.objectWillChange) { _ in
@@ -45,34 +67,37 @@ struct FeatherApp: App {
 	}
 	
 	private func _handleURL(_ url: URL) {
-		if url.scheme == "ksign" {
-			if let fullPath = url.validatedScheme(after: "/source/") {
-				FR.handleSource(fullPath) { }
-			}
-			
-			if
-				let fullPath = url.validatedScheme(after: "/install/"),
-				let downloadURL = URL(string: fullPath)
-			{
-				_ = DownloadManager.shared.startDownload(from: downloadURL, id: "FeatherManualDownload_\(UUID().uuidString)")
-			}
-		} else {
-			if url.pathExtension == "ipa" || url.pathExtension == "tipa" {
-				if FileManager.default.isFileFromFileProvider(at: url) {
-					guard url.startAccessingSecurityScopedResource() else { return }
-					FR.handlePackageFile(url) { _ in }
-				} else {
-					FR.handlePackageFile(url) { _ in }
-				}
-				
-				return
-			}
-			
+        if url.scheme == "appstore" {
+            // Bare appstore:// opens the bundled PUBG MOBILE product page.
+            // Existing source/install links retain their original behavior.
+            if let fullPath = url.validatedScheme(after: "/source/") {
+                FR.handleSource(fullPath) { }
+                return
+            }
+
+            if let fullPath = url.validatedScheme(after: "/install/"),
+               let downloadURL = URL(string: fullPath) {
+                _ = DownloadManager.shared.startDownload(from: downloadURL, id: "FeatherManualDownload_\\(UUID().uuidString)")
+                return
+            }
+
+            showPUBGProductPage = true
+        } else {
+            if url.pathExtension == "ipa" || url.pathExtension == "tipa" {
+                if FileManager.default.isFileFromFileProvider(at: url) {
+                    guard url.startAccessingSecurityScopedResource() else { return }
+                    FR.handlePackageFile(url) { _ in }
+                } else {
+                    FR.handlePackageFile(url) { _ in }
+                }
+                return
+            }
+
             if url.pathExtension == "ksign" {
                 UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Ksign certificate file (.ksign) is now unsupported from v1.5.1, please refer to use .p12 and .mobileprovision instead."))
             }
-		}
-	}
+        }
+    }
 	
 }
 
