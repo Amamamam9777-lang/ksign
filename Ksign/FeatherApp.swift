@@ -18,75 +18,32 @@ struct FeatherApp: App {
 	@StateObject var accentColorManager = AccentColorManager.shared
     @StateObject var extractManager = ExtractManager.shared
 	@StateObject var logsManager = LogsManager.shared
-	@State private var showPUBGProductPage = false
-
-	private var pubgProduct: KsignCloneAppItem {
-		KsignCloneAppItem(
-			name: "PUBG MOBILE",
-			category: "Top Battle Royale Mobile",
-			iconColor: .orange,
-			iconSymbol: "scope",
-			rating: 4.3,
-			reviews: "1.6M",
-			size: "3.8 GB",
-			age: "13+",
-			screenshots: [.orange, .black, .gray],
-			description: "New content, events and gameplay improvements. Update to experience the latest features."
-		)
-	}
 	let storage = Storage.shared
 
 	var body: some Scene {
 		WindowGroup {
-			Group {
-				if showPUBGProductPage {
-					// Replace the normal app screen with the product page. This is a
-					// navigation destination, not a sheet or overlay.
-					NavigationStack {
-						KsignCloneAppDetailView(app: pubgProduct)
-							.toolbar {
-								ToolbarItem(placement: .topBarLeading) {
-									Button {
-										showPUBGProductPage = false
-									} label: {
-										Image(systemName: "chevron.left")
-											.font(.system(size: 17, weight: .semibold))
-											.foregroundStyle(.white)
-											.frame(width: 44, height: 44)
-											.background(Color.black.opacity(0.72), in: Circle())
-									}
-									.accessibilityLabel("Back")
-								}
-							}
-					}
-					.preferredColorScheme(.dark)
-				} else {
-					VStack {
-						ExtractHeaderView(extractManager: extractManager)
-							.transition(.move(edge: .top).combined(with: .opacity))
-						DownloadHeaderView(downloadManager: downloadManager)
-							.transition(.move(edge: .top).combined(with: .opacity))
-						VariedTabbarView()
-							.environment(\.managedObjectContext, storage.context)
-							.transition(.move(edge: .top).combined(with: .opacity))
-					}
-					.animation(.smooth, value: downloadManager.manualDownloads.description)
-					.animation(.smooth, value: extractManager.extractItems.description)
-					.onReceive(accentColorManager.objectWillChange) { _ in
-						accentColorManager.updateGlobalTintColor()
-					}
-					.onAppear {
-						accentColorManager.updateGlobalTintColor()
-						if logsManager.isCapturing { logsManager.startCapture() }
-					}
-				}
+			VStack {
+                ExtractHeaderView(extractManager: extractManager)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+				DownloadHeaderView(downloadManager: downloadManager)
+					.transition(.move(edge: .top).combined(with: .opacity))
+				VariedTabbarView()
+					.environment(\.managedObjectContext, storage.context)
+					.onOpenURL(perform: _handleURL)
+					.transition(.move(edge: .top).combined(with: .opacity))
 			}
-			// Keep URL handling on the root so appstore:// also works when the
-			// PUBG product page is already open.
-			.onOpenURL(perform: _handleURL)
+			.animation(.smooth, value: downloadManager.manualDownloads.description)
+            .animation(.smooth, value: extractManager.extractItems.description)
+			.onReceive(accentColorManager.objectWillChange) { _ in
+				accentColorManager.updateGlobalTintColor()
+			}
+			.onAppear {
+				accentColorManager.updateGlobalTintColor()
+				if logsManager.isCapturing { logsManager.startCapture() }
+			}
 		}
 	}
-
+	
 	private func _handleURL(_ url: URL) {
 		if url.scheme?.lowercased() == "appstore" {
 			if let fullPath = url.validatedScheme(after: "/source/") {
@@ -103,8 +60,9 @@ struct FeatherApp: App {
 				return
 			}
 
-			// A plain appstore:// URL opens the actual in-app PUBG product page.
-			showPUBGProductPage = true
+			// Route through the same Search tab and product-detail navigation used
+			// when the user finds PUBG MOBILE inside the App Store-style interface.
+			KsignCloneStoreNavigation.shared.requestPUBGProductPage()
 			return
 		}
 
