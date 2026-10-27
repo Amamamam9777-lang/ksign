@@ -162,7 +162,7 @@ struct KsignCloneStoreView: View {
                 .tabItem { Label("Apps", systemImage: "square.stack.3d.up.fill") }
                 .tag(2)
 
-            Text("Arcade")
+            KsignCloneArcadeView()
                 .tabItem { Label("Arcade", systemImage: "arcade.stick") }
                 .tag(3)
 
@@ -243,6 +243,107 @@ struct KsignCloneInstalledAppsView: View {
         UIApplication.shared.open(url, options: [:]) { success in
             if !success { failedToOpenName = app.name }
         }
+    }
+}
+
+
+// A populated Arcade landing page instead of the previous blank "Arcade" label.
+private struct KsignCloneArcadeGame: Identifiable {
+    let id: String
+    let title: String
+    let subtitle: String
+    let symbol: String
+}
+
+struct KsignCloneArcadeView: View {
+    private let games = [
+        KsignCloneArcadeGame(id: "sneaky-sasquatch", title: "Sneaky Sasquatch", subtitle: "Adventure", symbol: "figure.walk"),
+        KsignCloneArcadeGame(id: "oceanhorn", title: "Oceanhorn 2", subtitle: "Adventure RPG", symbol: "sword.fill"),
+        KsignCloneArcadeGame(id: "mini-motorways", title: "Mini Motorways", subtitle: "Strategy", symbol: "road.lanes"),
+        KsignCloneArcadeGame(id: "what-the-golf", title: "WHAT THE GOLF?", subtitle: "Arcade", symbol: "figure.golf")
+    ]
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    Text("Arcade")
+                        .font(.largeTitle.bold())
+                        .padding(.top, 8)
+
+                    ZStack(alignment: .bottomLeading) {
+                        LinearGradient(
+                            colors: [Color.indigo, Color.purple, Color.black],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        Circle()
+                            .fill(Color.white.opacity(0.12))
+                            .frame(width: 190, height: 190)
+                            .offset(x: 175, y: -70)
+                        VStack(alignment: .leading, spacing: 9) {
+                            Text("APPLE ARCADE")
+                                .font(.caption.bold())
+                                .tracking(1.4)
+                                .foregroundStyle(.white.opacity(0.8))
+                            Text("Great games.\nNo interruptions.")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                            Text("Discover a new favourite.")
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.85))
+                        }
+                        .padding(22)
+                    }
+                    .frame(height: 220)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+
+                    Text("Explore games")
+                        .font(.title2.bold())
+
+                    ForEach(games) { game in
+                        HStack(spacing: 14) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 15, style: .continuous)
+                                    .fill(LinearGradient(
+                                        colors: [.indigo, .blue.opacity(0.65)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ))
+                                Image(systemName: game.symbol)
+                                    .font(.system(size: 25, weight: .semibold))
+                                    .foregroundStyle(.white)
+                            }
+                            .frame(width: 60, height: 60)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(game.title)
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(.primary)
+                                Text(game.subtitle)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer(minLength: 8)
+
+                            Text("PLAY")
+                                .font(.caption.bold())
+                                .foregroundStyle(.blue)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color(uiColor: .secondarySystemBackground), in: Capsule())
+                        }
+                        .padding(.vertical, 5)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 24)
+            }
+            .background(Color.black.ignoresSafeArea())
+            .toolbar(.hidden, for: .navigationBar)
+        }
+        .preferredColorScheme(.dark)
     }
 }
 
@@ -787,6 +888,21 @@ struct KsignCloneAppDetailView: View {
                 }
                 .frame(height: 250)
                 .clipped()
+                // Keep exactly one app-owned back control at the hero's upper-left.
+                // Attaching it to the hero prevents an extra floating control mid-page.
+                .overlay(alignment: .topLeading) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 23, weight: .medium))
+                            .foregroundStyle(.white)
+                            .frame(width: 54, height: 54)
+                            .background(Color.black.opacity(0.68), in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 48)
+                    .padding(.leading, 20)
+                    .accessibilityLabel("Back")
+                }
 
                 HStack(spacing: 14) {
                     KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor,
@@ -884,20 +1000,10 @@ struct KsignCloneAppDetailView: View {
         // Match the App Store product page: artwork extends behind the status bar,
         // with a circular back control over the hero instead of a blank nav-bar row.
         .toolbar(.hidden, for: .navigationBar)
+        // Prevent NavigationStack from drawing its own back control in addition
+        // to the single custom button on the hero artwork.
+        .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
-        .overlay(alignment: .topLeading) {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 23, weight: .medium))
-                    .foregroundStyle(.white)
-                    .frame(width: 54, height: 54)
-                    .background(Color.black.opacity(0.68), in: Circle())
-            }
-            .buttonStyle(.plain)
-            .padding(.top, 48)
-            .padding(.leading, 20)
-            .accessibilityLabel("Back")
-        }
         // Reserve room for the App Store-style bottom tab bar while allowing the
         // full product page to scroll beneath it.
         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 84) }
