@@ -2550,19 +2550,31 @@ struct KsignCloneGetButton: View {
         appName.localizedCaseInsensitiveContains("PUBG MOBILE")
     }
 
+    private var isPending: Bool {
+        !isPUBG && prompt.presentedAppName == appName
+    }
+
     var body: some View {
         Button(action: handleTap) {
-            Text(isPUBG ? "Open" : "Get")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(isPUBG ? Color.white : KsignCloneTheme.accent)
-                .frame(width: width, height: 30)
-                .background(isPUBG ? Color.blue : Color(uiColor: .secondarySystemBackground), in: Capsule())
-                .scaleEffect(isPressed ? 0.94 : 1)
-                .animation(.spring(response: 0.22, dampingFraction: 0.55), value: isPressed)
+            Group {
+                if isPending {
+                    ProgressView()
+                        .tint(KsignCloneTheme.accent)
+                        .frame(width: width, height: 30)
+                } else {
+                    Text(isPUBG ? "Open" : "Get")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(isPUBG ? Color.white : KsignCloneTheme.accent)
+                        .frame(width: width, height: 30)
+                        .background(isPUBG ? Color.blue : Color(uiColor: .secondarySystemBackground), in: Capsule())
+                }
+            }
+            .scaleEffect(isPressed ? 0.94 : 1)
+            .animation(.spring(response: 0.22, dampingFraction: 0.55), value: isPressed)
         }
         .buttonStyle(.plain)
         .fixedSize()
-        .accessibilityLabel(isPUBG ? "Open PUBG MOBILE" : "Get \(appName)")
+        .accessibilityLabel(isPUBG ? "Open PUBG MOBILE" : (isPending ? "Preparing \(appName)" : "Get \(appName)"))
     }
 
     private func handleTap() {
@@ -2580,121 +2592,156 @@ struct KsignCloneGetButton: View {
 private struct KsignCloneInstallPromptOverlay: View {
     @ObservedObject private var prompt = KsignCloneInstallPrompt.shared
 
+    private var developerName: String {
+        let name = prompt.presentedAppName ?? ""
+        if name.localizedCaseInsensitiveContains("Roblox") { return "Roblox Corporation" }
+        if name.localizedCaseInsensitiveContains("PUBG MOBILE") { return "Tencent Mobile International Limited" }
+        if name.localizedCaseInsensitiveContains("ChatGPT") { return "OpenAI" }
+        if name.localizedCaseInsensitiveContains("Instagram") { return "Instagram, Inc." }
+        if name.localizedCaseInsensitiveContains("TikTok") { return "TikTok Ltd." }
+        if name.localizedCaseInsensitiveContains("YouTube") { return "Google LLC" }
+        return name.isEmpty ? "App Store" : name
+    }
+
+    private var ageRating: String {
+        let name = prompt.presentedAppName ?? ""
+        if name.localizedCaseInsensitiveContains("Roblox") || name.localizedCaseInsensitiveContains("PUBG MOBILE") { return "13+" }
+        if name.localizedCaseInsensitiveContains("Discord") || name.localizedCaseInsensitiveContains("TikTok") { return "17+" }
+        return "4+"
+    }
+
     var body: some View {
         GeometryReader { proxy in
             if let appName = prompt.presentedAppName {
                 ZStack(alignment: .bottom) {
-                    Color.black.opacity(0.70)
+                    // The source recording shows the product page dimmed almost to black.
+                    Color.black.opacity(0.78)
                         .ignoresSafeArea()
+                        .contentShape(Rectangle())
                         .onTapGesture { prompt.dismiss() }
                         .transition(.opacity)
 
-                    VStack {
-                        HStack {
-                            Spacer()
-                            if !prompt.isConfirming {
-                                Text("Double-Click to Install")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(.white.opacity(0.96))
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Color(white: 0.19), in: Capsule())
-                                    .overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 0.7))
-                            }
-                        }
-                        .padding(.horizontal, 18)
-                        .padding(.top, max(proxy.safeAreaInsets.top, 20) + 8)
-                        Spacer()
+                    // System-style side-button hint, positioned midway down the right edge.
+                    HStack(alignment: .center, spacing: 8) {
+                        Spacer(minLength: 0)
+                        Text("Double-Click\nto Install")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.96))
+                            .multilineTextAlignment(.trailing)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Capsule()
+                            .fill(Color.white)
+                            .frame(width: 4, height: 94)
                     }
+                    .padding(.trailing, 2)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, proxy.size.height * 0.285)
+                    .frame(maxHeight: .infinity, alignment: .top)
                     .allowsHitTesting(false)
 
                     VStack(spacing: 0) {
-                        HStack(spacing: 10) {
+                        HStack {
                             Text("App Store")
                                 .font(.system(size: 17, weight: .semibold))
                                 .foregroundStyle(.white)
                             Spacer()
                             Button { prompt.dismiss() } label: {
                                 Image(systemName: "xmark")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 14, weight: .medium))
                                     .foregroundStyle(.white.opacity(0.9))
-                                    .frame(width: 30, height: 30)
-                                    .background(Color.white.opacity(0.09), in: Circle())
+                                    .frame(width: 36, height: 36)
+                                    .background(Color.white.opacity(0.08), in: Circle())
                             }
                             .buttonStyle(.plain)
                             .accessibilityLabel("Close install preview")
                         }
+                        .padding(.horizontal, 6)
 
-                        Divider().overlay(Color.white.opacity(0.09)).padding(.top, 12)
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack(alignment: .center, spacing: 10) {
+                                KsignCloneAppIcon(name: appName, fallbackColor: .blue,
+                                                  fallbackSymbol: "app.fill", size: 58, cornerRadius: 13)
 
-                        HStack(spacing: 12) {
-                            KsignCloneAppIcon(name: appName, fallbackColor: .blue,
-                                              fallbackSymbol: "app.fill", size: 54, cornerRadius: 12)
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(appName)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(.white)
-                                    .lineLimit(1)
-                                Text("App Store · Preview")
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(.secondary)
-                                Text("Account: demonstration only")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                            }
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.vertical, 15)
-
-                        Button { prompt.confirmVisualDemo() } label: {
-                            HStack(spacing: 11) {
-                                ZStack {
-                                    Circle().fill(Color.blue).frame(width: 32, height: 32)
-                                    Image(systemName: prompt.isConfirming ? "checkmark" : "faceid")
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .foregroundStyle(.white)
-                                }
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(prompt.isConfirming ? "Confirming…" : "Confirm with Side Button")
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundStyle(.white)
-                                    Text(prompt.isConfirming ? "Please wait" : "Double-click the side button to continue")
+                                VStack(alignment: .leading, spacing: 2) {
+                                    HStack(spacing: 5) {
+                                        Text(appName)
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundStyle(.white)
+                                            .lineLimit(1)
+                                        Text(ageRating)
+                                            .font(.system(size: 9, weight: .medium))
+                                            .foregroundStyle(.white.opacity(0.75))
+                                            .padding(.horizontal, 4)
+                                            .padding(.vertical, 1)
+                                            .overlay(Capsule().stroke(Color.white.opacity(0.25), lineWidth: 0.6))
+                                    }
+                                    Text(developerName)
                                         .font(.system(size: 10, weight: .regular))
-                                        .foregroundStyle(.white.opacity(0.65))
+                                        .foregroundStyle(.white.opacity(0.68))
+                                        .lineLimit(1)
+                                    Text("Offers In-App Purchases")
+                                        .font(.system(size: 10, weight: .regular))
+                                        .foregroundStyle(.white.opacity(0.68))
+                                        .lineLimit(1)
                                 }
                                 Spacer(minLength: 0)
-                                if prompt.isConfirming {
-                                    ProgressView().tint(.white)
-                                } else {
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundStyle(.white.opacity(0.45))
-                                }
                             }
-                            .padding(11)
-                            .background(Color.white.opacity(0.065), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                            Text("Account: Demo account")
+                                .font(.system(size: 10, weight: .regular))
+                                .foregroundStyle(.white.opacity(0.55))
+                                .lineLimit(1)
+                        }
+                        .padding(12)
+                        .background(Color(white: 0.18), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.045), lineWidth: 0.7))
+                        .padding(.top, 12)
+
+                        Button { prompt.confirmVisualDemo() } label: {
+                            VStack(spacing: 4) {
+                                ZStack {
+                                    Circle()
+                                        .stroke(Color(red: 0.18, green: 0.60, blue: 1.0), lineWidth: 1.5)
+                                        .frame(width: 38, height: 38)
+                                    Image(systemName: prompt.isConfirming ? "checkmark" : "faceid")
+                                        .font(.system(size: 25, weight: .regular))
+                                        .foregroundStyle(Color(red: 0.18, green: 0.60, blue: 1.0))
+                                    if !prompt.isConfirming {
+                                        Image(systemName: "arrow.left.arrow.right")
+                                            .font(.system(size: 7, weight: .bold))
+                                            .foregroundStyle(Color(red: 0.18, green: 0.60, blue: 1.0))
+                                            .offset(x: 12, y: 8)
+                                    }
+                                }
+                                Text(prompt.isConfirming ? "Confirming…" : "Confirm with Side Button")
+                                    .font(.system(size: 10, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.92))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .disabled(prompt.isConfirming)
+                        .padding(.top, 13)
                     }
-                    .padding(16)
+                    .padding(14)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 238)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .background(Color(red: 0.105, green: 0.105, blue: 0.115), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.13), lineWidth: 0.8))
-                    .shadow(color: .black.opacity(0.36), radius: 24, x: 0, y: -5)
-                    .padding(.horizontal, 8)
-                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 10) + 8)
+                    .frame(height: min(338, proxy.size.height * 0.43))
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 38, style: .continuous))
+                    .background(Color(red: 0.075, green: 0.075, blue: 0.085), in: RoundedRectangle(cornerRadius: 38, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 38, style: .continuous).stroke(Color.white.opacity(0.10), lineWidth: 0.8))
+                    .shadow(color: .black.opacity(0.35), radius: 25, x: 0, y: -4)
+                    .padding(.horizontal, 6)
+                    .padding(.bottom, 5)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+                .frame(width: proxy.size.width, height: proxy.size.height)
                 .ignoresSafeArea()
-                .animation(.spring(response: 0.38, dampingFraction: 0.86), value: prompt.presentedAppName)
+                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: prompt.presentedAppName)
                 .animation(.easeInOut(duration: 0.18), value: prompt.isConfirming)
             }
         }
+        .ignoresSafeArea()
         .allowsHitTesting(prompt.presentedAppName != nil)
     }
 }
