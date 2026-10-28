@@ -48,7 +48,7 @@ enum TabEnum: String, CaseIterable, Hashable {
 		case .library: LibraryView()
 		case .settings: SettingsView()
 		case .certificates: NBNavigationView(.localized("Certificates")) { CertificatesView() }
-		case .appstore: KsignCloneStoreView()
+		case .appstore: KsignCloneStoreView().toolbar(.hidden, for: .tabBar)
         case .downloader: DownloaderView()
 		}
 	}
