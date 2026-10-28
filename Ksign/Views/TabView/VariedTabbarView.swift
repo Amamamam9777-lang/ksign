@@ -2,19 +2,22 @@
 //  VariedTabbarView.swift
 //  Feather
 //
-//  Created by samara on 11.04.2025.
+//  Use the regular TabView on compact iPhone layouts so the App Store-style
+//  screen can reliably hide the host tab bar. The store has its own floating bar.
 //
 
 import SwiftUI
 
 struct VariedTabbarView: View {
-	init() {}
-	
-	var body: some View {
-		if #available(iOS 18, *) {
-			ExtendedTabbarView()
-		} else {
-			TabbarView()
-		}
-	}
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    var body: some View {
+        if horizontalSizeClass == .compact {
+            TabbarView()
+        } else if #available(iOS 18, *) {
+            ExtendedTabbarView()
+        } else {
+            TabbarView()
+        }
+    }
 }
