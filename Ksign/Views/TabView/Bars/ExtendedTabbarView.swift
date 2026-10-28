@@ -71,6 +71,8 @@ struct ExtendedTabbarView: View {
 			.defaultVisibility(.hidden, for: .tabBar)
 			.hidden(horizontalSizeClass == .compact)
 		}
+        // The embedded App Store clone already owns a floating tab bar.
+        .toolbar(.hidden, for: .tabBar)
 		.tabViewStyle(.sidebarAdaptable)
 		.tabViewCustomization($customization)
 		.sheet(isPresented: $_isAddingPresenting) {
