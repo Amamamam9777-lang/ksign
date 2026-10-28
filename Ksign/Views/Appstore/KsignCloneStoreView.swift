@@ -2203,7 +2203,7 @@ struct KsignCloneSearchView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Games, Apps, and More")
-            .searchFocused($isSearchFocused)
+            .compatibleSearchFocused($isSearchFocused)
             .searchSuggestions {
                 if !searchText.isEmpty && isSearchFocused && !didSubmitSearch {
                     ForEach(searchSuggestionItems) { item in
@@ -3106,4 +3106,18 @@ private struct KsignClonePUBGPreviewBanner: View {
 
 #Preview {
     KsignCloneStoreView()
+}
+
+
+// Keeps search focus behavior on iOS 18+, while allowing the project to compile
+// when its deployment target is iOS 17 or earlier.
+private extension View {
+    @ViewBuilder
+    func compatibleSearchFocused(_ binding: FocusState<Bool>.Binding) -> some View {
+        if #available(iOS 18.0, *) {
+            self.searchFocused(binding)
+        } else {
+            self
+        }
+    }
 }
