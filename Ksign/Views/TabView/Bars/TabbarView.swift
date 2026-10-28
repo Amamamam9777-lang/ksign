@@ -20,8 +20,5 @@ struct TabbarView: View {
 					.tag(tab)
 			}
 		}
-        // The App Store-style screen provides its own five-item floating bar.
-        // Hide the host KSign bar while it is active, otherwise the two bars stack.
-        .toolbar(.hidden, for: .tabBar)
 	}
 }
