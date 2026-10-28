@@ -16,12 +16,12 @@ import SwiftUI
 import Combine
 import UIKit
 
-// Navy/blue styling for the account sheet and all of its subpages.
+// Neutral charcoal palette matching the Apple Account sheet in the reference.
 private enum KsignCloneTheme {
-    static let accountBackground = Color(red: 0.012, green: 0.025, blue: 0.070)
-    static let accountCard = Color(red: 0.035, green: 0.055, blue: 0.120)
-    static let accountRaised = Color(red: 0.055, green: 0.080, blue: 0.165)
-    static let accountBorder = Color(red: 0.17, green: 0.25, blue: 0.43).opacity(0.55)
+    static let accountBackground = Color(red: 0.105, green: 0.105, blue: 0.115) // #1B1B1D
+    static let accountCard = Color(red: 0.170, green: 0.170, blue: 0.180)       // #2B2B2E
+    static let accountRaised = Color(red: 0.125, green: 0.125, blue: 0.135)
+    static let accountBorder = Color(white: 0.28).opacity(0.24)
     static let accent = Color(red: 0.20, green: 0.57, blue: 1.0)
 }
 
@@ -132,6 +132,21 @@ class KsignCloneStoreData: ObservableObject {
             KsignCloneAppItem(name: "Google Photos", category: "Photo & Video", iconColor: .blue, iconSymbol: "photo.on.rectangle.angled", rating: 4.7, reviews: "1.2M", size: "250 MB", age: "4+", screenshots: [.blue, .red, .yellow], description: "Back up, organise, and share your photos."),
         ]
 
+        featuredApps += [
+            KsignCloneAppItem(name: "Shortcuts", category: "Productivity", iconColor: .purple, iconSymbol: "square.stack.3d.up.fill", rating: 4.6, reviews: "49K", size: "120 MB", age: "16+", screenshots: [.purple, .indigo, .blue], description: "Automate everyday tasks with powerful personal shortcuts."),
+            KsignCloneAppItem(name: "DramaBox - Stream Drama Shorts", category: "Entertainment", iconColor: .pink, iconSymbol: "play.rectangle.fill", rating: 4.6, reviews: "887K", size: "190 MB", age: "12+", screenshots: [.black, .pink, .purple], description: "Watch short dramas, exclusive stories, and new episodes."),
+            KsignCloneAppItem(name: "SHAREit: Transfer, Share Files", category: "Utilities", iconColor: .blue, iconSymbol: "arrow.left.arrow.right", rating: 4.6, reviews: "620K", size: "140 MB", age: "12+", screenshots: [.blue, .cyan, .purple], description: "Transfer files and share photos, videos, and documents."),
+            KsignCloneAppItem(name: "Barbie Dreamhouse Adventures", category: "Games", iconColor: .pink, iconSymbol: "house.fill", rating: 4.5, reviews: "210K", size: "1.1 GB", age: "4+", screenshots: [.pink, .purple, .cyan], description: "Design rooms, meet friends, and create your own stories."),
+            KsignCloneAppItem(name: "Apple Books", category: "Books", iconColor: .orange, iconSymbol: "book.fill", rating: 4.7, reviews: "380K", size: "90 MB", age: "12+", screenshots: [.orange, .red, .purple], description: "Read stories, discover authors, and listen to audiobooks."),
+            KsignCloneAppItem(name: "Apple Podcasts", category: "Entertainment", iconColor: .purple, iconSymbol: "mic.fill", rating: 4.8, reviews: "250K", size: "85 MB", age: "12+", screenshots: [.purple, .pink, .blue], description: "Listen to your favourite podcasts and discover new shows."),
+            KsignCloneAppItem(name: "Color Widgets", category: "Graphics & Design", iconColor: .purple, iconSymbol: "square.grid.2x2.fill", rating: 4.6, reviews: "520K", size: "110 MB", age: "12+", screenshots: [.purple, .blue, .pink], description: "Personalise your Home Screen with widgets and themes."),
+            KsignCloneAppItem(name: "Pushcut: Shortcuts Automation", category: "Productivity", iconColor: .indigo, iconSymbol: "bolt.fill", rating: 4.5, reviews: "3K", size: "55 MB", age: "4+", screenshots: [.indigo, .purple, .blue], description: "Automate shortcuts, notifications, and smart-home actions."),
+            KsignCloneAppItem(name: "Notion: Notes, Docs, Tasks", category: "Productivity", iconColor: .black, iconSymbol: "n.square.fill", rating: 4.7, reviews: "190K", size: "220 MB", age: "4+", screenshots: [.black, .gray, .white], description: "Write notes, plan projects, and organise your workspace."),
+            KsignCloneAppItem(name: "Google Drive", category: "Productivity", iconColor: .blue, iconSymbol: "externaldrive.fill", rating: 4.7, reviews: "2.5M", size: "260 MB", age: "4+", screenshots: [.blue, .green, .yellow], description: "Store files securely and collaborate from anywhere."),
+            KsignCloneAppItem(name: "Snapchat", category: "Social Networking", iconColor: .yellow, iconSymbol: "bolt.fill", rating: 4.5, reviews: "3.2M", size: "300 MB", age: "12+", screenshots: [.yellow, .black, .purple], description: "Share moments and chat with friends."),
+            KsignCloneAppItem(name: "Zoom Workplace", category: "Business", iconColor: .blue, iconSymbol: "video.fill", rating: 4.6, reviews: "1.4M", size: "230 MB", age: "4+", screenshots: [.blue, .cyan, .white], description: "Join video meetings, chat, and collaborate."),
+        ]
+
         games = [
             KsignCloneAppItem(name: "PUBG MOBILE", category: "Top Battle Royale Mobile", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "1.6M", size: "3.8 GB", age: "13+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches."),
             KsignCloneAppItem(name: "Roblox", category: "Adventure", iconColor: .gray, iconSymbol: "cube.fill", rating: 4.5, reviews: "5M", size: "300 MB", age: "12+", screenshots: [.gray, .blue, .green], description: "Play millions of experiences with friends."),
@@ -211,6 +226,22 @@ struct KsignCloneStoreView: View {
     @State private var showPUBGProductPage = false
     @State private var keyboardVisible = false
 
+    @ViewBuilder
+    private var selectedStoreContent: some View {
+        switch selectedStoreTab {
+        case 0:
+            KsignCloneTodayView(data: data)
+        case 1:
+            KsignCloneAppsView(title: "Games", apps: data.games)
+        case 2:
+            KsignCloneAppsView(title: "Apps", apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps)
+        case 3:
+            KsignCloneArcadeView()
+        default:
+            KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
+        }
+    }
+
     private func handlePUBGProductPageRequest(_ requestID: UInt64) {
         guard deepLinkNavigation.consumePUBGProductPageRequest(requestID) else { return }
         selectedStoreTab = 4
@@ -223,25 +254,10 @@ struct KsignCloneStoreView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            TabView(selection: $selectedStoreTab) {
-                KsignCloneTodayView(data: data)
-                    .tabItem { Label("Today", systemImage: "doc.text.image") }
-                    .tag(0)
-                KsignCloneAppsView(title: "Games", apps: data.games)
-                    .tabItem { Label("Games", systemImage: "gamecontroller.fill") }
-                    .tag(1)
-                KsignCloneAppsView(title: "Apps", apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps)
-                    .tabItem { Label("Apps", systemImage: "square.stack.3d.up.fill") }
-                    .tag(2)
-                KsignCloneArcadeView()
-                    .tabItem { Label("Arcade", systemImage: "arcade.stick") }
-                    .tag(3)
-                KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
-                    .tabItem { Label("Search", systemImage: "magnifyingglass") }
-                    .tag(4)
-            }
-            .toolbar(.hidden, for: .tabBar)
-            .background(Color.black.ignoresSafeArea())
+            // Do not nest another TabView here: its native tab bar stacked with the
+            // custom App Store bar and produced the duplicate-panel bug.
+            selectedStoreContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if !keyboardVisible {
                 KsignCloneFloatingTabBar(selection: $selectedStoreTab)
@@ -250,6 +266,11 @@ struct KsignCloneStoreView: View {
                     .zIndex(20)
                     .transition(.opacity)
             }
+
+            // Shared visual install-confirmation sheet; placed at the root so the
+            // same animation works from Today, Games, Apps, Search and product pages.
+            KsignCloneInstallPromptOverlay()
+                .zIndex(1000)
         }
         .background(Color.black.ignoresSafeArea())
         .toolbar(.hidden, for: .tabBar)
@@ -573,7 +594,7 @@ struct KsignCloneTodayCardView: View {
                     Text(card.category.localizedCapitalized).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer(minLength: 4)
-                KsignCloneGetButton(width: 72)
+                KsignCloneGetButton(width: 72, appName: card.appName)
             }
             .padding(.horizontal, 14).padding(.vertical, 12)
             .background(Color(white: 0.095))
@@ -838,7 +859,7 @@ struct KsignCloneSmallAppRow: View {
                 KsignCloneOpenButton { KsignCloneLaunchApp.openPUBG() }
             } else {
                 VStack(spacing: 4) {
-                    KsignCloneGetButton(width: 72)
+                    KsignCloneGetButton(width: 72, appName: app.name)
                     Text("In-App Purchases").font(.system(size: 8)).foregroundStyle(.secondary).lineLimit(1)
                 }.fixedSize()
             }
@@ -875,7 +896,7 @@ struct KsignCloneFeaturedAppCard: View {
                         Text(tagline).font(.system(size: 11)).foregroundStyle(.white.opacity(0.84)).lineLimit(1)
                     }
                     Spacer(minLength: 4)
-                    KsignCloneGetButton(width: 68)
+                    KsignCloneGetButton(width: 68, appName: appName)
                 }
                 .padding(12)
             }
@@ -1662,10 +1683,21 @@ struct KsignCloneAppDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     private var isPUBG: Bool { app.name.localizedCaseInsensitiveContains("PUBG MOBILE") }
-    // Match the tall App Store hero composition in the reference screenshot.
+    private var isShortcuts: Bool { app.name.localizedCaseInsensitiveCompare("Shortcuts") == .orderedSame }
+    // Match the tall App Store hero composition for PUBG; Apple utilities use the regular product layout.
     private var heroHeight: CGFloat { min(UIScreen.main.bounds.width * 0.815, 420) }
 
     var body: some View {
+        Group {
+            if isShortcuts {
+                shortcutsDetailBody
+            } else {
+                genericDetailBody
+            }
+        }
+    }
+
+    private var genericDetailBody: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 // Tall PUBG MOBILE hero banner matching the reference screenshot.
@@ -1703,7 +1735,7 @@ struct KsignCloneAppDetailView: View {
                             if isPUBG {
                                 KsignCloneOpenButton { KsignCloneLaunchApp.openPUBG() }
                             } else {
-                                KsignCloneGetButton(width: 76)
+                                KsignCloneGetButton(width: 76, appName: app.name)
                             }
                             Spacer()
                         }.padding(.top, 4)
@@ -1796,6 +1828,220 @@ struct KsignCloneAppDetailView: View {
         // full product page to scroll beneath it.
         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 84) }
     }
+
+    private var shortcutsDetailBody: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 19, weight: .medium))
+                            .foregroundStyle(.white)
+                            .frame(width: 42, height: 42)
+                            .background(Color(white: 0.13), in: Circle())
+                    }.buttonStyle(.plain).accessibilityLabel("Back")
+                    Spacer()
+                    Button {} label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 18, weight: .medium)).foregroundStyle(.white)
+                            .frame(width: 42, height: 42).background(Color(white: 0.13), in: Circle())
+                    }.buttonStyle(.plain).accessibilityLabel("Share Shortcuts")
+                    Button {} label: {
+                        Image(systemName: "icloud.and.arrow.down")
+                            .font(.system(size: 20, weight: .medium)).foregroundStyle(.blue)
+                            .frame(width: 42, height: 42)
+                    }.buttonStyle(.plain).accessibilityLabel("Download Shortcuts")
+                }
+                .padding(.horizontal, 20).padding(.top, 8)
+
+                HStack(spacing: 13) {
+                    KsignCloneAppIcon(name: "Shortcuts", fallbackColor: .purple,
+                                      fallbackSymbol: "square.stack.3d.up.fill", size: 76, cornerRadius: 17)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Shortcuts").font(.system(size: 22, weight: .semibold)).foregroundStyle(.white)
+                        Text("Apple").font(.system(size: 14)).foregroundStyle(.blue)
+                        Text("Automate the things you do every day").font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(2)
+                    }
+                    Spacer(minLength: 0)
+                }.padding(.horizontal, 20)
+
+                Divider().overlay(Color.white.opacity(0.12)).padding(.horizontal, 20)
+
+                HStack(spacing: 0) {
+                    VStack(spacing: 5) {
+                        Text("49K RATINGS").font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                        Text("4.6").font(.system(size: 24, weight: .bold)).foregroundStyle(.secondary)
+                        Text("★★★★★").font(.system(size: 11)).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity)
+                    Divider().frame(height: 65)
+                    VStack(spacing: 5) {
+                        Text("AGE RATING").font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                        Text("16+").font(.system(size: 24, weight: .bold)).foregroundStyle(.secondary)
+                        Text("Years").font(.system(size: 11)).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity)
+                    Divider().frame(height: 65)
+                    VStack(spacing: 5) {
+                        Text("CATEGORY").font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                        Image(systemName: "square.grid.2x2.fill").font(.system(size: 20)).foregroundStyle(.secondary)
+                        Text("Productivity").font(.system(size: 11)).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity)
+                }.padding(.horizontal, 8)
+
+                Divider().overlay(Color.white.opacity(0.12)).padding(.horizontal, 20)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Preview").font(.title3.bold()).padding(.horizontal, 20)
+                    KsignCloneAppScreenshotGallery(appName: "Shortcuts")
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack { Text("Ratings & Reviews").font(.title3.bold()); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.secondary) }
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("4.6").font(.system(size: 43, weight: .bold))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("★★★★★").font(.system(size: 15)).foregroundStyle(.secondary)
+                            Text("49K Ratings").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack { Text("Fantastic Potential").font(.headline); Spacer(); Text("★★★★★").foregroundStyle(.secondary) }
+                        Text("Shortcuts makes it easy to automate everyday tasks and connect your favourite apps. Build quick actions and launch them whenever you need them.")
+                            .font(.system(size: 13)).foregroundStyle(.secondary)
+                        Text("Review Summary · Users find the app useful for productivity and automation.")
+                            .font(.system(size: 11)).foregroundStyle(.secondary)
+                    }.padding(16).background(Color(white: 0.105), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }.padding(.horizontal, 20)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack { Text("App Privacy").font(.title3.bold()); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.secondary) }
+                    Text("The developer, Apple, has indicated that this app's privacy practices may include handling of data as described below. For more information, see the developer's privacy policy.")
+                        .font(.system(size: 13)).foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        Image(systemName: "person.crop.circle").font(.system(size: 28)).foregroundStyle(.blue)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Data Linked to You").font(.system(size: 14, weight: .semibold))
+                            Text("The following data may be collected and linked to your identity.").font(.system(size: 11)).foregroundStyle(.secondary)
+                        }
+                    }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(white: 0.105), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }.padding(.horizontal, 20)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack { Text("Information").font(.title3.bold()); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.secondary) }
+                    detailInfoRow("Seller", value: "Apple Inc.")
+                    detailInfoRow("Category", value: "Productivity")
+                    detailInfoRow("Compatibility", value: "Works on this iPhone")
+                    detailInfoRow("Languages", value: "English and 32 more")
+                    detailInfoRow("Age Rating", value: "16+")
+                    detailInfoRow("Copyright", value: "Copyright © 2026 Apple Inc.")
+                    Text("Developer Website     ↗").font(.system(size: 13)).foregroundStyle(.blue).padding(.top, 4)
+                    Text("Privacy Policy     ↗").font(.system(size: 13)).foregroundStyle(.blue)
+                }.padding(.horizontal, 20)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack { Text("More by Apple").font(.title3.bold()); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.secondary) }
+                    ForEach(["Apple Books", "Apple Podcasts"], id: \.self) { name in
+                        HStack(spacing: 12) {
+                            KsignCloneAppIcon(name: name, fallbackColor: .purple, fallbackSymbol: "app.fill", size: 48, cornerRadius: 11)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(name).font(.system(size: 14, weight: .medium))
+                                Text("Apple").font(.system(size: 11)).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text("Open").font(.system(size: 13, weight: .semibold)).foregroundStyle(.blue)
+                                .padding(.horizontal, 17).padding(.vertical, 7).background(Color(white: 0.12), in: Capsule())
+                        }
+                    }
+                }.padding(.horizontal, 20).padding(.bottom, 30)
+            }
+            .padding(.top, 8)
+        }
+        .background(Color.black.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
+        .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 84) }
+    }
+
+    private func detailInfoRow(_ title: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title).font(.system(size: 13)).foregroundStyle(.secondary)
+            Spacer()
+            Text(value).font(.system(size: 13)).foregroundStyle(.white).multilineTextAlignment(.trailing)
+        }
+        .padding(.vertical, 11)
+        .overlay(alignment: .bottom) { Divider().overlay(Color.white.opacity(0.09)) }
+    }
+
+}
+
+private struct KsignCloneAppScreenshotGallery: View {
+    let appName: String
+    @State private var screenshotURLs: [URL] = []
+
+    private struct SearchResponse: Decodable { let results: [AppResult] }
+    private struct AppResult: Decodable {
+        let trackName: String?
+        let screenshotUrls: [URL]?
+        let ipadScreenshotUrls: [URL]?
+    }
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                if screenshotURLs.isEmpty {
+                    KsignCloneShortcutSearchPreview(title: "Describe a Shortcut", accent: .purple, variant: 0)
+                    KsignCloneShortcutSearchPreview(title: "Shortcuts Gallery", accent: .pink, variant: 1)
+                    KsignCloneShortcutSearchPreview(title: "Shortcuts Library", accent: .blue, variant: 2)
+                } else {
+                    ForEach(Array(screenshotURLs.prefix(6).enumerated()), id: \.offset) { entry in
+                        AsyncImage(url: entry.element) { phase in
+                            if let image = phase.image {
+                                image.resizable().scaledToFill()
+                            } else if phase.error != nil {
+                                Color(white: 0.12).overlay(Image(systemName: "app.fill").foregroundStyle(.secondary))
+                            } else {
+                                Color(white: 0.12).overlay(ProgressView().tint(.white))
+                            }
+                        }
+                        .frame(width: 218, height: 388)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
+                }
+            }.padding(.horizontal, 20)
+        }
+        .task { await loadScreenshots() }
+    }
+
+    @MainActor
+    private func loadScreenshots() async {
+        guard screenshotURLs.isEmpty else { return }
+        let key = "KsignAppStoreScreenshots_" + appName.lowercased()
+        if let saved = UserDefaults.standard.array(forKey: key) as? [String] {
+            screenshotURLs = saved.compactMap(URL.init(string:))
+            if !screenshotURLs.isEmpty { return }
+        }
+        do {
+            var components = URLComponents(string: "https://itunes.apple.com/search")
+            components?.queryItems = [
+                URLQueryItem(name: "term", value: appName),
+                URLQueryItem(name: "entity", value: "software"),
+                URLQueryItem(name: "limit", value: "8"),
+                URLQueryItem(name: "country", value: "us")
+            ]
+            guard let url = components?.url else { return }
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(SearchResponse.self, from: data)
+            let result = response.results.first { $0.trackName?.localizedCaseInsensitiveCompare(appName) == .orderedSame }
+                ?? response.results.first
+            let urls = result?.screenshotUrls?.isEmpty == false ? result?.screenshotUrls : result?.ipadScreenshotUrls
+            guard let urls, !urls.isEmpty else { return }
+            screenshotURLs = urls
+            UserDefaults.standard.set(urls.map(\.absoluteString), forKey: key)
+        } catch {
+            // Keep the visual fallback; the next visit can retry the public catalogue.
+        }
+    }
 }
 
 struct KsignCloneStatItem: View {
@@ -1821,23 +2067,105 @@ struct KsignCloneStatItem: View {
 
 // MARK: - 4. Search View
 
+private struct KsignCloneSearchSuggestion: Identifiable {
+    let title: String
+    let symbol: String
+    let completion: String
+    var id: String { title }
+}
+
 struct KsignCloneSearchView: View {
     @ObservedObject var data: KsignCloneStoreData
     @Binding var showPUBGProductPage: Bool
     @State private var searchText = ""
+    @State private var didSubmitSearch = false
+    @FocusState private var isSearchFocused: Bool
 
     private var pubgApp: KsignCloneAppItem? {
         data.games.first { $0.name.localizedCaseInsensitiveContains("PUBG MOBILE") }
     }
 
+    private var shortcutsApp: KsignCloneAppItem? {
+        data.featuredApps.first { $0.name.localizedCaseInsensitiveCompare("Shortcuts") == .orderedSame }
+    }
+
     private var allApps: [KsignCloneAppItem] { data.featuredApps + data.games }
+
     private var filteredApps: [KsignCloneAppItem] {
-        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
-        return allApps.filter {
-            $0.name.localizedCaseInsensitiveContains(searchText) ||
-            $0.category.localizedCaseInsensitiveContains(searchText) ||
-            $0.description.localizedCaseInsensitiveContains(searchText)
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return [] }
+        let normalized = query.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+        return allApps.filter { app in
+            let nameMatch = app.name.localizedCaseInsensitiveContains(query)
+            let categoryMatch = app.category.localizedCaseInsensitiveContains(query)
+            let descriptionMatch = app.description.localizedCaseInsensitiveContains(query)
+            let russianShortcutsAlias = normalized.contains("команд") && app.name == "Shortcuts"
+            return nameMatch || categoryMatch || descriptionMatch || russianShortcutsAlias
         }
+    }
+
+    private var isShortcutsSearch: Bool {
+        let query = searchText.lowercased()
+        return query.contains("shortcut") || query.contains("команд")
+    }
+
+    private var searchSuggestionItems: [KsignCloneSearchSuggestion] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !query.isEmpty else { return [] }
+
+        if query == "k" || query == "к" {
+            return [
+                .init(title: "алиэкспресс", symbol: "magnifyingglass", completion: "алиэкспресс"),
+                .init(title: "автокликер", symbol: "magnifyingglass", completion: "автокликер"),
+                .init(title: "авито", symbol: "magnifyingglass", completion: "авито"),
+                .init(title: "алиса ai", symbol: "magnifyingglass", completion: "алиса ai"),
+                .init(title: "аудиокниги от pathephone in Watch Apps", symbol: "applewatch", completion: "аудиокниги"),
+                .init(title: "амонг ас", symbol: "magnifyingglass", completion: "Among Us!"),
+                .init(title: "алиса", symbol: "magnifyingglass", completion: "алиса"),
+                .init(title: "авиасейлс", symbol: "magnifyingglass", completion: "авиасейлс")
+            ]
+        }
+
+        if query.contains("short") || query.contains("команд") || query == "sh" {
+            let russian = query.contains("команд")
+            if russian {
+                return [
+                    .init(title: "команды", symbol: "magnifyingglass", completion: "Команды"),
+                    .init(title: "быстрые команды", symbol: "magnifyingglass", completion: "Команды"),
+                    .init(title: "все команды", symbol: "magnifyingglass", completion: "Команды"),
+                    .init(title: "команды действия", symbol: "magnifyingglass", completion: "Команды"),
+                    .init(title: "команды в подборках", symbol: "appstore.fill", completion: "Команды"),
+                    .init(title: "команды программного обеспечения в разработчиках", symbol: "person.crop.square", completion: "Команды"),
+                    .init(title: "Pushcut: автоматизация команд в Watch Apps", symbol: "applewatch", completion: "Pushcut: Shortcuts Automation"),
+                    .init(title: "библиотека команд", symbol: "magnifyingglass", completion: "Команды")
+                ]
+            }
+            return [
+                .init(title: "apple shortcuts app", symbol: "magnifyingglass", completion: "Shortcuts"),
+                .init(title: "shortcuts", symbol: "magnifyingglass", completion: "Shortcuts"),
+                .init(title: "all shortcuts", symbol: "magnifyingglass", completion: "Shortcuts"),
+                .init(title: "shortcuts actions", symbol: "magnifyingglass", completion: "Shortcuts"),
+                .init(title: "shortcuts in Stories", symbol: "appstore.fill", completion: "Shortcuts"),
+                .init(title: "shortcuts software in Developers", symbol: "person.crop.square", completion: "Shortcuts"),
+                .init(title: "pushcut: shortcuts automation in Watch Apps", symbol: "applewatch", completion: "Pushcut: Shortcuts Automation"),
+                .init(title: "shortcuts library", symbol: "magnifyingglass", completion: "Shortcuts")
+            ]
+        }
+
+        let matchingApps = allApps.filter {
+            $0.name.localizedCaseInsensitiveContains(query) || $0.category.localizedCaseInsensitiveContains(query)
+        }.prefix(5)
+        if !matchingApps.isEmpty {
+            return Array(matchingApps.map { .init(title: $0.name, symbol: "magnifyingglass", completion: $0.name) }) + [
+                .init(title: "top \(searchText) apps", symbol: "magnifyingglass", completion: searchText),
+                .init(title: "best \(searchText) games", symbol: "magnifyingglass", completion: searchText)
+            ]
+        }
+        return [
+            .init(title: searchText, symbol: "magnifyingglass", completion: searchText),
+            .init(title: "top \(searchText) apps", symbol: "magnifyingglass", completion: searchText),
+            .init(title: "best \(searchText) games", symbol: "magnifyingglass", completion: searchText)
+        ]
     }
 
     private let browseTiles: [(String, String, [Color])] = [
@@ -1846,94 +2174,24 @@ struct KsignCloneSearchView: View {
         ("Stories", "book.fill", [.orange, .pink]),
         ("Editors’ Choice", "star.fill", [.purple, .indigo])
     ]
-    private let suggestions = ["PUBG MOBILE", "photo editor", "shortcuts", "ai assistant", "fitness", "wallpaper", "music", "Roblox", "ChatGPT", "TikTok", "Minecraft", "social networking", "racing games", "puzzle games"]
+    private let suggestions = ["PUBG MOBILE", "photo editor", "shortcuts", "ai assistant", "fitness", "wallpaper", "music", "Roblox", "ChatGPT", "TikTok", "Minecraft", "social networking", "racing games", "puzzle games", "DramaBox", "SHAREit", "Barbie Dreamhouse Adventures", "Apple Books", "Apple Podcasts", "Color Widgets"]
 
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     if searchText.isEmpty {
-                        VStack(alignment: .leading, spacing: 14) {
-                            Text("Suggested").font(.system(size: 21, weight: .bold))
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                                ForEach(Array(browseTiles.enumerated()), id: \.offset) { _, tile in
-                                    Button { searchText = tile.0 } label: {
-                                        ZStack(alignment: .bottomLeading) {
-                                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                                .fill(LinearGradient(colors: tile.2, startPoint: .topLeading, endPoint: .bottomTrailing))
-                                            Circle().fill(.white.opacity(0.14)).frame(width: 86, height: 86).offset(x: 65, y: -35)
-                                            VStack(alignment: .leading, spacing: 12) {
-                                                Image(systemName: tile.1).font(.system(size: 25, weight: .semibold))
-                                                Text(tile.0).font(.system(size: 16, weight: .bold)).lineLimit(2)
-                                            }.foregroundStyle(.white).padding(14)
-                                        }.frame(height: 118)
-                                    }.buttonStyle(.plain)
-                                }
-                            }
+                        if !isSearchFocused {
+                            emptySearchHome
                         }
-
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Trending Searches").font(.system(size: 21, weight: .bold))
-                            ForEach(suggestions, id: \.self) { term in
-                                Button { searchText = term } label: {
-                                    HStack(spacing: 12) {
-                                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                                        Text(term).foregroundStyle(.white)
-                                        Spacer()
-                                        Image(systemName: "arrow.up.left").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
-                                    }.padding(.vertical, 7)
-                                }.buttonStyle(.plain)
-                                Divider().overlay(Color.white.opacity(0.09))
-                            }
-                        }
-
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack { Text("Suggested for You").font(.system(size: 21, weight: .bold)); Spacer(); Text("See All").font(.subheadline).foregroundStyle(.blue) }
-                            ForEach(Array(data.games.prefix(4))) { app in
-                                NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
-                                    KsignCloneSmallAppRow(app: app)
-                                }.buttonStyle(.plain)
-                            }
-                        }
+                    } else if isSearchFocused && !didSubmitSearch {
+                        // The live completion list is rendered by .searchSuggestions,
+                        // as in the reference App Store screen; keep the content area clean.
+                        Color.clear.frame(height: 1)
+                    } else if isShortcutsSearch {
+                        shortcutsSearchResults
                     } else {
-                        HStack {
-                            Text("Results").font(.system(size: 21, weight: .bold))
-                            Spacer()
-                            Text("\(filteredApps.count) Apps").font(.caption).foregroundStyle(.secondary)
-                        }
-                        if filteredApps.isEmpty {
-                            VStack(spacing: 12) {
-                                Image(systemName: "magnifyingglass").font(.system(size: 36)).foregroundStyle(.secondary)
-                                Text("No Results").font(.headline)
-                                Text("Try another app name or category.").font(.subheadline).foregroundStyle(.secondary)
-                            }.frame(maxWidth: .infinity).padding(.vertical, 50)
-                        } else {
-                            ForEach(filteredApps) { app in
-                                if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
-                                    HStack(spacing: 10) {
-                                        Button { showPUBGProductPage = true; searchText = "PUBG MOBILE" } label: {
-                                            HStack(spacing: 10) {
-                                                KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 58, cornerRadius: 13)
-                                                VStack(alignment: .leading, spacing: 4) {
-                                                    Text(app.name).font(.system(size: 15, weight: .medium)).foregroundStyle(.white).lineLimit(1)
-                                                    Text("Tencent Mobile International Limited").font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(2)
-                                                    Text("★★★★☆  1.6M").font(.system(size: 11)).foregroundStyle(.secondary)
-                                                }.frame(maxWidth: .infinity, alignment: .leading)
-                                            }
-                                        }.buttonStyle(.plain)
-                                        Button { KsignCloneLaunchApp.openPUBG() } label: {
-                                            Text("Open").font(.system(size: 14, weight: .semibold)).foregroundStyle(.blue)
-                                                .frame(width: 68, height: 32).background(Color(white: 0.14), in: Capsule())
-                                        }.buttonStyle(.plain)
-                                    }.padding(.vertical, 8)
-                                } else {
-                                    NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
-                                        KsignCloneSmallAppRow(app: app)
-                                    }.buttonStyle(.plain)
-                                }
-                                Divider().overlay(Color.white.opacity(0.09))
-                            }
-                        }
+                        ordinarySearchResults
                     }
                 }
                 .padding(.horizontal, 20)
@@ -1944,18 +2202,281 @@ struct KsignCloneSearchView: View {
             .navigationTitle("Search")
             .navigationBarTitleDisplayMode(.large)
             .toolbarColorScheme(.dark, for: .navigationBar)
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Games, Apps, Stories and More")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Games, Apps, and More")
+            .searchFocused($isSearchFocused)
+            .searchSuggestions {
+                if !searchText.isEmpty && isSearchFocused && !didSubmitSearch {
+                    ForEach(searchSuggestionItems) { item in
+                        Label(item.title, systemImage: item.symbol)
+                            .searchCompletion(item.completion)
+                    }
+                }
+            }
+            .onSubmit(of: .search) {
+                didSubmitSearch = true
+                isSearchFocused = false
+            }
+            .onChange(of: searchText) { _ in
+                didSubmitSearch = false
+            }
             .navigationDestination(isPresented: $showPUBGProductPage) {
                 if let app = pubgApp { KsignCloneAppDetailView(app: app) }
             }
             .onChange(of: showPUBGProductPage) { isShowing in
-                if isShowing { searchText = "PUBG MOBILE" }
+                if isShowing {
+                    searchText = "PUBG MOBILE"
+                    didSubmitSearch = true
+                    isSearchFocused = false
+                }
+            }
+            .onAppear {
+                // Search opens with the keyboard as it does in the reference video.
+                // When a deep link is opening PUBG, leave the keyboard closed.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    if !showPUBGProductPage && searchText.isEmpty {
+                        isSearchFocused = true
+                    }
+                }
             }
         }
         .preferredColorScheme(.dark)
     }
+
+    @ViewBuilder
+    private var emptySearchHome: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Suggested").font(.system(size: 21, weight: .bold))
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                ForEach(Array(browseTiles.enumerated()), id: \.offset) { _, tile in
+                    Button {
+                        searchText = tile.0
+                        didSubmitSearch = true
+                        isSearchFocused = false
+                    } label: {
+                        ZStack(alignment: .bottomLeading) {
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(LinearGradient(colors: tile.2, startPoint: .topLeading, endPoint: .bottomTrailing))
+                            Circle().fill(.white.opacity(0.14)).frame(width: 86, height: 86).offset(x: 65, y: -35)
+                            VStack(alignment: .leading, spacing: 12) {
+                                Image(systemName: tile.1).font(.system(size: 25, weight: .semibold))
+                                Text(tile.0).font(.system(size: 16, weight: .bold)).lineLimit(2)
+                            }.foregroundStyle(.white).padding(14)
+                        }.frame(height: 118)
+                    }.buttonStyle(.plain)
+                }
+            }
+        }
+
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Trending Searches").font(.system(size: 21, weight: .bold))
+            ForEach(suggestions, id: \.self) { term in
+                Button {
+                    searchText = term
+                    didSubmitSearch = true
+                    isSearchFocused = false
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                        Text(term).foregroundStyle(.white)
+                        Spacer()
+                        Image(systemName: "arrow.up.left").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
+                    }.padding(.vertical, 7)
+                }.buttonStyle(.plain)
+                Divider().overlay(Color.white.opacity(0.09))
+            }
+        }
+
+        VStack(alignment: .leading, spacing: 12) {
+            HStack { Text("Suggested for You").font(.system(size: 21, weight: .bold)); Spacer(); Text("See All").font(.subheadline).foregroundStyle(.blue) }
+            ForEach(Array(data.games.prefix(4))) { app in
+                NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                    KsignCloneSmallAppRow(app: app)
+                }.buttonStyle(.plain)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var ordinarySearchResults: some View {
+        HStack {
+            Text("Results").font(.system(size: 21, weight: .bold))
+            Spacer()
+            Text("\(filteredApps.count) Apps").font(.caption).foregroundStyle(.secondary)
+        }
+        if filteredApps.isEmpty {
+            VStack(spacing: 12) {
+                Image(systemName: "magnifyingglass").font(.system(size: 36)).foregroundStyle(.secondary)
+                Text("No Results").font(.headline)
+                Text("Try another app name or category.").font(.subheadline).foregroundStyle(.secondary)
+            }.frame(maxWidth: .infinity).padding(.vertical, 50)
+        } else {
+            ForEach(filteredApps) { app in
+                if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                    HStack(spacing: 10) {
+                        Button { showPUBGProductPage = true; searchText = "PUBG MOBILE"; didSubmitSearch = true } label: {
+                            HStack(spacing: 10) {
+                                KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 58, cornerRadius: 13)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(app.name).font(.system(size: 15, weight: .medium)).foregroundStyle(.white).lineLimit(1)
+                                    Text("Tencent Mobile International Limited").font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(2)
+                                    Text("★★★★☆  1.6M").font(.system(size: 11)).foregroundStyle(.secondary)
+                                }.frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }.buttonStyle(.plain)
+                        Button { KsignCloneLaunchApp.openPUBG() } label: {
+                            Text("Open").font(.system(size: 14, weight: .semibold)).foregroundStyle(.blue)
+                                .frame(width: 68, height: 32).background(Color(white: 0.14), in: Capsule())
+                        }.buttonStyle(.plain)
+                    }.padding(.vertical, 8)
+                } else {
+                    NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                        KsignCloneSmallAppRow(app: app)
+                    }.buttonStyle(.plain)
+                }
+                Divider().overlay(Color.white.opacity(0.09))
+            }
+        }
+    }
+
+    private var shortcutsSearchResults: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            if let app = shortcutsApp {
+                HStack(spacing: 10) {
+                    NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                        HStack(spacing: 10) {
+                            KsignCloneAppIcon(name: "Shortcuts", fallbackColor: .purple, fallbackSymbol: "square.stack.3d.up.fill", size: 54, cornerRadius: 13)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Shortcuts").font(.system(size: 15, weight: .semibold)).foregroundStyle(.white)
+                                Text("Apple").font(.system(size: 12)).foregroundStyle(.secondary)
+                                Text("4.6  ★★★★★  49K Ratings").font(.system(size: 10)).foregroundStyle(.secondary)
+                            }
+                        }
+                    }.buttonStyle(.plain)
+                    Spacer(minLength: 2)
+                    Button { } label: {
+                        Image(systemName: "icloud.and.arrow.down")
+                            .font(.system(size: 21, weight: .medium)).foregroundStyle(.blue)
+                    }.buttonStyle(.plain).accessibilityLabel("Download Shortcuts")
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        KsignCloneShortcutSearchPreview(title: "Describe a Shortcut", accent: Color(red: 0.40, green: 0.40, blue: 0.92), variant: 0)
+                        KsignCloneShortcutSearchPreview(title: "Shortcuts Gallery", accent: Color(red: 0.98, green: 0.36, blue: 0.52), variant: 1)
+                        KsignCloneShortcutSearchPreview(title: "Shortcuts Library", accent: Color(red: 0.28, green: 0.58, blue: 0.96), variant: 2)
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top, spacing: 10) {
+                    KsignCloneAppIcon(name: "DramaBox - Stream Drama Shorts", fallbackColor: .pink, fallbackSymbol: "play.rectangle.fill", size: 54, cornerRadius: 12)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("DramaBox - Stream Drama Shorts").font(.system(size: 14, weight: .semibold)).lineLimit(2)
+                        Text("Ad · Hub of Shorts").font(.system(size: 11)).foregroundStyle(.secondary)
+                        Text("★★★★☆ 887K").font(.system(size: 10)).foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 3)
+                    KsignCloneGetButton(width: 64, appName: "DramaBox - Stream Drama Shorts")
+                }
+                Text("#10 in Entertainment  ·  STORYMATRIX PTE. LTD.")
+                    .font(.system(size: 10, weight: .medium)).foregroundStyle(.secondary)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        KsignCloneSearchAdPreview(title: "Watch Exclusive Stories", index: 0)
+                        KsignCloneSearchAdPreview(title: "Diverse Content Selection", index: 1)
+                        KsignCloneSearchAdPreview(title: "Immersive HD Streaming", index: 2)
+                    }
+                }
+            }
+            .padding(.top, 2)
+
+            HStack { Text("More Results").font(.system(size: 20, weight: .bold)); Spacer() }
+            ForEach(["SHAREit: Transfer, Share Files", "Barbie Dreamhouse Adventures", "Color Widgets", "Apple Books", "Apple Podcasts", "Pushcut: Shortcuts Automation"], id: \.self) { name in
+                if let app = allApps.first(where: { $0.name == name }) {
+                    NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                        KsignCloneSmallAppRow(app: app)
+                    }.buttonStyle(.plain)
+                    Divider().overlay(Color.white.opacity(0.09))
+                }
+            }
+        }
+    }
 }
 
+private struct KsignCloneShortcutSearchPreview: View {
+    let title: String
+    let accent: Color
+    let variant: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text(title)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(Color.black.opacity(0.85))
+                .lineLimit(2)
+                .frame(height: 22, alignment: .topLeading)
+            ZStack {
+                RoundedRectangle(cornerRadius: 9).fill(Color(red: 0.965, green: 0.965, blue: 0.98))
+                VStack(spacing: 7) {
+                    HStack(spacing: 5) {
+                        Circle().fill(Color.red.opacity(0.8)).frame(width: 5, height: 5)
+                        Circle().fill(Color.orange.opacity(0.8)).frame(width: 5, height: 5)
+                        Circle().fill(Color.green.opacity(0.8)).frame(width: 5, height: 5)
+                        Spacer()
+                    }
+                    if variant == 0 {
+                        RoundedRectangle(cornerRadius: 6).fill(Color.white).overlay(Text("What do you want your shortcut to do?").font(.system(size: 6)).foregroundStyle(.black).padding(4)).frame(height: 38)
+                        RoundedRectangle(cornerRadius: 5).fill(accent.opacity(0.85)).frame(height: 17)
+                        RoundedRectangle(cornerRadius: 5).fill(Color.gray.opacity(0.18)).frame(height: 17)
+                    } else {
+                        ForEach(0..<4, id: \.self) { row in
+                            HStack(spacing: 5) {
+                                RoundedRectangle(cornerRadius: 4).fill([accent, .blue, .orange, .purple][(row + variant) % 4]).frame(width: 24, height: 22)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    RoundedRectangle(cornerRadius: 2).fill(Color.black.opacity(0.20)).frame(height: 4)
+                                    RoundedRectangle(cornerRadius: 2).fill(Color.black.opacity(0.09)).frame(width: 42, height: 3)
+                                }
+                                Spacer(minLength: 0)
+                            }
+                        }
+                    }
+                    Spacer(minLength: 0)
+                }.padding(8)
+            }
+        }
+        .padding(8)
+        .frame(width: 136, height: 176)
+        .background(Color.white, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+private struct KsignCloneSearchAdPreview: View {
+    let title: String
+    let index: Int
+    private var colors: [Color] {
+        switch index {
+        case 0: return [Color(red: 0.09, green: 0.10, blue: 0.20), Color(red: 0.30, green: 0.06, blue: 0.16)]
+        case 1: return [Color(red: 0.12, green: 0.07, blue: 0.20), Color(red: 0.36, green: 0.08, blue: 0.25)]
+        default: return [Color(red: 0.04, green: 0.12, blue: 0.22), Color(red: 0.15, green: 0.04, blue: 0.16)]
+        }
+    }
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing))
+            Circle().fill(.white.opacity(0.09)).frame(width: 95, height: 95).offset(x: 80, y: -25)
+            VStack(alignment: .leading, spacing: 7) {
+                Image(systemName: index == 0 ? "play.rectangle.fill" : (index == 1 ? "sparkles" : "play.tv.fill"))
+                    .font(.system(size: 28, weight: .semibold)).foregroundStyle(.white.opacity(0.94))
+                Text(title).font(.system(size: 12, weight: .bold)).foregroundStyle(.white).lineLimit(3)
+            }.padding(12)
+        }
+        .frame(width: 194, height: 126)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
 
 // Launch helper for the installed PUBG MOBILE app. The app must register this URL scheme.
 enum KsignCloneLaunchApp {
@@ -1984,42 +2505,197 @@ struct KsignCloneOpenButton: View {
     }
 }
 
+// Shared state for the App Store-style install confirmation animation.
+// This is a visual demo only and never invokes an Apple purchase or installation API.
+final class KsignCloneInstallPrompt: ObservableObject {
+    static let shared = KsignCloneInstallPrompt()
+
+    @Published var presentedAppName: String?
+    @Published var isConfirming = false
+
+    private init() {}
+
+    func present(appName: String) {
+        isConfirming = false
+        withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
+            presentedAppName = appName
+        }
+    }
+
+    func dismiss() {
+        withAnimation(.spring(response: 0.34, dampingFraction: 0.9)) {
+            presentedAppName = nil
+            isConfirming = false
+        }
+    }
+
+    func confirmVisualDemo() {
+        guard let appName = presentedAppName, !isConfirming else { return }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        withAnimation(.easeInOut(duration: 0.18)) { isConfirming = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) { [weak self] in
+            guard let self, self.presentedAppName == appName else { return }
+            self.dismiss()
+        }
+    }
+}
+
 struct KsignCloneGetButton: View {
     var width: CGFloat = 72
-    @State private var state: DownloadState = .get
-    
-    enum DownloadState {
-        case get, loading, open
+    var appName: String = "App"
+    @ObservedObject private var prompt = KsignCloneInstallPrompt.shared
+    @State private var isPressed = false
+
+    private var isPUBG: Bool {
+        appName.localizedCaseInsensitiveContains("PUBG MOBILE")
     }
-    
+
     var body: some View {
-        Button(action: {
-            if state == .get {
-                withAnimation { state = .loading }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    withAnimation { state = .open }
-                }
-            }
-        }) {
-            ZStack {
-                Capsule()
-                    .fill(state == .get ? Color(uiColor: .secondarySystemBackground) : (state == .open ? .blue : .clear))
-                
-                if state == .get {
-                    Text("Get")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.blue)
-                } else if state == .loading {
-                    ProgressView()
-                } else {
-                    Text("Open")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
-            }
-            .frame(width: width, height: 28)
+        Button(action: handleTap) {
+            Text(isPUBG ? "Open" : "Get")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(isPUBG ? Color.white : KsignCloneTheme.accent)
+                .frame(width: width, height: 30)
+                .background(isPUBG ? Color.blue : Color(uiColor: .secondarySystemBackground), in: Capsule())
+                .scaleEffect(isPressed ? 0.94 : 1)
+                .animation(.spring(response: 0.22, dampingFraction: 0.55), value: isPressed)
         }
         .buttonStyle(.plain)
+        .fixedSize()
+        .accessibilityLabel(isPUBG ? "Open PUBG MOBILE" : "Get \(appName)")
+    }
+
+    private func handleTap() {
+        if isPUBG {
+            KsignCloneLaunchApp.openPUBG()
+            return
+        }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        isPressed = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { isPressed = false }
+        prompt.present(appName: appName)
+    }
+}
+
+private struct KsignCloneInstallPromptOverlay: View {
+    @ObservedObject private var prompt = KsignCloneInstallPrompt.shared
+
+    var body: some View {
+        GeometryReader { proxy in
+            if let appName = prompt.presentedAppName {
+                ZStack(alignment: .bottom) {
+                    Color.black.opacity(0.70)
+                        .ignoresSafeArea()
+                        .onTapGesture { prompt.dismiss() }
+                        .transition(.opacity)
+
+                    VStack {
+                        HStack {
+                            Spacer()
+                            if !prompt.isConfirming {
+                                Text("Double-Click to Install")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(.white.opacity(0.96))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Color(white: 0.19), in: Capsule())
+                                    .overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 0.7))
+                            }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.top, max(proxy.safeAreaInsets.top, 20) + 8)
+                        Spacer()
+                    }
+                    .allowsHitTesting(false)
+
+                    VStack(spacing: 0) {
+                        HStack(spacing: 10) {
+                            Text("App Store")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.white)
+                            Spacer()
+                            Button { prompt.dismiss() } label: {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(.white.opacity(0.9))
+                                    .frame(width: 30, height: 30)
+                                    .background(Color.white.opacity(0.09), in: Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Close install preview")
+                        }
+
+                        Divider().overlay(Color.white.opacity(0.09)).padding(.top, 12)
+
+                        HStack(spacing: 12) {
+                            KsignCloneAppIcon(name: appName, fallbackColor: .blue,
+                                              fallbackSymbol: "app.fill", size: 54, cornerRadius: 12)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(appName)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .lineLimit(1)
+                                Text("App Store · Preview")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.secondary)
+                                Text("Account: demonstration only")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.vertical, 15)
+
+                        Button { prompt.confirmVisualDemo() } label: {
+                            HStack(spacing: 11) {
+                                ZStack {
+                                    Circle().fill(Color.blue).frame(width: 32, height: 32)
+                                    Image(systemName: prompt.isConfirming ? "checkmark" : "faceid")
+                                        .font(.system(size: 17, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                }
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(prompt.isConfirming ? "Confirming…" : "Confirm with Side Button")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                    Text(prompt.isConfirming ? "Please wait" : "Double-click the side button to continue")
+                                        .font(.system(size: 10, weight: .regular))
+                                        .foregroundStyle(.white.opacity(0.65))
+                                }
+                                Spacer(minLength: 0)
+                                if prompt.isConfirming {
+                                    ProgressView().tint(.white)
+                                } else {
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(.white.opacity(0.45))
+                                }
+                            }
+                            .padding(11)
+                            .background(Color.white.opacity(0.065), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(prompt.isConfirming)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 238)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .background(Color(red: 0.105, green: 0.105, blue: 0.115), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.13), lineWidth: 0.8))
+                    .shadow(color: .black.opacity(0.36), radius: 24, x: 0, y: -5)
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 10) + 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .ignoresSafeArea()
+                .animation(.spring(response: 0.38, dampingFraction: 0.86), value: prompt.presentedAppName)
+                .animation(.easeInOut(duration: 0.18), value: prompt.isConfirming)
+            }
+        }
+        .allowsHitTesting(prompt.presentedAppName != nil)
     }
 }
 
@@ -2030,6 +2706,37 @@ struct KsignCloneAccountIcon: View {
             .frame(width: 34, height: 34)
             .overlay(Circle().stroke(Color.white.opacity(0.08), lineWidth: 0.7))
             .accessibilityLabel("Account")
+    }
+}
+
+// Dotted rainbow ring and centered Apple glyph, matching the Apple Account header mark.
+struct KsignCloneAppleAccountMark: View {
+    private let colors: [Color] = [
+        Color(red: 0.43, green: 0.78, blue: 0.97),
+        Color(red: 0.40, green: 0.66, blue: 0.98),
+        Color(red: 0.55, green: 0.48, blue: 0.95),
+        Color(red: 0.77, green: 0.39, blue: 0.84),
+        Color(red: 0.93, green: 0.35, blue: 0.64),
+        Color(red: 0.98, green: 0.49, blue: 0.48),
+        Color(red: 0.98, green: 0.70, blue: 0.39),
+        Color(red: 0.99, green: 0.80, blue: 0.51)
+    ]
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<36, id: \.self) { index in
+                Circle()
+                    .fill(colors[index / 5 % colors.count].opacity(0.96))
+                    .frame(width: 2.6, height: 2.6)
+                    .offset(y: -17)
+                    .rotationEffect(.degrees(Double(index) * 10))
+            }
+            Image(systemName: "apple.logo")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(.white)
+        }
+        .frame(width: 44, height: 44)
+        .accessibilityLabel("Apple Account")
     }
 }
 
@@ -2045,10 +2752,8 @@ struct KsignCloneAccountView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
                     HStack(spacing: 9) {
-                        ZStack {
-                            Circle().fill(LinearGradient(colors: [.purple, .blue, .pink], startPoint: .topLeading, endPoint: .bottomTrailing))
-                            Image(systemName: "sparkle").font(.system(size: 17, weight: .bold)).foregroundStyle(.white)
-                        }.frame(width: 30, height: 30)
+                        KsignCloneAppleAccountMark()
+                            .frame(width: 44, height: 44)
                         Text("Apple Account").font(.system(size: 19, weight: .semibold))
                         Spacer()
                         Button { dismiss() } label: {
@@ -2117,7 +2822,7 @@ struct KsignCloneAccountView: View {
                             accountDivider
                             NavigationLink(destination: KsignCloneAccountSubpageView(title: "Downloads")) { accountSubRow("Downloads", symbol: "arrow.down.circle.fill") }.buttonStyle(.plain)
                             accountDivider
-                            NavigationLink(destination: KsignCloneAccountSubpageView(title: "KSign Settings")) { accountSubRow("Settings", symbol: "gearshape.fill") }.buttonStyle(.plain)
+                            NavigationLink(destination: KsignCloneAccountSubpageView(title: "App Store Settings")) { accountSubRow("Settings", symbol: "gearshape.fill") }.buttonStyle(.plain)
                         }
                     }
                     .background(sectionColor, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -2133,7 +2838,7 @@ struct KsignCloneAccountView: View {
                     VStack(spacing: 0) {
                         accountFooterNavigationRow("Set Up Family", symbol: "person.2.fill", destination: "Set Up Family")
                         accountDivider
-                        accountFooterNavigationRow("App Store Settings", symbol: "gearshape", destination: "KSign Settings")
+                        accountFooterNavigationRow("App Store Settings", symbol: "gearshape", destination: "App Store Settings")
                     }
                     .background(sectionColor, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(KsignCloneTheme.accountBorder, lineWidth: 0.8))
@@ -2141,10 +2846,7 @@ struct KsignCloneAccountView: View {
                     .padding(.bottom, 30)
                 }
             }
-            .background(
-                LinearGradient(colors: [KsignCloneTheme.accountBackground, Color(red: 0.018, green: 0.040, blue: 0.105)], startPoint: .top, endPoint: .bottom)
-                    .ignoresSafeArea()
-            )
+            .background(KsignCloneTheme.accountBackground.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
         }
         .preferredColorScheme(.dark)
@@ -2295,7 +2997,7 @@ struct KsignCloneAccountSubpageView: View {
                             Divider().overlay(KsignCloneTheme.accountBorder).padding(.leading, 80).padding(.trailing, 14)
                         }
                     }.background(KsignCloneTheme.accountCard, in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
-                } else if title == "Account Settings" || title == "Personalized Recommendations" || title == "KSign Settings" {
+                } else if title == "Account Settings" || title == "Personalized Recommendations" || title == "App Store Settings" {
                     VStack(spacing: 0) {
                         subpageRow("Account Details")
                         subpageRow("Country/Region", detail: "United States")
