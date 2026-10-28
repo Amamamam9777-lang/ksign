@@ -468,7 +468,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ksign/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Ksign;
+				INFOPLIST_KEY_CFBundleDisplayName = "App Store";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2025 Nagata Asami";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -534,7 +534,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = "SERVER=1";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ksign/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Ksign;
+				INFOPLIST_KEY_CFBundleDisplayName = "App Store";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2025 Nagata Asami";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
