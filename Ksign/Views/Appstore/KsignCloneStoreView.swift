@@ -76,6 +76,7 @@ struct KsignCloneTodayCardItem: Identifiable {
     let category: String
     let title: String
     let subtitle: String
+    let appName: String
     let imageColor: Color
     let overlayPosition: Alignment
 }
@@ -90,33 +91,49 @@ class KsignCloneStoreData: ObservableObject {
     }
     
     func generateMockData() {
+        // Names are resolved against the public App Store catalogue at runtime so app
+        // icons and screenshots are real artwork, then cached locally by Ksign.
         featuredApps = [
-            KsignCloneAppItem(name: "Procreate", category: "Graphics & Design", iconColor: .purple, iconSymbol: "paintbrush.fill", rating: 4.8, reviews: "24K", size: "450 MB", age: "4+", screenshots: [.purple, .blue, .pink], description: "Sketch, paint, create."),
-            KsignCloneAppItem(name: "Linear", category: "Productivity", iconColor: .black, iconSymbol: "checklist", rating: 4.9, reviews: "12K", size: "80 MB", age: "4+", screenshots: [.gray, .black, .white], description: "Issue tracking built for speed."),
-            KsignCloneAppItem(name: "Duolingo", category: "Education", iconColor: .green, iconSymbol: "message.fill", rating: 4.7, reviews: "1.2M", size: "120 MB", age: "4+", screenshots: [.green, .orange, .yellow], description: "Learn languages for free."),
-            KsignCloneAppItem(name: "Flighty", category: "Travel", iconColor: .orange, iconSymbol: "airplane", rating: 4.8, reviews: "8K", size: "95 MB", age: "4+", screenshots: [.orange, .blue, .black], description: "Live flight tracking."),
-            KsignCloneAppItem(name: "Spotify", category: "Music", iconColor: .green, iconSymbol: "music.note", rating: 4.8, reviews: "20M", size: "150 MB", age: "12+", screenshots: [.black, .green, .gray], description: "Music for everyone.")
+            KsignCloneAppItem(name: "Instagram", category: "Photo & Video", iconColor: .pink, iconSymbol: "camera.fill", rating: 4.7, reviews: "3.1M", size: "350 MB", age: "12+", screenshots: [.pink, .purple, .orange], description: "Share photos, reels and messages."),
+            KsignCloneAppItem(name: "ChatGPT", category: "Productivity", iconColor: .black, iconSymbol: "sparkles", rating: 4.8, reviews: "1.2M", size: "150 MB", age: "12+", screenshots: [.black, .blue, .purple], description: "Ask anything and get help with everyday tasks."),
+            KsignCloneAppItem(name: "YouTube", category: "Photo & Video", iconColor: .red, iconSymbol: "play.rectangle.fill", rating: 4.7, reviews: "9M", size: "280 MB", age: "12+", screenshots: [.red, .black, .white], description: "Watch videos, music and creators."),
+            KsignCloneAppItem(name: "WhatsApp Messenger", category: "Social Networking", iconColor: .green, iconSymbol: "message.fill", rating: 4.7, reviews: "15M", size: "220 MB", age: "12+", screenshots: [.green, .white, .black], description: "Simple, reliable private messaging."),
+            KsignCloneAppItem(name: "Discord - Talk, Play, Hang Out", category: "Social Networking", iconColor: .indigo, iconSymbol: "gamecontroller.fill", rating: 4.7, reviews: "2.1M", size: "240 MB", age: "17+", screenshots: [.indigo, .purple, .black], description: "Talk, play and hang out with communities."),
+            KsignCloneAppItem(name: "Spotify: Music and Podcasts", category: "Music", iconColor: .green, iconSymbol: "music.note", rating: 4.8, reviews: "5M", size: "190 MB", age: "12+", screenshots: [.black, .green, .gray], description: "Listen to music and podcasts."),
+            KsignCloneAppItem(name: "CapCut - Video Editor", category: "Photo & Video", iconColor: .black, iconSymbol: "film.fill", rating: 4.7, reviews: "1.8M", size: "300 MB", age: "12+", screenshots: [.black, .gray, .white], description: "Make videos with powerful editing tools."),
+            KsignCloneAppItem(name: "Google Maps", category: "Navigation", iconColor: .blue, iconSymbol: "map.fill", rating: 4.7, reviews: "3M", size: "280 MB", age: "4+", screenshots: [.blue, .green, .yellow], description: "Find places and navigate anywhere."),
+            KsignCloneAppItem(name: "Shazam: Find Music & Concerts", category: "Music", iconColor: .blue, iconSymbol: "waveform", rating: 4.8, reviews: "1.5M", size: "90 MB", age: "12+", screenshots: [.blue, .black, .white], description: "Identify songs playing around you."),
+            KsignCloneAppItem(name: "Duolingo - Language Lessons", category: "Education", iconColor: .green, iconSymbol: "graduationcap.fill", rating: 4.7, reviews: "2.8M", size: "160 MB", age: "4+", screenshots: [.green, .yellow, .blue], description: "Learn a language in bite-sized lessons."),
+            KsignCloneAppItem(name: "Telegram Messenger", category: "Social Networking", iconColor: .blue, iconSymbol: "paperplane.fill", rating: 4.5, reviews: "800K", size: "180 MB", age: "12+", screenshots: [.blue, .white, .black], description: "Fast messaging and large communities."),
+            KsignCloneAppItem(name: "Picsart AI Photo Editor", category: "Photo & Video", iconColor: .purple, iconSymbol: "wand.and.stars", rating: 4.6, reviews: "700K", size: "250 MB", age: "12+", screenshots: [.purple, .pink, .blue], description: "Edit photos and create designs."),
         ]
-        
+
         games = [
+            KsignCloneAppItem(name: "PUBG MOBILE", category: "Top Battle Royale Mobile", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "1.6M", size: "3.8 GB", age: "13+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches."),
+            KsignCloneAppItem(name: "Roblox", category: "Adventure", iconColor: .gray, iconSymbol: "cube.fill", rating: 4.5, reviews: "5M", size: "300 MB", age: "12+", screenshots: [.gray, .blue, .green], description: "Play millions of experiences with friends."),
             KsignCloneAppItem(name: "Clash Royale", category: "Strategy", iconColor: .blue, iconSymbol: "shield.fill", rating: 4.6, reviews: "3M", size: "200 MB", age: "9+", screenshots: [.blue, .red, .yellow], description: "Real-time multiplayer battles."),
-            KsignCloneAppItem(name: "Genshin Impact", category: "RPG", iconColor: .cyan, iconSymbol: "star.fill", rating: 4.7, reviews: "500K", size: "3.5 GB", age: "12+", screenshots: [.cyan, .purple, .orange], description: "Step into Teyvat."),
-            KsignCloneAppItem(name: "Subway Surfers", category: "Action", iconColor: .red, iconSymbol: "figure.run", rating: 4.5, reviews: "1.5M", size: "180 MB", age: "9+", screenshots: [.red, .yellow, .green], description: "Dash as fast as you can!"),
-            KsignCloneAppItem(name: "Minecraft", category: "Simulation", iconColor: .green, iconSymbol: "cube.fill", rating: 4.9, reviews: "10M", size: "500 MB", age: "9+", screenshots: [.green, .brown, .blue], description: "Create, explore and survive."),
-            KsignCloneAppItem(name: "PUBG MOBILE", category: "Top Battle Royale Mobile", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "2.8M", size: "3.8 GB", age: "12+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches."),
-            KsignCloneAppItem(name: "Call of Duty: Mobile", category: "Action", iconColor: .black, iconSymbol: "scope", rating: 4.7, reviews: "1.8M", size: "3.1 GB", age: "17+", screenshots: [.black, .gray, .red], description: "Multiplayer action and battle royale."),
+            KsignCloneAppItem(name: "MONOPOLY GO!", category: "Board", iconColor: .green, iconSymbol: "dice.fill", rating: 4.7, reviews: "1.6M", size: "250 MB", age: "9+", screenshots: [.green, .yellow, .blue], description: "Roll, build, dream and scheme."),
+            KsignCloneAppItem(name: "Subway Surfers", category: "Action", iconColor: .red, iconSymbol: "figure.run", rating: 4.5, reviews: "1.5M", size: "180 MB", age: "9+", screenshots: [.red, .yellow, .green], description: "Dash as fast as you can."),
             KsignCloneAppItem(name: "Brawl Stars", category: "Action", iconColor: .orange, iconSymbol: "star.fill", rating: 4.7, reviews: "2M", size: "1.2 GB", age: "9+", screenshots: [.orange, .yellow, .purple], description: "Fast-paced multiplayer battles."),
-            KsignCloneAppItem(name: "Roblox", category: "Adventure", iconColor: .gray, iconSymbol: "cube.fill", rating: 4.5, reviews: "5M", size: "300 MB", age: "12+", screenshots: [.gray, .blue, .green], description: "Play, create, and explore experiences."),
-            KsignCloneAppItem(name: "Free Fire", category: "Action", iconColor: .red, iconSymbol: "flame.fill", rating: 4.3, reviews: "1.5M", size: "1.1 GB", age: "17+", screenshots: [.red, .orange, .black], description: "Battle royale survival action."),
-            KsignCloneAppItem(name: "Among Us!", category: "Party", iconColor: .red, iconSymbol: "person.fill", rating: 4.1, reviews: "900K", size: "700 MB", age: "9+", screenshots: [.red, .blue, .purple], description: "Find the impostor with your crew.")
+            KsignCloneAppItem(name: "Minecraft", category: "Simulation", iconColor: .green, iconSymbol: "cube.fill", rating: 4.9, reviews: "10M", size: "500 MB", age: "9+", screenshots: [.green, .brown, .blue], description: "Create, explore and survive."),
+            KsignCloneAppItem(name: "Genshin Impact", category: "Role Playing", iconColor: .cyan, iconSymbol: "sparkles", rating: 4.7, reviews: "500K", size: "3.5 GB", age: "12+", screenshots: [.cyan, .purple, .orange], description: "Step into the world of Teyvat."),
+            KsignCloneAppItem(name: "Township", category: "Simulation", iconColor: .green, iconSymbol: "house.fill", rating: 4.7, reviews: "1.4M", size: "320 MB", age: "4+", screenshots: [.green, .yellow, .blue], description: "Build your dream town and farm."),
+            KsignCloneAppItem(name: "Whiteout Survival", category: "Strategy", iconColor: .cyan, iconSymbol: "snowflake", rating: 4.6, reviews: "500K", size: "900 MB", age: "12+", screenshots: [.cyan, .white, .blue], description: "Lead survivors through a frozen world."),
+            KsignCloneAppItem(name: "Among Us!", category: "Party", iconColor: .red, iconSymbol: "person.fill", rating: 4.1, reviews: "900K", size: "700 MB", age: "9+", screenshots: [.red, .blue, .purple], description: "Find the impostor with your crew."),
+            KsignCloneAppItem(name: "Call of Duty: Mobile", category: "Action", iconColor: .black, iconSymbol: "scope", rating: 4.7, reviews: "1.8M", size: "3.1 GB", age: "17+", screenshots: [.black, .gray, .red], description: "Multiplayer action and battle royale."),
+            KsignCloneAppItem(name: "Meowdoku!", category: "Puzzle", iconColor: .purple, iconSymbol: "cat.fill", rating: 4.8, reviews: "20K", size: "170 MB", age: "4+", screenshots: [.purple, .pink, .yellow], description: "A cute brain puzzle game."),
+            KsignCloneAppItem(name: "NTE: Neverness to Everness", category: "Role Playing", iconColor: .teal, iconSymbol: "sparkles", rating: 4.5, reviews: "20K", size: "2.6 GB", age: "12+", screenshots: [.teal, .blue, .purple], description: "Explore an urban open world."),
         ]
-        
+
         todayCards = [
-            KsignCloneTodayCardItem(category: "WORLD PREMIERE", title: "The Future of\nMobile Gaming", subtitle: "Experience console quality.", imageColor: .indigo, overlayPosition: .bottomLeading),
-            KsignCloneTodayCardItem(category: "APP OF THE DAY", title: "Focus & Flow", subtitle: "Get more done.", imageColor: .orange, overlayPosition: .bottomLeading),
-            KsignCloneTodayCardItem(category: "THE BASICS", title: "Edit Photos\nLike a Pro", subtitle: "Top 5 apps for editing.", imageColor: .blue, overlayPosition: .topLeading)
+            KsignCloneTodayCardItem(category: "WHAT WE’RE PLAYING", title: "Hit the Streets in\nNeverness to Everness", subtitle: "This urban adventure’s full of hidden wonders.", appName: "NTE: Neverness to Everness", imageColor: .teal, overlayPosition: .bottomLeading),
+            KsignCloneTodayCardItem(category: "NEW GAMES WE LOVE", title: "Crushed in Time", subtitle: "Walk the frog, explore, and more.", appName: "Township", imageColor: .green, overlayPosition: .bottomLeading),
+            KsignCloneTodayCardItem(category: "GAME OF THE DAY", title: "Meowdoku!", subtitle: "A little puzzle with a lot of purr-sonality.", appName: "Meowdoku!", imageColor: .purple, overlayPosition: .bottomLeading),
+            KsignCloneTodayCardItem(category: "FEATURED STORY", title: "Face a Zombie Outbreak in Township", subtitle: "Build, explore, and discover something new.", appName: "Township", imageColor: .orange, overlayPosition: .bottomLeading),
         ]
     }
+
+
 }
 
 // Shared deep-link state. appstore:// requests navigation through the same
@@ -149,56 +166,110 @@ struct KsignCloneStoreView: View {
     @StateObject private var deepLinkNavigation = KsignCloneStoreNavigation.shared
     @State private var selectedStoreTab = 0
     @State private var showPUBGProductPage = false
+    @State private var keyboardVisible = false
 
     private func handlePUBGProductPageRequest(_ requestID: UInt64) {
         guard deepLinkNavigation.consumePUBGProductPageRequest(requestID) else { return }
-
-        // Always select Search first. Resetting the destination before pushing it
-        // makes repeated appstore:// opens work even after the user has returned
-        // from the product page to Search.
         selectedStoreTab = 4
         showPUBGProductPage = false
-
-        // Let SwiftUI commit the pop/tab change before pushing the same destination
-        // again. Ignore stale scheduled pushes if a newer URL arrives meanwhile.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
             guard deepLinkNavigation.pubgProductPageRequestID == requestID else { return }
             showPUBGProductPage = true
         }
     }
 
     var body: some View {
-        TabView(selection: $selectedStoreTab) {
-            KsignCloneTodayView(data: data)
-                .tabItem { Label("Today", systemImage: "doc.text.image") }
-                .tag(0)
+        ZStack(alignment: .bottom) {
+            TabView(selection: $selectedStoreTab) {
+                KsignCloneTodayView(data: data)
+                    .tabItem { Label("Today", systemImage: "doc.text.image") }
+                    .tag(0)
+                KsignCloneAppsView(title: "Games", apps: data.games)
+                    .tabItem { Label("Games", systemImage: "gamecontroller.fill") }
+                    .tag(1)
+                KsignCloneAppsView(title: "Apps", apps: data.featuredApps)
+                    .tabItem { Label("Apps", systemImage: "square.stack.3d.up.fill") }
+                    .tag(2)
+                KsignCloneArcadeView()
+                    .tabItem { Label("Arcade", systemImage: "arcade.stick") }
+                    .tag(3)
+                KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
+                    .tabItem { Label("Search", systemImage: "magnifyingglass") }
+                    .tag(4)
+            }
+            .toolbar(.hidden, for: .tabBar)
+            .background(Color.black.ignoresSafeArea())
 
-            KsignCloneAppsView(title: "Games", apps: data.games)
-                .tabItem { Label("Games", systemImage: "gamecontroller.fill") }
-                .tag(1)
-
-            KsignCloneAppsView(title: "Apps", apps: data.featuredApps)
-                .tabItem { Label("Apps", systemImage: "square.stack.3d.up.fill") }
-                .tag(2)
-
-            KsignCloneArcadeView()
-                .tabItem { Label("Arcade", systemImage: "arcade.stick") }
-                .tag(3)
-
-            KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
-                .tabItem { Label("Search", systemImage: "magnifyingglass") }
-                .tag(4)
+            if !keyboardVisible {
+                KsignCloneFloatingTabBar(selection: $selectedStoreTab)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
+                    .zIndex(20)
+                    .transition(.opacity)
+            }
         }
-        // Hide Ksign's outer tab bar while this App Store-style screen is active.
-        .toolbar(.hidden, for: .tabBar)
-        .onReceive(deepLinkNavigation.$pubgProductPageRequestID) { requestID in
-            handlePUBGProductPageRequest(requestID)
+        .background(Color.black.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .onReceive(deepLinkNavigation.$pubgProductPageRequestID) { handlePUBGProductPageRequest($0) }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.15)) { keyboardVisible = true }
         }
-        .onAppear {
-            handlePUBGProductPageRequest(deepLinkNavigation.pubgProductPageRequestID)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.15)) { keyboardVisible = false }
         }
+        .onAppear { handlePUBGProductPageRequest(deepLinkNavigation.pubgProductPageRequestID) }
     }
 }
+
+private struct KsignCloneFloatingTabBar: View {
+    @Binding var selection: Int
+    private let tabs: [(title: String, symbol: String)] = [
+        ("Today", "doc.text.image"),
+        ("Games", "rocket.fill"),
+        ("Apps", "square.stack.3d.up.fill"),
+        ("Arcade", "arcade.stick.console"),
+        ("Search", "magnifyingglass")
+    ]
+    private let accent = Color(red: 0.10, green: 0.58, blue: 1.0)
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.18)) { selection = index }
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: tab.symbol)
+                            .font(.system(size: 23, weight: .semibold))
+                            .frame(height: 26)
+                        Text(tab.title)
+                            .font(.system(size: 10.5, weight: .medium))
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(selection == index ? accent : Color.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 58)
+                    .background {
+                        if selection == index {
+                            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                                .fill(Color.white.opacity(0.09))
+                                .padding(.horizontal, 1)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(tab.title)
+            }
+        }
+        .padding(5)
+        .background(.ultraThinMaterial, in: Capsule())
+        .background(Color.black.opacity(0.48), in: Capsule())
+        .overlay(Capsule().stroke(Color.white.opacity(0.13), lineWidth: 0.8))
+        .shadow(color: .black.opacity(0.4), radius: 16, x: 0, y: 5)
+    }
+}
+
 
 struct KsignCloneInstalledAppsView: View {
     @StateObject private var store = KsignInstalledAppsStore.shared
@@ -277,180 +348,193 @@ private struct KsignCloneArcadeGame: Identifiable {
 }
 
 struct KsignCloneArcadeView: View {
-    private let games = [
-        KsignCloneArcadeGame(id: "sneaky-sasquatch", title: "Sneaky Sasquatch", subtitle: "Adventure", symbol: "figure.walk"),
-        KsignCloneArcadeGame(id: "oceanhorn", title: "Oceanhorn 2", subtitle: "Adventure RPG", symbol: "sword.fill"),
-        KsignCloneArcadeGame(id: "mini-motorways", title: "Mini Motorways", subtitle: "Strategy", symbol: "road.lanes"),
-        KsignCloneArcadeGame(id: "what-the-golf", title: "WHAT THE GOLF?", subtitle: "Arcade", symbol: "figure.golf")
+    @State private var showOfferInfo = false
+    private let arcadeGames: [(String, String, Color, String)] = [
+        ("Sneaky Sasquatch", "Adventure", .green, "figure.walk"),
+        ("Oceanhorn 2", "Adventure RPG", .blue, "sailboat.fill"),
+        ("Mini Motorways", "Strategy", .orange, "road.lanes"),
+        ("WHAT THE GOLF?", "Arcade", .purple, "figure.golf")
     ]
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    Text("Arcade")
-                        .font(.largeTitle.bold())
-                        .padding(.top, 8)
-
-                    ZStack(alignment: .bottomLeading) {
-                        LinearGradient(
-                            colors: [Color.indigo, Color.purple, Color.black],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        Circle()
-                            .fill(Color.white.opacity(0.12))
-                            .frame(width: 190, height: 190)
-                            .offset(x: 175, y: -70)
-                        VStack(alignment: .leading, spacing: 9) {
-                            Text("APPLE ARCADE")
-                                .font(.caption.bold())
-                                .tracking(1.4)
-                                .foregroundStyle(.white.opacity(0.8))
-                            Text("Great games.\nNo interruptions.")
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
-                            Text("Discover a new favourite.")
-                                .font(.subheadline)
-                                .foregroundStyle(.white.opacity(0.85))
-                        }
-                        .padding(22)
-                    }
-                    .frame(height: 220)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-
-                    Text("Explore games")
-                        .font(.title2.bold())
-
-                    ForEach(games) { game in
-                        HStack(spacing: 14) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 15, style: .continuous)
-                                    .fill(LinearGradient(
-                                        colors: [.indigo, .blue.opacity(0.65)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ))
-                                Image(systemName: game.symbol)
-                                    .font(.system(size: 25, weight: .semibold))
-                                    .foregroundStyle(.white)
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 26) {
+                    ZStack(alignment: .topLeading) {
+                        KsignCloneAppBanner(name: "Sneaky Sasquatch", fallbackColor: .green,
+                                            fallbackSymbol: "figure.walk", width: UIScreen.main.bounds.width,
+                                            height: 500)
+                            .frame(height: 500)
+                        LinearGradient(colors: [.black.opacity(0.30), .clear, .black.opacity(0.8)],
+                                       startPoint: .top, endPoint: .bottom)
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(alignment: .center) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Arcade").font(.system(size: 22, weight: .bold))
+                                    Text("1 month free, then $6.99/month.")
+                                        .font(.subheadline).foregroundStyle(.white.opacity(0.86))
+                                }
+                                Spacer()
+                                Button("Accept Offer") { showOfferInfo = true }
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .padding(.horizontal, 14).padding(.vertical, 10)
+                                    .background(Color.cyan, in: Capsule())
                             }
-                            .frame(width: 60, height: 60)
-
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(game.title)
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundStyle(.primary)
-                                Text(game.subtitle)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                            Spacer()
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("ONLY ON APPLE ARCADE").font(.caption.bold()).tracking(0.6)
+                                Text("Sneaky Sasquatch").font(.title2.bold())
+                                Text("Meet Sasquatch! Sneaky. Hungry. Only on Apple Arcade.")
+                                    .font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                                Button { showOfferInfo = true } label: {
+                                    Label("View Game", systemImage: "chevron.right")
+                                        .font(.subheadline.weight(.semibold))
+                                }.padding(.top, 2)
                             }
-
-                            Spacer(minLength: 8)
-
-                            Text("PLAY")
-                                .font(.caption.bold())
-                                .foregroundStyle(.blue)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(Color(uiColor: .secondarySystemBackground), in: Capsule())
+                            .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
-                        .padding(.vertical, 5)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 18).padding(.top, 12).padding(.bottom, 14)
                     }
+                    .frame(height: 500)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Discover the Perks of Arcade").font(.title3.bold()).padding(.horizontal, 20)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                arcadePerkCard(title: "Play without limits", subtitle: "No ads. No in-app purchases.", colors: [.blue, .purple])
+                                arcadePerkCard(title: "Family fun", subtitle: "Play together with one subscription.", colors: [.orange, .pink])
+                            }.padding(.horizontal, 20)
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack { Text("Explore Games").font(.title3.bold()); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.secondary) }
+                            .padding(.horizontal, 20)
+                        ForEach(Array(arcadeGames.enumerated()), id: \.offset) { entry in
+                            let game = entry.element
+                            HStack(spacing: 12) {
+                                KsignCloneAppIcon(name: game.0, fallbackColor: game.2, fallbackSymbol: game.3, size: 58, cornerRadius: 13)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(game.0).font(.system(size: 16, weight: .medium))
+                                    Text("Apple Arcade · " + game.1).font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Text("PLAY").font(.caption.bold()).foregroundStyle(.blue)
+                                    .padding(.horizontal, 16).padding(.vertical, 8)
+                                    .background(Color.white.opacity(0.10), in: Capsule())
+                            }.padding(.horizontal, 20)
+                        }
+                    }
+                    .padding(.bottom, 105)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
             }
             .background(Color.black.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
+            .alert("Apple Arcade", isPresented: $showOfferInfo) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("This is a visual App Store-style demo. Subscription and game actions are not connected to Apple services.")
+            }
         }
         .preferredColorScheme(.dark)
     }
+
+    private func arcadePerkCard(title: String, subtitle: String, colors: [Color]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay(Image(systemName: "gamecontroller.fill").font(.system(size: 40, weight: .medium)).foregroundStyle(.white.opacity(0.9)))
+                .frame(width: 240, height: 130)
+            Text(title).font(.headline)
+            Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
+        }.frame(width: 240, alignment: .leading)
+    }
 }
+
 
 // MARK: - 1. Today View
 
 struct KsignCloneTodayView: View {
     @ObservedObject var data: KsignCloneStoreData
     @State private var showAccount = false
-    
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 30) {
-                    // Header
-                    HStack(alignment: .bottom) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("THURSDAY, NOVEMBER 20")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.secondary)
-                            Text("Today")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                        }
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack(alignment: .center) {
+                        Text("Today").font(.system(size: 34, weight: .bold, design: .rounded))
                         Spacer()
-                        Button(action: { showAccount.toggle() }) {
-                            KsignCloneAccountIcon()
-                        }
+                        Button { showAccount = true } label: { KsignCloneAccountIcon() }
+                            .buttonStyle(.plain)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    
-                    // Cards
+                    .padding(.horizontal, 20).padding(.top, 12)
+
                     ForEach(data.todayCards) { card in
                         KsignCloneTodayCardView(card: card)
                     }
                 }
-                .padding(.bottom, 20)
+                .padding(.bottom, 110)
             }
-            .toolbar(.hidden)
+            .background(Color.black.ignoresSafeArea())
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showAccount) {
                 KsignCloneAccountView()
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.hidden)
             }
         }
+        .preferredColorScheme(.dark)
     }
 }
 
 struct KsignCloneTodayCardView: View {
     let card: KsignCloneTodayCardItem
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            ZStack(alignment: card.overlayPosition) {
-                // Each Today card uses artwork from its own app/game listing.
-                KsignCloneAppIcon(
-                    name: card.category == "APP OF THE DAY" ? "Notion" : (card.category == "THE BASICS" ? "Adobe Lightroom Photo Editor" : "Genshin Impact"),
-                    fallbackColor: card.imageColor,
-                    fallbackSymbol: "sparkles",
-                    size: UIScreen.main.bounds.width - 40,
-                    cornerRadius: 16
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
-                LinearGradient(colors: [.black.opacity(0.08), .black.opacity(0.78)], startPoint: .top, endPoint: .bottom)
+    private var cardWidth: CGFloat { UIScreen.main.bounds.width - 40 }
 
-                // Text Content
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack(alignment: .bottomLeading) {
+                KsignCloneAppBanner(name: card.appName, fallbackColor: card.imageColor,
+                                    fallbackSymbol: "sparkles", width: cardWidth, height: 270)
+                    .frame(width: cardWidth, height: 270)
+                LinearGradient(colors: [.black.opacity(0.02), .clear, .black.opacity(0.76)],
+                               startPoint: .top, endPoint: .bottom)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(card.category)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(.white.opacity(0.8))
-                    Text(card.title)
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundStyle(.white)
-                    Text(card.subtitle)
-                        .font(.system(size: 15))
-                        .foregroundStyle(.white.opacity(0.9))
+                    Text(card.category).font(.system(size: 12, weight: .bold)).tracking(0.6)
+                        .foregroundStyle(.white.opacity(0.88))
+                    Text(card.title).font(.system(size: 26, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
+                    Text(card.subtitle).font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.94)).fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(20)
+                .padding(18)
             }
+            .frame(height: 270)
+            HStack(spacing: 10) {
+                KsignCloneAppIcon(name: card.appName, fallbackColor: card.imageColor,
+                                  fallbackSymbol: "sparkles", size: 44, cornerRadius: 11)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(card.appName).font(.system(size: 14, weight: .semibold)).lineLimit(1)
+                    Text(card.category.localizedCapitalized).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                }
+                Spacer(minLength: 4)
+                KsignCloneGetButton(width: 72)
+            }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .background(Color(white: 0.095))
         }
-        .frame(height: 420)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .shadow(color: .black.opacity(0.15), radius: 15, x: 0, y: 10)
+        .frame(width: cardWidth)
+        .background(Color(white: 0.095))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.08), lineWidth: 0.7))
         .padding(.horizontal, 20)
     }
 }
+
 
 // MARK: - 2. Apps / Games View (Shared Layout)
 
@@ -458,128 +542,115 @@ struct KsignCloneAppsView: View {
     let title: String
     let apps: [KsignCloneAppItem]
     @State private var showAccount = false
-    
+    @State private var selectedGenre = "Action"
+
+    private let gamesGenres = ["Action", "Racing", "Strategy"]
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    Divider()
-                    
-                    // Horizontal Carousel (Featured)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 15) {
-                            KsignCloneFeaturedAppCard(
-                                appName: "Clash of Clans",
-                                category: "NEW UPDATE",
-                                headline: "Clash of Clans",
-                                subtitle: "Major Town Hall update.",
-                                tagline: "Build your village. Lead your clan."
-                            )
-                            KsignCloneFeaturedAppCard(
-                                appName: "Genshin Impact",
-                                category: "EXPLORE NOW",
-                                headline: "Genshin Impact",
-                                subtitle: "A vast world awaits.",
-                                tagline: "Step into the world of Teyvat."
-                            )
-                            KsignCloneFeaturedAppCard(
-                                appName: "Minecraft",
-                                category: "PLAYER FAVORITE",
-                                headline: "Minecraft",
-                                subtitle: "Create your own adventure.",
-                                tagline: "Build. Explore. Survive."
-                            )
-                            KsignCloneFeaturedAppCard(
-                                appName: "PUBG MOBILE",
-                                category: "BATTLE ROYALE",
-                                headline: "PUBG MOBILE",
-                                subtitle: "Drop in. Gear up. Survive.",
-                                tagline: "Be the last one standing."
-                            )
-                            KsignCloneFeaturedAppCard(
-                                appName: "Call of Duty: Mobile",
-                                category: "ACTION SPOTLIGHT",
-                                headline: "Call of Duty: Mobile",
-                                subtitle: "Jump into multiplayer action.",
-                                tagline: "Your next match starts here."
-                            )
-                            KsignCloneFeaturedAppCard(
-                                appName: "Brawl Stars",
-                                category: "QUICK MATCHES",
-                                headline: "Brawl Stars",
-                                subtitle: "Fast matches with friends.",
-                                tagline: "Team up and battle."
-                            )
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 25) {
+                    HStack {
+                        Text(title).font(.system(size: 34, weight: .bold, design: .rounded))
+                        Spacer()
+                        Button { showAccount = true } label: { KsignCloneAccountIcon() }.buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 20).padding(.top, 12)
+
+                    if title == "Games" {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 9) {
+                                ForEach(gamesGenres, id: \.self) { genre in
+                                    let symbol = genre == "Action" ? "sun.max.fill" : (genre == "Racing" ? "flag.checkered" : "target")
+                                    Button { selectedGenre = genre } label: {
+                                        Label(genre, systemImage: symbol)
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundStyle(.white)
+                                            .padding(.horizontal, 15).padding(.vertical, 10)
+                                            .background(selectedGenre == genre ? Color(white: 0.28) : Color(white: 0.12), in: Capsule())
+                                    }.buttonStyle(.plain)
+                                }
+                            }.padding(.horizontal, 20)
                         }
-                        .padding(.horizontal, 20)
                     }
-                    
-                    Divider()
-                        .padding(.horizontal, 20)
-                    
-                    // Sections
-                    KsignCloneAppSectionView(title: "Must-Have Apps", apps: apps)
-                    KsignCloneAppSectionView(title: "Now Trending", apps: apps.reversed())
-                    KsignCloneAppSectionView(title: "Top Paid", apps: apps.shuffled())
-                }
-            }
-            .navigationTitle(title)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { showAccount.toggle() }) {
-                        KsignCloneAccountIcon()
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(title == "Games" ? "NEW GAME" : "FEATURED")
+                                .font(.system(size: 11, weight: .bold)).foregroundStyle(.blue)
+                            Text(title == "Games" ? "Engage in Stretchy Shenanigans" : "Apps that make every day easier")
+                                .font(.system(size: 21, weight: .semibold))
+                            Text(title == "Games" ? "And crack a hilarious case" : "Discover something new to create, work, and play.")
+                                .font(.system(size: 14)).foregroundStyle(.secondary)
+                        }.padding(.horizontal, 20)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 14) {
+                                ForEach(Array(apps.prefix(title == "Games" ? 5 : 4))) { app in
+                                    NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                                        KsignCloneFeaturedAppCard(
+                                            appName: app.name,
+                                            category: title == "Games" ? "WHAT WE’RE PLAYING" : "APP OF THE DAY",
+                                            headline: app.name,
+                                            subtitle: app.description,
+                                            tagline: app.category
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }.padding(.horizontal, 20)
+                        }
                     }
+
+                    KsignCloneAppSectionView(title: title == "Games" ? "What We’re Playing" : "Great Apps on iPhone",
+                                             apps: apps)
+                    KsignCloneAppSectionView(title: title == "Games" ? "Top Free Games" : "Popular Apps on iPhone Duo",
+                                             apps: Array(apps.reversed()))
+                    KsignCloneAppSectionView(title: title == "Games" ? "Great Games on iPhone Duo" : "Apps in Heavy Rotation",
+                                             apps: apps)
                 }
+                .padding(.bottom, 110)
             }
+            .background(Color.black.ignoresSafeArea())
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showAccount) {
                 KsignCloneAccountView()
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.hidden)
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
+}
+
+
+struct KsignCloneAppSectionView: View {
+    let title: String
+    let apps: [KsignCloneAppItem]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 11) {
+            HStack(spacing: 6) {
+                Text(title).font(.system(size: 21, weight: .bold))
+                Image(systemName: "chevron.right").font(.system(size: 15, weight: .semibold)).foregroundStyle(.secondary)
+                Spacer()
+            }.padding(.horizontal, 20)
+
+            VStack(spacing: 0) {
+                ForEach(Array(apps.prefix(5))) { app in
+                    NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                        KsignCloneSmallAppRow(app: app)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 20)
+                    if app.id != apps.prefix(5).last?.id {
+                        Divider().overlay(Color.white.opacity(0.09)).padding(.leading, 90).padding(.trailing, 20)
+                    }
+                }
             }
         }
     }
 }
 
-struct KsignCloneAppSectionView: View {
-    let title: String
-    let apps: [KsignCloneAppItem]
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                Text(title)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Spacer()
-                Button("See All") {}
-                    .font(.body)
-                    .foregroundStyle(.blue)
-            }
-            .padding(.horizontal, 20)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 15) {
-                    // Create grid-like columns of 3 items per slide
-                    let chunks = apps.ksignCloneChunked(into: 3)
-                    ForEach(0..<chunks.count, id: \.self) { index in
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(chunks[index]) { app in
-                                NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
-                                    KsignCloneSmallAppRow(app: app)
-                                }
-                                .buttonStyle(.plain)
-                                
-                                if app.id != chunks[index].last?.id {
-                                    Divider().padding(.leading, 70)
-                                }
-                            }
-                        }
-                        .frame(width: UIScreen.main.bounds.width - 40)
-                    }
-                }
-                .padding(.horizontal, 20)
-            }
-        }
-    }
-}
 
 // Downloads artwork once, then stores both the resolved artwork URL and image bytes
 // in the app's persistent Caches directory so later launches can show it offline.
@@ -693,29 +764,32 @@ struct KsignCloneAppIcon: View {
 
 struct KsignCloneSmallAppRow: View {
     let app: KsignCloneAppItem
-    
+
     var body: some View {
         HStack(spacing: 12) {
-            KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 60, cornerRadius: 12)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(app.name)
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(.primary)
-                Text(app.category)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
+            KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor,
+                              fallbackSymbol: app.iconSymbol, size: 58, cornerRadius: 13)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(app.name).font(.system(size: 15, weight: .medium)).foregroundStyle(.white).lineLimit(1)
+                Text(app.description).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1)
+                Text("In-App Purchases").font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
             }
-            
-            Spacer(minLength: 4)
-
-            if !app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
-                KsignCloneGetButton()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer(minLength: 2)
+            if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                KsignCloneOpenButton { KsignCloneLaunchApp.openPUBG() }
+            } else {
+                VStack(spacing: 4) {
+                    KsignCloneGetButton(width: 72)
+                    Text("In-App Purchases").font(.system(size: 8)).foregroundStyle(.secondary).lineLimit(1)
+                }.fixedSize()
             }
         }
         .padding(.vertical, 8)
+        .contentShape(Rectangle())
     }
 }
+
 
 struct KsignCloneFeaturedAppCard: View {
     let appName: String
@@ -723,45 +797,37 @@ struct KsignCloneFeaturedAppCard: View {
     let headline: String
     let subtitle: String
     let tagline: String
+    private var cardWidth: CGFloat { UIScreen.main.bounds.width - 64 }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(category)
-                .font(.caption)
-                .fontWeight(.bold)
-                .foregroundStyle(.blue)
-
-            Text(headline)
-                .font(.title2)
-                .fontWeight(.medium)
-
-            Text(subtitle)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            Text(category).font(.system(size: 11, weight: .bold)).foregroundStyle(.blue)
+            Text(headline).font(.system(size: 20, weight: .semibold)).foregroundStyle(.white).lineLimit(2)
+            Text(subtitle).font(.system(size: 13)).foregroundStyle(.secondary).lineLimit(2)
 
             ZStack(alignment: .bottomLeading) {
-                KsignCloneAppIcon(
-                    name: appName,
-                    fallbackColor: .teal,
-                    fallbackSymbol: "gamecontroller.fill",
-                    size: UIScreen.main.bounds.width - 40,
-                    cornerRadius: 12
-                )
-                .frame(width: UIScreen.main.bounds.width - 40, height: 220)
-                .clipped()
-                LinearGradient(colors: [.clear, .black.opacity(0.78)], startPoint: .center, endPoint: .bottom)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(appName.uppercased()).font(.caption.weight(.bold))
-                    Text(tagline).font(.headline)
+                KsignCloneAppBanner(name: appName, fallbackColor: .teal,
+                                    fallbackSymbol: "gamecontroller.fill", width: cardWidth, height: 205)
+                    .frame(width: cardWidth, height: 205)
+                LinearGradient(colors: [.clear, .black.opacity(0.82)], startPoint: .center, endPoint: .bottom)
+                HStack(spacing: 10) {
+                    KsignCloneAppIcon(name: appName, fallbackColor: .blue, fallbackSymbol: "app.fill", size: 42, cornerRadius: 10)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(appName).font(.system(size: 13, weight: .semibold)).lineLimit(1)
+                        Text(tagline).font(.system(size: 11)).foregroundStyle(.white.opacity(0.84)).lineLimit(1)
+                    }
+                    Spacer(minLength: 4)
+                    KsignCloneGetButton(width: 68)
                 }
-                .foregroundStyle(.white)
-                .padding(16)
+                .padding(12)
             }
-            .frame(width: UIScreen.main.bounds.width - 40, height: 220)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .frame(width: cardWidth, height: 205)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
+        .frame(width: cardWidth, alignment: .leading)
     }
 }
+
 
 // Loads a real App Store screenshot for the hero banner and persists it on-device.
 // Uses the app icon only as a fallback if screenshots are unavailable.
@@ -1705,132 +1771,133 @@ struct KsignCloneSearchView: View {
     private var pubgApp: KsignCloneAppItem? {
         data.games.first { $0.name.localizedCaseInsensitiveContains("PUBG MOBILE") }
     }
-    
-    var filteredApps: [KsignCloneAppItem] {
-        if searchText.isEmpty { return [] }
-        return data.featuredApps.filter { $0.name.localizedCaseInsensitiveContains(searchText) } +
-               data.games.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-    }
-    
-    var body: some View {
-        NavigationStack {
-            List {
-                if searchText.isEmpty {
-                    Section(header: Text("Discover")) {
-                        ForEach(["RPG Games", "Video Editors", "Fitness", "Wallpaper"], id: \.self) { item in
-                            Button(action: { searchText = item }) {
-                                HStack {
-                                    Image(systemName: "magnifyingglass")
-                                    Text(item)
-                                }
-                                .foregroundStyle(.blue)
-                            }
-                        }
-                    }
-                    
-                    Section(header: Text("Suggested")) {
-                        ForEach(data.games.prefix(2)) { app in
-                            NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
-                                KsignCloneSmallAppRow(app: app)
-                            }
-                        }
-                    }
-                } else {
-                    ForEach(filteredApps) { app in
-                        if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
-                            // Keep navigation and launching as separate hit targets: tapping the icon/title
-                            // opens the product page; only the blue OPEN button launches the installed game.
-                            HStack(spacing: 8) {
-                                NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
-                                    HStack(spacing: 10) {
-                                        KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 56, cornerRadius: 12)
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(app.name)
-                                                .font(.system(size: 16, weight: .medium))
-                                                .lineLimit(1)
-                                                .minimumScaleFactor(0.8)
-                                                .foregroundStyle(.primary)
-                                            Text(app.category)
-                                                .font(.system(size: 13))
-                                                .lineLimit(1)
-                                                .truncationMode(.tail)
-                                                .foregroundStyle(.secondary)
-                                            HStack(spacing: 4) {
-                                                Text("★★★★☆")
-                                                    .font(.system(size: 12, weight: .medium))
-                                                    .foregroundStyle(.secondary)
-                                                    .fixedSize(horizontal: true, vertical: false)
-                                                Text("1.6M")
-                                                    .font(.system(size: 12))
-                                                    .foregroundStyle(.secondary)
-                                                    .fixedSize(horizontal: true, vertical: false)
-                                            }
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .layoutPriority(1)
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                                .frame(maxWidth: .infinity)
 
-                                Button { KsignCloneLaunchApp.openPUBG() } label: {
-                                    Text("Open")
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundStyle(Color(red: 0.10, green: 0.58, blue: 1.0))
-                                        .frame(width: 82, height: 44)
-                                        .background(Color(red: 0.12, green: 0.12, blue: 0.13), in: Capsule())
-                                }
-                                .buttonStyle(.plain)
-                                .fixedSize()
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 8)
-                            .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
-                            if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
-                                HStack(spacing: 8) {
-                                    Text("#12 in Action")
-                                    Text("|").foregroundStyle(.tertiary)
-                                    Text("Battle Royale")
-                                    Text("Multiplayer")
-                                }
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.75)
-                                .padding(.horizontal, 12)
-                                .padding(.top, 2)
-                                .padding(.bottom, 8)
-                                .listRowInsets(EdgeInsets(top: 0, leading: 12, bottom: 8, trailing: 12))
-                            }
-                        } else {
-                            NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
-                                KsignCloneSmallAppRow(app: app)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-            }
-            .listStyle(.plain)
-            .navigationTitle("Search")
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
-            .navigationDestination(isPresented: $showPUBGProductPage) {
-                if let app = pubgApp {
-                    KsignCloneAppDetailView(app: app)
-                }
-            }
-            .onChange(of: showPUBGProductPage) { isShowing in
-                if isShowing {
-                    // So the page underneath the detail view is the same PUBG search result
-                    // users see when they type PUBG MOBILE in the Search tab.
-                    searchText = "PUBG MOBILE"
-                }
-            }
+    private var allApps: [KsignCloneAppItem] { data.featuredApps + data.games }
+    private var filteredApps: [KsignCloneAppItem] {
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
+        return allApps.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.category.localizedCaseInsensitiveContains(searchText) ||
+            $0.description.localizedCaseInsensitiveContains(searchText)
         }
     }
+
+    private let browseTiles: [(String, String, [Color])] = [
+        ("Games", "gamecontroller.fill", [.blue, .purple]),
+        ("Apps", "square.stack.3d.up.fill", [.cyan, .blue]),
+        ("Stories", "book.fill", [.orange, .pink]),
+        ("Editors’ Choice", "star.fill", [.purple, .indigo])
+    ]
+    private let suggestions = ["photo editor", "shortcuts", "ai assistant", "fitness", "wallpaper", "music"]
+
+    var body: some View {
+        NavigationStack {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 24) {
+                    if searchText.isEmpty {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text("Suggested").font(.system(size: 21, weight: .bold))
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                ForEach(Array(browseTiles.enumerated()), id: \.offset) { _, tile in
+                                    Button { searchText = tile.0 } label: {
+                                        ZStack(alignment: .bottomLeading) {
+                                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                                .fill(LinearGradient(colors: tile.2, startPoint: .topLeading, endPoint: .bottomTrailing))
+                                            Circle().fill(.white.opacity(0.14)).frame(width: 86, height: 86).offset(x: 65, y: -35)
+                                            VStack(alignment: .leading, spacing: 12) {
+                                                Image(systemName: tile.1).font(.system(size: 25, weight: .semibold))
+                                                Text(tile.0).font(.system(size: 16, weight: .bold)).lineLimit(2)
+                                            }.foregroundStyle(.white).padding(14)
+                                        }.frame(height: 118)
+                                    }.buttonStyle(.plain)
+                                }
+                            }
+                        }
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Trending Searches").font(.system(size: 21, weight: .bold))
+                            ForEach(suggestions, id: \.self) { term in
+                                Button { searchText = term } label: {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                                        Text(term).foregroundStyle(.white)
+                                        Spacer()
+                                        Image(systemName: "arrow.up.left").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
+                                    }.padding(.vertical, 7)
+                                }.buttonStyle(.plain)
+                                Divider().overlay(Color.white.opacity(0.09))
+                            }
+                        }
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack { Text("Suggested for You").font(.system(size: 21, weight: .bold)); Spacer(); Text("See All").font(.subheadline).foregroundStyle(.blue) }
+                            ForEach(Array(data.games.prefix(4))) { app in
+                                NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                                    KsignCloneSmallAppRow(app: app)
+                                }.buttonStyle(.plain)
+                            }
+                        }
+                    } else {
+                        HStack {
+                            Text("Results").font(.system(size: 21, weight: .bold))
+                            Spacer()
+                            Text("\(filteredApps.count) Apps").font(.caption).foregroundStyle(.secondary)
+                        }
+                        if filteredApps.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "magnifyingglass").font(.system(size: 36)).foregroundStyle(.secondary)
+                                Text("No Results").font(.headline)
+                                Text("Try another app name or category.").font(.subheadline).foregroundStyle(.secondary)
+                            }.frame(maxWidth: .infinity).padding(.vertical, 50)
+                        } else {
+                            ForEach(filteredApps) { app in
+                                if app.name.localizedCaseInsensitiveContains("PUBG MOBILE") {
+                                    HStack(spacing: 10) {
+                                        Button { showPUBGProductPage = true; searchText = "PUBG MOBILE" } label: {
+                                            HStack(spacing: 10) {
+                                                KsignCloneAppIcon(name: app.name, fallbackColor: app.iconColor, fallbackSymbol: app.iconSymbol, size: 58, cornerRadius: 13)
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(app.name).font(.system(size: 15, weight: .medium)).foregroundStyle(.white).lineLimit(1)
+                                                    Text("Tencent Mobile International Limited").font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(2)
+                                                    Text("★★★★☆  1.6M").font(.system(size: 11)).foregroundStyle(.secondary)
+                                                }.frame(maxWidth: .infinity, alignment: .leading)
+                                            }
+                                        }.buttonStyle(.plain)
+                                        Button { KsignCloneLaunchApp.openPUBG() } label: {
+                                            Text("Open").font(.system(size: 14, weight: .semibold)).foregroundStyle(.blue)
+                                                .frame(width: 68, height: 32).background(Color(white: 0.14), in: Capsule())
+                                        }.buttonStyle(.plain)
+                                    }.padding(.vertical, 8)
+                                } else {
+                                    NavigationLink(destination: KsignCloneAppDetailView(app: app)) {
+                                        KsignCloneSmallAppRow(app: app)
+                                    }.buttonStyle(.plain)
+                                }
+                                Divider().overlay(Color.white.opacity(0.09))
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 112)
+            }
+            .background(Color.black.ignoresSafeArea())
+            .navigationTitle("Search")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Games, Apps, Stories and More")
+            .navigationDestination(isPresented: $showPUBGProductPage) {
+                if let app = pubgApp { KsignCloneAppDetailView(app: app) }
+            }
+            .onChange(of: showPUBGProductPage) { isShowing in
+                if isShowing { searchText = "PUBG MOBILE" }
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
 }
+
 
 // Launch helper for the installed PUBG MOBILE app. The app must register this URL scheme.
 enum KsignCloneLaunchApp {
@@ -1847,8 +1914,8 @@ struct KsignCloneOpenButton: View {
 
     var body: some View {
         Button(action: action) {
-            Text("OPEN")
-                .font(.system(size: 14, weight: .bold))
+            Text("Open")
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 18)
                 .frame(height: 30)
@@ -1881,14 +1948,14 @@ struct KsignCloneGetButton: View {
                     .fill(state == .get ? Color(uiColor: .secondarySystemBackground) : (state == .open ? .blue : .clear))
                 
                 if state == .get {
-                    Text("GET")
-                        .font(.system(size: 14, weight: .bold))
+                    Text("Get")
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.blue)
                 } else if state == .loading {
                     ProgressView()
                 } else {
-                    Text("OPEN")
-                        .font(.system(size: 13, weight: .bold))
+                    Text("Open")
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.white)
                 }
             }
@@ -1901,82 +1968,294 @@ struct KsignCloneGetButton: View {
 struct KsignCloneAccountIcon: View {
     var body: some View {
         Circle()
-            .fill(Color.blue.gradient)
-            .frame(width: 32, height: 32)
-            .overlay(Text("JA").font(.caption).fontWeight(.bold).foregroundStyle(.white))
+            .fill(LinearGradient(colors: [Color(white: 0.42), Color(white: 0.20)], startPoint: .topLeading, endPoint: .bottomTrailing))
+            .frame(width: 34, height: 34)
+            .overlay(Circle().stroke(Color.white.opacity(0.08), lineWidth: 0.7))
+            .accessibilityLabel("Account")
     }
 }
 
 struct KsignCloneAccountView: View {
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismiss) private var dismiss
     @State private var recommendationTapCount = 0
     @State private var showPersonalizedMenu = false
-    
+
+    private let sectionColor = Color(white: 0.105)
+
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    HStack(spacing: 12) {
-                        Circle().fill(.blue).frame(width: 50, height: 50).overlay(Text("JA").foregroundStyle(.white))
-                        VStack(alignment: .leading) {
-                            Text("John Appleseed").font(.headline)
-                            Text("john.appleseed@icloud.com").font(.caption).foregroundStyle(.secondary)
-                        }
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack(spacing: 9) {
+                        ZStack {
+                            Circle().fill(LinearGradient(colors: [.purple, .blue, .pink], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            Image(systemName: "sparkle").font(.system(size: 17, weight: .bold)).foregroundStyle(.white)
+                        }.frame(width: 30, height: 30)
+                        Text("Apple Account").font(.system(size: 19, weight: .semibold))
+                        Spacer()
+                        Button { dismiss() } label: {
+                            Image(systemName: "xmark").font(.system(size: 17, weight: .medium))
+                                .foregroundStyle(.white).frame(width: 38, height: 38)
+                                .background(Color(white: 0.13), in: Circle())
+                        }.buttonStyle(.plain)
                     }
-                }
-                
-                Section("Account") {
-                    NavigationLink("Purchased") {}
-                    NavigationLink {
-                        KsignCloneInstalledAppsView()
-                    } label: {
-                        Label("My Apps", systemImage: "square.grid.2x2.fill")
-                    }
-                    NavigationLink("Subscriptions") {}
-                    NavigationLink("Notifications") {}
-                }
+                    .padding(.horizontal, 20).padding(.top, 16)
 
-                Section {
-                    Button {
-                        recommendationTapCount += 1
-                        if recommendationTapCount >= 3 {
-                            showPersonalizedMenu.toggle()
-                            recommendationTapCount = 0
-                        }
-                    } label: {
-                        HStack {
-                            Text("Personalized Recommendations")
-                                .foregroundStyle(.primary)
+                    VStack(spacing: 0) {
+                        NavigationLink(destination: KsignCloneAccountSubpageView(title: "Account Settings")) {
+                            HStack(spacing: 12) {
+                                Circle().fill(LinearGradient(colors: [Color(white: 0.46), Color(white: 0.22)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                    .frame(width: 56, height: 56)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("8 8").font(.system(size: 17, weight: .semibold)).foregroundStyle(.white)
+                                    Text("Account info, payments,\nand settings").font(.system(size: 12)).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.gray)
+                            }.padding(16)
+                        }.buttonStyle(.plain)
+                        Divider().overlay(Color.white.opacity(0.08)).padding(.leading, 82).padding(.trailing, 16)
+                        HStack(spacing: 12) {
+                            Circle().fill(Color(white: 0.72)).frame(width: 32, height: 32)
+                                .overlay(Text("A").font(.system(size: 15, weight: .medium)).foregroundStyle(.white))
+                            Text("Game Center").font(.system(size: 14, weight: .medium))
                             Spacer()
-                            if showPersonalizedMenu {
-                                Image(systemName: "chevron.down").foregroundStyle(.secondary)
-                            }
-                        }
-                        .contentShape(Rectangle())
+                            Text("АпполонМедовый7\n2").font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(2)
+                            Image(systemName: "arrow.up.right").font(.system(size: 11)).foregroundStyle(.secondary)
+                        }.padding(.horizontal, 16).padding(.vertical, 13)
                     }
-                    .buttonStyle(.plain)
-                    if showPersonalizedMenu {
-                        NavigationLink { FilesView() } label: { Label("Files", systemImage: "folder.fill") }
-                        NavigationLink { LibraryView() } label: { Label("Library", systemImage: "square.grid.2x2") }
-                        NavigationLink { DownloaderView() } label: { Label("Downloads", systemImage: "square.and.arrow.down.fill") }
-                        NavigationLink { SettingsView() } label: { Label("Settings", systemImage: "gearshape.2") }
-                    }
-                }
+                    .background(sectionColor, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .padding(.horizontal, 20)
 
-                Section {
-                    Button("Sign Out") { dismiss() }.foregroundStyle(.blue)
+                    VStack(spacing: 0) {
+                        accountNavigationRow("App Updates", subtitle: nil, destination: "App Updates")
+                        accountDivider
+                        accountNavigationRow("Apps & Purchase History", subtitle: nil, destination: "Apps & Purchase History")
+                        accountDivider
+                        accountNavigationRow("Notifications", subtitle: nil, destination: "Notifications")
+                        accountDivider
+                        accountNavigationRow("Ratings & Reviews", subtitle: nil, destination: "Ratings & Reviews")
+                        accountDivider
+                        Button {
+                            recommendationTapCount += 1
+                            if recommendationTapCount >= 3 {
+                                withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) { showPersonalizedMenu.toggle() }
+                                recommendationTapCount = 0
+                            }
+                        } label: {
+                            HStack {
+                                Text("Personalized Recommendations").font(.system(size: 14)).foregroundStyle(.white)
+                                Spacer()
+                                Image(systemName: showPersonalizedMenu ? "chevron.down" : "chevron.right")
+                                    .font(.system(size: 12, weight: .semibold)).foregroundStyle(.gray)
+                            }.padding(.horizontal, 16).padding(.vertical, 16).contentShape(Rectangle())
+                        }.buttonStyle(.plain)
+                        if showPersonalizedMenu {
+                            accountDivider
+                            NavigationLink(destination: KsignCloneInstalledAppsView()) { accountSubRow("Files", symbol: "folder.fill") }.buttonStyle(.plain)
+                            accountDivider
+                            NavigationLink(destination: KsignCloneInstalledAppsView()) { accountSubRow("Library", symbol: "square.grid.2x2.fill") }.buttonStyle(.plain)
+                            accountDivider
+                            NavigationLink(destination: KsignCloneAccountSubpageView(title: "Downloads")) { accountSubRow("Downloads", symbol: "arrow.down.circle.fill") }.buttonStyle(.plain)
+                            accountDivider
+                            NavigationLink(destination: KsignCloneAccountSubpageView(title: "KSign Settings")) { accountSubRow("Settings", symbol: "gearshape.fill") }.buttonStyle(.plain)
+                        }
+                    }
+                    .background(sectionColor, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .padding(.horizontal, 20)
+
+                    HStack(spacing: 9) {
+                        accountAction(title: "Add Money", symbol: "dollarsign", color: .blue)
+                        accountAction(title: "Redeem Code", symbol: "qrcode", color: .blue)
+                        accountAction(title: "Send Gift Card", symbol: "gift.fill", color: .blue)
+                    }.padding(.horizontal, 20).padding(.bottom, 30)
                 }
             }
-            .navigationTitle("Account")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }.fontWeight(.bold)
-                }
-            }
+            .background(Color.black.ignoresSafeArea())
+            .toolbar(.hidden, for: .navigationBar)
         }
+        .preferredColorScheme(.dark)
+    }
+
+    private var accountDivider: some View {
+        Divider().overlay(Color.white.opacity(0.075)).padding(.leading, 16).padding(.trailing, 16)
+    }
+
+    private func accountNavigationRow(_ title: String, subtitle: String?, destination: String) -> some View {
+        NavigationLink(destination: KsignCloneAccountSubpageView(title: destination)) {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title).font(.system(size: 14)).foregroundStyle(.white)
+                    if let subtitle { Text(subtitle).font(.system(size: 11)).foregroundStyle(.secondary) }
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(.gray)
+            }.padding(.horizontal, 16).padding(.vertical, 16)
+        }.buttonStyle(.plain)
+    }
+
+    private func accountSubRow(_ title: String, symbol: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: symbol).foregroundStyle(.blue).frame(width: 22)
+            Text(title).font(.system(size: 14)).foregroundStyle(.white)
+            Spacer()
+            Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(.gray)
+        }.padding(.horizontal, 16).padding(.vertical, 13)
+    }
+
+    private func accountAction(title: String, symbol: String, color: Color) -> some View {
+        Button {} label: {
+            VStack(spacing: 8) {
+                Image(systemName: symbol).font(.system(size: 16, weight: .medium)).foregroundStyle(color)
+                Text(title).font(.system(size: 10, weight: .medium)).foregroundStyle(color).multilineTextAlignment(.center).lineLimit(2)
+            }.frame(maxWidth: .infinity).frame(height: 82)
+                .background(Color(white: 0.105), in: Capsule())
+        }.buttonStyle(.plain)
     }
 }
+
+struct KsignCloneAccountSubpageView: View {
+    let title: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var updatesEnabled = true
+    @State private var recommendationsEnabled = false
+    @State private var newslettersEnabled = true
+    @State private var selectedAppsFilter = 0
+
+    private let updates = [
+        ("Мой билайн", "Oct 20, 2026", "New features and performance improvements."),
+        ("Discord - Talk, Play, Hang Out", "Oct 19, 2026", "We've been hard at work making Discord better for you."),
+        ("Instagram", "Oct 19, 2026", "The latest version contains bug fixes and performance improvements."),
+        ("Shazam: Find Music & Concerts", "Oct 18, 2026", "Find the songs you love."),
+        ("TikTok - Videos, Shop & LIVE", "Oct 18, 2026", "Watch and create videos."),
+        ("ChatGPT", "Oct 17, 2026", "Improvements and bug fixes.")
+    ]
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Button { dismiss() } label: {
+                        Image(systemName: "chevron.left").font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.white).frame(width: 38, height: 38).background(Color(white: 0.13), in: Circle())
+                    }.buttonStyle(.plain)
+                    Spacer()
+                    Text(title).font(.system(size: 17, weight: .semibold)).lineLimit(1)
+                    Spacer()
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(.white).frame(width: 38, height: 38).background(Color(white: 0.13), in: Circle())
+                    }.buttonStyle(.plain)
+                }.padding(.horizontal, 20).padding(.top, 14)
+
+                if title == "App Updates" {
+                    VStack(spacing: 0) {
+                        ForEach(Array(updates.enumerated()), id: \.offset) { entry in
+                            let update = entry.element
+                            VStack(alignment: .leading, spacing: 9) {
+                                HStack(spacing: 11) {
+                                    KsignCloneAppIcon(name: update.0, fallbackColor: .blue, fallbackSymbol: "app.fill", size: 54, cornerRadius: 13)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(update.0).font(.system(size: 14, weight: .medium)).lineLimit(2)
+                                        Text(update.1).font(.system(size: 11)).foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Button("Update") {}.font(.system(size: 13, weight: .semibold)).foregroundStyle(.blue)
+                                        .padding(.horizontal, 15).padding(.vertical, 8).background(Color(white: 0.13), in: Capsule())
+                                }
+                                Text(update.2).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(2)
+                                HStack { Spacer(); Text("more").font(.system(size: 12)).foregroundStyle(.blue) }
+                            }.padding(14)
+                            Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 14)
+                        }
+                    }.background(Color(white: 0.09), in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
+                } else if title == "Apps & Purchase History" {
+                    VStack(spacing: 0) {
+                        HStack {
+                            Picker("Apps", selection: $selectedAppsFilter) {
+                                Text("All").tag(0)
+                                Text("Not on this iPhone").tag(1)
+                            }.pickerStyle(.segmented)
+                        }.padding(12)
+                        ForEach(["Antutu Benchmark", "Nyme Chat: Calls & Messages", "Discord - Talk, Play, Hang Out", "CPU-X Dasher z Battery life", "Instagram", "TikTok - Videos, Shop & LIVE", "WhatsApp Messenger", "Fusvob VPN: Super VPN 2026"], id: \.self) { name in
+                            HStack(spacing: 12) {
+                                KsignCloneAppIcon(name: name, fallbackColor: .indigo, fallbackSymbol: "app.fill", size: 54, cornerRadius: 12)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(name).font(.system(size: 14, weight: .medium)).lineLimit(2)
+                                    Text("Purchased · Previously downloaded").font(.system(size: 11)).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "icloud.and.arrow.down").font(.system(size: 22)).foregroundStyle(.blue)
+                            }.padding(.horizontal, 14).padding(.vertical, 10)
+                            Divider().overlay(Color.white.opacity(0.08)).padding(.leading, 80).padding(.trailing, 14)
+                        }
+                    }.background(Color(white: 0.09), in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
+                } else if title == "Account Settings" || title == "Personalized Recommendations" || title == "KSign Settings" {
+                    VStack(spacing: 0) {
+                        subpageRow("Account Details")
+                        subpageRow("Country/Region", detail: "United States")
+                        subpageRow("Add Money to Account")
+                        subpageRow("Purchase History")
+                        subpageRow("Subscriptions")
+                    }.background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
+                    VStack(spacing: 0) {
+                        subpageRow("Education Verification", detail: "Verify your status as a student or educator")
+                        Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 16)
+                        Toggle("Newsletters and Special Offers", isOn: $newslettersEnabled).tint(.blue).padding(16)
+                        Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 16)
+                        Toggle("Personalized Recommendations", isOn: $recommendationsEnabled).tint(.blue).padding(16)
+                    }.background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
+                    VStack(spacing: 0) {
+                        subpageRow("Terms & Conditions")
+                        Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 16)
+                        subpageRow("Privacy Policy")
+                    }.background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
+                } else if title == "Notifications" {
+                    VStack(spacing: 0) {
+                        Toggle("App Updates", isOn: $updatesEnabled).tint(.blue).padding(16)
+                        Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 16)
+                        Toggle("Personalized Recommendations", isOn: $recommendationsEnabled).tint(.blue).padding(16)
+                        Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 16)
+                        Toggle("News and Offers", isOn: $newslettersEnabled).tint(.blue).padding(16)
+                    }.background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
+                } else if title == "Ratings & Reviews" {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Image(systemName: "star.bubble").font(.system(size: 36)).foregroundStyle(.secondary)
+                        Text("Ratings & Reviews").font(.title2.bold())
+                        Text("The apps you rate and review will appear here.").font(.subheadline).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity, alignment: .leading).padding(22)
+                        .background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
+                } else if title == "Downloads" {
+                    KsignCloneInstalledAppsView().frame(height: 460).padding(.horizontal, 12)
+                } else {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(title).font(.title2.bold())
+                        Text("This is a visual App Store-style demonstration screen. Account, purchase, and subscription actions are not connected to Apple services.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                    }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.horizontal, 20)
+                }
+            }
+            .padding(.bottom, 30)
+        }
+        .background(Color.black.ignoresSafeArea())
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
+        .preferredColorScheme(.dark)
+    }
+
+    private func subpageRow(_ title: String, detail: String? = nil) -> some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.system(size: 14)).foregroundStyle(.white)
+                if let detail { Text(detail).font(.system(size: 11)).foregroundStyle(.secondary) }
+            }
+            Spacer()
+            Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(.gray)
+        }.padding(16)
+    }
+}
+
 
 // Helper to chunk arrays for the grid layout
 extension Array {
