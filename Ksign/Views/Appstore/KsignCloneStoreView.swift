@@ -290,20 +290,27 @@ private struct KsignCloneFloatingTabBar: View {
     @Binding var selection: Int
     private let titles = ["Today", "Games", "Apps", "Arcade", "Search"]
     private let accent = Color(red: 0.10, green: 0.58, blue: 1.0)
+    @Namespace private var selectionAnimation
 
     var body: some View {
-        HStack(spacing: 1) {
+        HStack(spacing: 2) {
             ForEach(Array(titles.enumerated()), id: \.offset) { index, title in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.18)) { selection = index }
+                    guard selection != index else { return }
+                    // Mirrors the reference video: the active capsule glides to the
+                    // chosen item with a soft spring while the icon/text turn blue.
+                    withAnimation(.spring(response: 0.38, dampingFraction: 0.76, blendDuration: 0.08)) {
+                        selection = index
+                    }
                 } label: {
                     VStack(spacing: 5) {
                         KsignCloneTabBarGlyph(index: index, color: selection == index ? accent : .white)
-                            .frame(height: 34)
+                            .frame(width: 34, height: 34)
+                            .scaleEffect(selection == index ? 1.04 : 1.0)
                         Text(title)
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: selection == index ? .semibold : .medium))
                             .lineLimit(1)
-                            .minimumScaleFactor(0.85)
+                            .minimumScaleFactor(0.82)
                     }
                     .foregroundStyle(selection == index ? accent : Color.white)
                     .frame(maxWidth: .infinity)
@@ -312,21 +319,29 @@ private struct KsignCloneFloatingTabBar: View {
                         if selection == index {
                             RoundedRectangle(cornerRadius: 34, style: .continuous)
                                 .fill(Color(red: 0.18, green: 0.18, blue: 0.19))
+                                .matchedGeometryEffect(id: "appstore.selected.tab", in: selectionAnimation)
                                 .padding(.horizontal, 0)
                         }
                     }
-                    .contentShape(Rectangle())
+                    .contentShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(KsignCloneTabPressStyle())
                 .accessibilityLabel(title)
             }
         }
         .padding(5)
-        // Opaque charcoal capsule, matching the older reference instead of the
-        // translucent/greenish material used by the newer incorrect version.
         .background(Color(red: 0.075, green: 0.075, blue: 0.08), in: Capsule())
         .overlay(Capsule().stroke(Color.white.opacity(0.13), lineWidth: 1))
         .shadow(color: .black.opacity(0.38), radius: 14, x: 0, y: 5)
+        .animation(.spring(response: 0.38, dampingFraction: 0.76), value: selection)
+    }
+}
+
+private struct KsignCloneTabPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
+            .animation(.spring(response: 0.22, dampingFraction: 0.62), value: configuration.isPressed)
     }
 }
 
