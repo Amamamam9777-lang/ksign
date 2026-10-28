@@ -253,19 +253,16 @@ struct KsignCloneStoreView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Do not nest another TabView here: its native tab bar stacked with the
-            // custom App Store bar and produced the duplicate-panel bug.
+        ZStack {
+            // Replace the selected page immediately. The spring animation belongs
+            // to the tab selection capsule only; animating this subtree caused the
+            // previous and next pages to blend together underneath the bar.
             selectedStoreContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            if !keyboardVisible {
-                KsignCloneFloatingTabBar(selection: $selectedStoreTab)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 8)
-                    .zIndex(20)
-                    .transition(.opacity)
-            }
+                .transaction { transaction in
+                    transaction.animation = nil
+                    transaction.disablesAnimations = true
+                }
 
             // Shared visual install-confirmation sheet; placed at the root so the
             // same animation works from Today, Games, Apps, Search and product pages.
@@ -273,6 +270,17 @@ struct KsignCloneStoreView: View {
                 .zIndex(1000)
         }
         .background(Color.black.ignoresSafeArea())
+        // Reserve space for the floating bar instead of drawing it over the page.
+        // This keeps app rows/cards from appearing through the bar during a tab switch.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !keyboardVisible {
+                KsignCloneFloatingTabBar(selection: $selectedStoreTab)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
+                    .transition(.opacity)
+            }
+        }
         .toolbar(.hidden, for: .tabBar)
         .preferredColorScheme(.dark)
         .onReceive(deepLinkNavigation.$pubgProductPageRequestID) { handlePUBGProductPageRequest($0) }
