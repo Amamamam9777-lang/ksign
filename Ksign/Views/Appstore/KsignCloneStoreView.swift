@@ -226,37 +226,37 @@ struct KsignCloneStoreView: View {
     @State private var showPUBGProductPage = false
     @State private var keyboardVisible = false
 
-    // Keep all five pages mounted and switch visibility without replacing the
-    // entire subtree. The old `switch selectedStoreTab` plus an animated binding
-    // let SwiftUI temporarily render outgoing and incoming NavigationStacks at
-    // once, which is why text/buttons from Today, Apps and PUBG detail appeared
-    // on top of each other in the recordings.
-    private var todayPage: some View {
-        KsignCloneTodayView(data: data)
-    }
-
-    private var gamesPage: some View {
-        KsignCloneAppsView(title: "Games", apps: data.games)
-    }
-
-    private var appsPage: some View {
-        KsignCloneAppsView(
-            title: "Apps",
-            apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps
-        )
-    }
-
-    private var arcadePage: some View {
-        KsignCloneArcadeView()
-    }
-
-    private var searchPage: some View {
-        KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
+    // Build only the active page. Keeping five NavigationStacks alive in one ZStack
+    // caused hidden Search to become active too (including its FocusState/search bar),
+    // and NavigationStack toolbars/backgrounds could leak through pages with opacity 0.
+    // Replacing only the selected branch prevents duplicate page content and avoids
+    // hidden Search views receiving focus on app launch.
+    @ViewBuilder
+    private var selectedStoreContent: some View {
+        switch selectedStoreTab {
+        case 0:
+            KsignCloneTodayView(data: data)
+        case 1:
+            KsignCloneAppsView(title: "Games", apps: data.games)
+        case 2:
+            KsignCloneAppsView(
+                title: "Apps",
+                apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps
+            )
+        case 3:
+            KsignCloneArcadeView()
+        default:
+            KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
+        }
     }
 
     private func handlePUBGProductPageRequest(_ requestID: UInt64) {
         guard deepLinkNavigation.consumePUBGProductPageRequest(requestID) else { return }
-        selectedStoreTab = 4
+        var tabTransaction = Transaction()
+        tabTransaction.animation = nil
+        withTransaction(tabTransaction) {
+            selectedStoreTab = 4
+        }
         showPUBGProductPage = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
             guard deepLinkNavigation.pubgProductPageRequestID == requestID else { return }
@@ -266,52 +266,12 @@ struct KsignCloneStoreView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // All pages occupy the same bounds, but only the selected page is
-            // visible, interactive and accessible. Changing tabs does not insert
-            // or remove NavigationStacks, so there is no crossfade/ghost-content.
-            ZStack {
-                todayPage
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .opacity(selectedStoreTab == 0 ? 1 : 0)
-                    .allowsHitTesting(selectedStoreTab == 0)
-                    .accessibilityHidden(selectedStoreTab != 0)
-                    .zIndex(selectedStoreTab == 0 ? 1 : 0)
-
-                gamesPage
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .opacity(selectedStoreTab == 1 ? 1 : 0)
-                    .allowsHitTesting(selectedStoreTab == 1)
-                    .accessibilityHidden(selectedStoreTab != 1)
-                    .zIndex(selectedStoreTab == 1 ? 1 : 0)
-
-                appsPage
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .opacity(selectedStoreTab == 2 ? 1 : 0)
-                    .allowsHitTesting(selectedStoreTab == 2)
-                    .accessibilityHidden(selectedStoreTab != 2)
-                    .zIndex(selectedStoreTab == 2 ? 1 : 0)
-
-                arcadePage
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .opacity(selectedStoreTab == 3 ? 1 : 0)
-                    .allowsHitTesting(selectedStoreTab == 3)
-                    .accessibilityHidden(selectedStoreTab != 3)
-                    .zIndex(selectedStoreTab == 3 ? 1 : 0)
-
-                searchPage
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .opacity(selectedStoreTab == 4 ? 1 : 0)
-                    .allowsHitTesting(selectedStoreTab == 4)
-                    .accessibilityHidden(selectedStoreTab != 4)
-                    .zIndex(selectedStoreTab == 4 ? 1 : 0)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black)
-            // Prevent inherited SwiftUI animations from fading the whole page
-            // stack. Tab highlight animation is handled independently by the bar.
-            .transaction { transaction in
-                transaction.animation = nil
-            }
+            // One active NavigationStack at a time. Do not keep inactive pages
+            // underneath transparent layers: SwiftUI can still create their search
+            // fields/toolbars and their state can interfere with the visible page.
+            selectedStoreContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .id(selectedStoreTab)
 
             // Do not add a native TabView inside this view. This is the sole custom
             // App Store bar for Today / Games / Apps / Arcade / Search.
@@ -2310,13 +2270,9 @@ struct KsignCloneSearchView: View {
                 }
             }
             .onAppear {
-                // Search opens with the keyboard as it does in the reference video.
-                // When a deep link is opening PUBG, leave the keyboard closed.
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    if !showPUBGProductPage && searchText.isEmpty {
-                        isSearchFocused = true
-                    }
-                }
+                // Opening the app or switching to Search must not summon the keyboard.
+                // Focus is acquired only when the user taps the search field.
+                isSearchFocused = false
             }
         }
         .preferredColorScheme(.dark)
