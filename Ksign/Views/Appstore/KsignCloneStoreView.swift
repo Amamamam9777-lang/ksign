@@ -253,39 +253,37 @@ struct KsignCloneStoreView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Do not nest another TabView here: its native tab bar stacked with the
-            // custom App Store bar and produced the duplicate-panel bug.
-            selectedStoreContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                // The matched-geometry spring belongs to the tab bar only. Do not
-                // animate the page subtree when selection changes; this avoids
-                // old/new pages ghosting over one another.
-                .transaction { transaction in transaction.animation = nil }
+        ZStack {
+            TabView(selection: $selectedStoreTab) {
+                KsignCloneTodayView(data: data)
+                    .tabItem { Label("Today", systemImage: "doc.text.image") }
+                    .tag(0)
 
-            if !keyboardVisible {
-                KsignCloneFloatingTabBar(selection: $selectedStoreTab)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 8)
-                    .zIndex(20)
-                    .transition(.opacity)
+                KsignCloneAppsView(title: "Games", apps: data.games)
+                    .tabItem { Label("Games", systemImage: "gamecontroller.fill") }
+                    .tag(1)
+
+                KsignCloneAppsView(title: "Apps", apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps)
+                    .tabItem { Label("Apps", systemImage: "square.stack.3d.up.fill") }
+                    .tag(2)
+
+                KsignCloneArcadeView()
+                    .tabItem { Label("Arcade", systemImage: "arcade.stick") }
+                    .tag(3)
+
+                KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
+                    .tabItem { Label("Search", systemImage: "magnifyingglass") }
+                    .tag(4)
             }
-
-            // Shared visual install-confirmation sheet; placed at the root so the
-            // same animation works from Today, Games, Apps, Search and product pages.
+            // Restore the original native five-tab navigation from the known-good source.
+            // Hide only the outer Ksign bar; this TabView owns the visible store bar.
+            .toolbar(.hidden, for: .tabBar)
             KsignCloneInstallPromptOverlay()
                 .zIndex(1000)
         }
         .background(Color.black.ignoresSafeArea())
-        .toolbar(.hidden, for: .tabBar)
         .preferredColorScheme(.dark)
         .onReceive(deepLinkNavigation.$pubgProductPageRequestID) { handlePUBGProductPageRequest($0) }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-            withAnimation(.easeOut(duration: 0.15)) { keyboardVisible = true }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-            withAnimation(.easeOut(duration: 0.15)) { keyboardVisible = false }
-        }
         .onAppear { handlePUBGProductPageRequest(deepLinkNavigation.pubgProductPageRequestID) }
     }
 }
