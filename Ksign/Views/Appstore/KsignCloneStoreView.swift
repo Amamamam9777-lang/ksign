@@ -257,15 +257,11 @@ struct KsignCloneStoreView: View {
             // Do not nest another TabView here: its native tab bar stacked with the
             // custom App Store bar and produced the duplicate-panel bug.
             selectedStoreContent
-                // Give each tab its own view identity. This fully tears down the
-                // previous NavigationStack instead of leaving search/detail state
-                // attached to the next tab.
                 .id(selectedStoreTab)
-                .transaction { transaction in
-                    // Tab-content changes must not inherit the pill's animation.
-                    transaction.animation = nil
-                }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Only the floating selection pill animates; page content swaps
+                // immediately so old/new screens cannot cross-fade or ghost.
+                .transaction { transaction in transaction.animation = nil }
 
             if !keyboardVisible {
                 KsignCloneFloatingTabBar(selection: $selectedStoreTab)
@@ -296,65 +292,153 @@ struct KsignCloneStoreView: View {
 
 private struct KsignCloneFloatingTabBar: View {
     @Binding var selection: Int
-    @Namespace private var selectionNamespace
-
-    private let tabs: [(title: String, symbol: String)] = [
-        ("Today", "doc.text.image"),
-        ("Games", "rocket.fill"),
-        ("Apps", "square.stack.3d.up.fill"),
-        ("Arcade", "arcade.stick.console"),
-        ("Search", "magnifyingglass")
-    ]
+    @State private var visualSelection = 0
+    @Namespace private var selectedPillAnimation
+    private let titles = ["Today", "Games", "Apps", "Arcade", "Search"]
     private let accent = Color(red: 0.10, green: 0.58, blue: 1.0)
 
     var body: some View {
-        HStack(spacing: 2) {
-            ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+        HStack(spacing: 1) {
+            ForEach(Array(titles.enumerated()), id: \.offset) { index, title in
                 Button {
-                    guard selection != index else { return }
-                    UISelectionFeedbackGenerator().selectionChanged()
-                    // Deliberately do not animate the selected page here. The
-                    // matched-geometry pill below is animated inside this bar only.
-                    selection = index
+                    // Change the displayed page without an animation transaction.
+                    // Animate only the separate visual selection state below.
+                    var transaction = Transaction()
+                    transaction.animation = nil
+                    withTransaction(transaction) { selection = index }
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        visualSelection = index
+                    }
                 } label: {
-                    VStack(spacing: 6) {
-                        Image(systemName: tab.symbol)
-                            .font(.system(size: 29, weight: .semibold))
-                            .frame(height: 33)
-                        Text(tab.title)
+                    VStack(spacing: 5) {
+                        KsignCloneTabBarGlyph(index: index, color: visualSelection == index ? accent : .white)
+                            .frame(height: 34)
+                        Text(title)
                             .font(.system(size: 14, weight: .medium))
                             .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                     }
-                    .foregroundStyle(selection == index ? accent : Color.white)
+                    .foregroundStyle(visualSelection == index ? accent : Color.white)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 78)
+                    .frame(height: 72)
                     .background {
-                        if selection == index {
-                            RoundedRectangle(cornerRadius: 38, style: .continuous)
-                                .fill(Color.white.opacity(0.12))
-                                .matchedGeometryEffect(id: "appstore-tab-selection", in: selectionNamespace)
-                                .padding(.horizontal, 1)
+                        if visualSelection == index {
+                            RoundedRectangle(cornerRadius: 34, style: .continuous)
+                                .fill(Color(red: 0.18, green: 0.18, blue: 0.19))
+                                .matchedGeometryEffect(id: "appstore-selected-tab-pill", in: selectedPillAnimation)
+                                .padding(.horizontal, 0)
                         }
                     }
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(tab.title)
-                .accessibilityAddTraits(selection == index ? .isSelected : [])
+                .accessibilityLabel(title)
             }
         }
-        .padding(6)
-        .background {
-            ZStack {
-                Capsule().fill(.ultraThinMaterial)
-                Capsule().fill(Color(red: 0.15, green: 0.16, blue: 0.16).opacity(0.88))
+        .padding(5)
+        // Opaque charcoal capsule, matching the older reference instead of the
+        // translucent/greenish material used by the newer incorrect version.
+        .background(Color(red: 0.075, green: 0.075, blue: 0.08), in: Capsule())
+        .overlay(Capsule().stroke(Color.white.opacity(0.13), lineWidth: 1))
+        .shadow(color: .black.opacity(0.38), radius: 14, x: 0, y: 5)
+        .onAppear { visualSelection = selection }
+        .onChange(of: selection) { newValue in
+            guard newValue != visualSelection else { return }
+            withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                visualSelection = newValue
             }
         }
-        .overlay(Capsule().stroke(Color.white.opacity(0.16), lineWidth: 0.8))
-        .shadow(color: .black.opacity(0.34), radius: 16, x: 0, y: 5)
-        .animation(.spring(response: 0.42, dampingFraction: 0.78), value: selection)
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("App Store navigation")
+    }
+}
+
+/// Hand-tuned SF-symbol-like glyphs to match the supplied reference panel.
+/// Custom drawings are used for Today and Arcade so their silhouettes don't vary
+/// with the installed SF Symbols version.
+private struct KsignCloneTabBarGlyph: View {
+    let index: Int
+    let color: Color
+
+    var body: some View {
+        Group {
+            switch index {
+            case 0:
+                todayGlyph
+            case 1:
+                Image(systemName: "rocket.fill")
+                    .font(.system(size: 31, weight: .regular))
+                    .rotationEffect(.degrees(0))
+                    .frame(width: 40, height: 34)
+            case 2:
+                Image(systemName: "square.stack.3d.up.fill")
+                    .font(.system(size: 31, weight: .regular))
+                    .frame(width: 40, height: 34)
+            case 3:
+                arcadeGlyph
+            default:
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 31, weight: .regular))
+                    .frame(width: 40, height: 34)
+            }
+        }
+        .foregroundStyle(color)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var todayGlyph: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 4.5, style: .continuous)
+                .stroke(color, lineWidth: 2.7)
+                .frame(width: 25, height: 31)
+            VStack(alignment: .leading, spacing: 3) {
+                Capsule().fill(color).frame(width: 13, height: 2.2)
+                Capsule().fill(color).frame(width: 9, height: 2.2)
+                RoundedRectangle(cornerRadius: 1.3, style: .continuous)
+                    .fill(color.opacity(0.18))
+                    .overlay(RoundedRectangle(cornerRadius: 1.3).stroke(color, lineWidth: 1.4))
+                    .frame(width: 15, height: 10)
+            }
+            .offset(y: 4)
+        }
+        .frame(width: 40, height: 34)
+    }
+
+    private var arcadeGlyph: some View {
+        ZStack(alignment: .topLeading) {
+            // Slanted arcade control deck.
+            Path { path in
+                path.move(to: CGPoint(x: 3, y: 21))
+                path.addQuadCurve(to: CGPoint(x: 8, y: 17), control: CGPoint(x: 4, y: 17))
+                path.addLine(to: CGPoint(x: 33, y: 17))
+                path.addQuadCurve(to: CGPoint(x: 38, y: 21), control: CGPoint(x: 37, y: 17))
+                path.addLine(to: CGPoint(x: 35, y: 30))
+                path.addQuadCurve(to: CGPoint(x: 6, y: 30), control: CGPoint(x: 20, y: 34))
+                path.closeSubpath()
+            }
+            .fill(color)
+
+            // Joystick post and ball on the left side of the deck.
+            Capsule().fill(color)
+                .frame(width: 3.2, height: 11)
+                .offset(x: 8.5, y: 5)
+            Circle().fill(color)
+                .frame(width: 7, height: 7)
+                .offset(x: 6.6, y: 1)
+
+            // Six raised action buttons on the right.
+            HStack(spacing: 3) {
+                ForEach(0..<3, id: \.self) { _ in
+                    Circle().fill(Color(red: 0.075, green: 0.075, blue: 0.08)).frame(width: 3.3, height: 3.3)
+                }
+            }
+            .offset(x: 17, y: 20)
+            HStack(spacing: 3) {
+                ForEach(0..<3, id: \.self) { _ in
+                    Circle().fill(Color(red: 0.075, green: 0.075, blue: 0.08)).frame(width: 3.3, height: 3.3)
+                }
+            }
+            .offset(x: 17, y: 25)
+        }
+        .frame(width: 40, height: 34)
     }
 }
 
