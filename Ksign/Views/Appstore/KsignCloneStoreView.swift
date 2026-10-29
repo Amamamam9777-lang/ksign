@@ -226,11 +226,6 @@ struct KsignCloneStoreView: View {
     @State private var showPUBGProductPage = false
     @State private var keyboardVisible = false
 
-    // Build only the active page. Keeping five NavigationStacks alive in one ZStack
-    // caused hidden Search to become active too (including its FocusState/search bar),
-    // and NavigationStack toolbars/backgrounds could leak through pages with opacity 0.
-    // Replacing only the selected branch prevents duplicate page content and avoids
-    // hidden Search views receiving focus on app launch.
     @ViewBuilder
     private var selectedStoreContent: some View {
         switch selectedStoreTab {
@@ -239,10 +234,7 @@ struct KsignCloneStoreView: View {
         case 1:
             KsignCloneAppsView(title: "Games", apps: data.games)
         case 2:
-            KsignCloneAppsView(
-                title: "Apps",
-                apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps
-            )
+            KsignCloneAppsView(title: "Apps", apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps)
         case 3:
             KsignCloneArcadeView()
         default:
@@ -252,11 +244,7 @@ struct KsignCloneStoreView: View {
 
     private func handlePUBGProductPageRequest(_ requestID: UInt64) {
         guard deepLinkNavigation.consumePUBGProductPageRequest(requestID) else { return }
-        var tabTransaction = Transaction()
-        tabTransaction.animation = nil
-        withTransaction(tabTransaction) {
-            selectedStoreTab = 4
-        }
+        selectedStoreTab = 4
         showPUBGProductPage = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
             guard deepLinkNavigation.pubgProductPageRequestID == requestID else { return }
@@ -266,15 +254,11 @@ struct KsignCloneStoreView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // One active NavigationStack at a time. Do not keep inactive pages
-            // underneath transparent layers: SwiftUI can still create their search
-            // fields/toolbars and their state can interfere with the visible page.
+            // Do not nest another TabView here: its native tab bar stacked with the
+            // custom App Store bar and produced the duplicate-panel bug.
             selectedStoreContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .id(selectedStoreTab)
 
-            // Do not add a native TabView inside this view. This is the sole custom
-            // App Store bar for Today / Games / Apps / Arcade / Search.
             if !keyboardVisible {
                 KsignCloneFloatingTabBar(selection: $selectedStoreTab)
                     .padding(.horizontal, 20)
@@ -304,10 +288,6 @@ struct KsignCloneStoreView: View {
 
 private struct KsignCloneFloatingTabBar: View {
     @Binding var selection: Int
-    // Keep visual animation state separate from the selected page state. Only the
-    // highlight capsule animates; the page content is switched without animation.
-    @Namespace private var selectionNamespace
-    @State private var visualSelection = 0
     private let tabs: [(title: String, symbol: String)] = [
         ("Today", "doc.text.image"),
         ("Games", "rocket.fill"),
@@ -321,16 +301,7 @@ private struct KsignCloneFloatingTabBar: View {
         HStack(spacing: 2) {
             ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
                 Button {
-                    // Switch page synchronously, without animating the whole SwiftUI
-                    // hierarchy. Animate only the selection capsule below.
-                    var transaction = Transaction()
-                    transaction.animation = nil
-                    withTransaction(transaction) {
-                        selection = index
-                    }
-                    withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
-                        visualSelection = index
-                    }
+                    withAnimation(.easeInOut(duration: 0.18)) { selection = index }
                 } label: {
                     VStack(spacing: 4) {
                         Image(systemName: tab.symbol)
@@ -340,15 +311,14 @@ private struct KsignCloneFloatingTabBar: View {
                             .font(.system(size: 10.5, weight: .medium))
                             .lineLimit(1)
                     }
-                    .foregroundStyle(visualSelection == index ? accent : Color.white)
+                    .foregroundStyle(selection == index ? accent : Color.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 58)
                     .background {
-                        if visualSelection == index {
+                        if selection == index {
                             RoundedRectangle(cornerRadius: 26, style: .continuous)
                                 .fill(Color.white.opacity(0.09))
                                 .padding(.horizontal, 1)
-                                .matchedGeometryEffect(id: "AppStoreTabHighlight", in: selectionNamespace)
                         }
                     }
                     .contentShape(Rectangle())
@@ -362,16 +332,6 @@ private struct KsignCloneFloatingTabBar: View {
         .background(Color.black.opacity(0.48), in: Capsule())
         .overlay(Capsule().stroke(Color.white.opacity(0.13), lineWidth: 0.8))
         .shadow(color: .black.opacity(0.4), radius: 16, x: 0, y: 5)
-        .onAppear {
-            visualSelection = selection
-        }
-        .onChange(of: selection) { newSelection in
-            // Also animate the indicator when selected tab changes via deep link.
-            guard newSelection != visualSelection else { return }
-            withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
-                visualSelection = newSelection
-            }
-        }
     }
 }
 
@@ -2268,11 +2228,6 @@ struct KsignCloneSearchView: View {
                     didSubmitSearch = true
                     isSearchFocused = false
                 }
-            }
-            .onAppear {
-                // Opening the app or switching to Search must not summon the keyboard.
-                // Focus is acquired only when the user taps the search field.
-                isSearchFocused = false
             }
         }
         .preferredColorScheme(.dark)
