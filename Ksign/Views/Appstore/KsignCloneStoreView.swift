@@ -147,6 +147,26 @@ class KsignCloneStoreData: ObservableObject {
             KsignCloneAppItem(name: "Zoom Workplace", category: "Business", iconColor: .blue, iconSymbol: "video.fill", rating: 4.6, reviews: "1.4M", size: "230 MB", age: "4+", screenshots: [.blue, .cyan, .white], description: "Join video meetings, chat, and collaborate."),
         ]
 
+        featuredApps += [
+            KsignCloneAppItem(name: "Swiftgram", category: "Social Networking", iconColor: .blue, iconSymbol: "paperplane.fill", rating: 4.6, reviews: "120K", size: "190 MB", age: "12+", screenshots: [.blue, .cyan, .white], description: "A Telegram-compatible messaging client with extra customisation."),
+            KsignCloneAppItem(name: "CPU-X", category: "Utilities", iconColor: .indigo, iconSymbol: "cpu", rating: 4.8, reviews: "19", size: "142 MB", age: "4+", screenshots: [.indigo, .blue, .black], description: "Inspect device information and hardware statistics."),
+            KsignCloneAppItem(name: "DeepSeek", category: "Productivity", iconColor: .blue, iconSymbol: "sparkles", rating: 4.7, reviews: "250K", size: "95 MB", age: "12+", screenshots: [.blue, .cyan, .white], description: "An AI assistant for questions, ideas, and everyday tasks."),
+            KsignCloneAppItem(name: "Games", category: "Entertainment", iconColor: .indigo, iconSymbol: "gamecontroller.fill", rating: 4.6, reviews: "—", size: "—", age: "4+", screenshots: [.indigo, .blue, .purple], description: "Discover games and launch your installed games app."),
+            KsignCloneAppItem(name: "Settings", category: "Utilities", iconColor: .gray, iconSymbol: "gearshape.fill", rating: 4.5, reviews: "—", size: "—", age: "4+", screenshots: [.gray, .black, .blue], description: "Manage device preferences and system settings."),
+            KsignCloneAppItem(name: "Files", category: "Productivity", iconColor: .blue, iconSymbol: "folder.fill", rating: 4.6, reviews: "—", size: "—", age: "4+", screenshots: [.blue, .cyan, .white], description: "Browse documents and files stored on your device."),
+            KsignCloneAppItem(name: "Photos", category: "Photo & Video", iconColor: .purple, iconSymbol: "photo.on.rectangle.angled", rating: 4.6, reviews: "—", size: "—", age: "4+", screenshots: [.purple, .pink, .blue], description: "View and organise your photo library."),
+            KsignCloneAppItem(name: "Camera", category: "Photo & Video", iconColor: .gray, iconSymbol: "camera.fill", rating: 4.5, reviews: "—", size: "—", age: "4+", screenshots: [.gray, .black, .blue], description: "Capture photos and record videos."),
+            KsignCloneAppItem(name: "Clock", category: "Utilities", iconColor: .orange, iconSymbol: "clock.fill", rating: 4.5, reviews: "—", size: "—", age: "4+", screenshots: [.orange, .red, .black], description: "Use alarms, timers, and the world clock."),
+            KsignCloneAppItem(name: "Weather", category: "Weather", iconColor: .cyan, iconSymbol: "cloud.sun.fill", rating: 4.6, reviews: "—", size: "—", age: "4+", screenshots: [.cyan, .blue, .yellow], description: "Check current conditions and forecasts."),
+            KsignCloneAppItem(name: "Calculator", category: "Utilities", iconColor: .orange, iconSymbol: "plus.forwardslash.minus", rating: 4.5, reviews: "—", size: "—", age: "4+", screenshots: [.orange, .gray, .black], description: "Perform everyday calculations."),
+            KsignCloneAppItem(name: "Voice Memos", category: "Utilities", iconColor: .red, iconSymbol: "waveform", rating: 4.5, reviews: "—", size: "—", age: "4+", screenshots: [.red, .orange, .black], description: "Record audio notes and ideas."),
+            KsignCloneAppItem(name: "Measure", category: "Utilities", iconColor: .yellow, iconSymbol: "ruler.fill", rating: 4.4, reviews: "—", size: "—", age: "4+", screenshots: [.yellow, .gray, .black], description: "Measure objects using your device camera."),
+            KsignCloneAppItem(name: "Translate", category: "Reference", iconColor: .blue, iconSymbol: "character.bubble.fill", rating: 4.5, reviews: "—", size: "—", age: "4+", screenshots: [.blue, .cyan, .white], description: "Translate words and conversations."),
+            KsignCloneAppItem(name: "Apple Support", category: "Utilities", iconColor: .blue, iconSymbol: "lifepreserver.fill", rating: 4.6, reviews: "—", size: "—", age: "4+", screenshots: [.blue, .white, .gray], description: "Find help and support for Apple products."),
+            KsignCloneAppItem(name: "TestFlight", category: "Developer Tools", iconColor: .blue, iconSymbol: "airplane", rating: 4.5, reviews: "—", size: "—", age: "4+", screenshots: [.blue, .cyan, .white], description: "Try beta versions of apps and share feedback."),
+            KsignCloneAppItem(name: "Shadow Fight 2", category: "Action", iconColor: .black, iconSymbol: "figure.martial.arts", rating: 4.7, reviews: "1M", size: "250 MB", age: "12+", screenshots: [.black, .gray, .orange], description: "Fight through a martial arts action adventure.")
+        ]
+
         games = [
             KsignCloneAppItem(name: "PUBG MOBILE", category: "Top Battle Royale Mobile", iconColor: .orange, iconSymbol: "scope", rating: 4.3, reviews: "1.6M", size: "3.8 GB", age: "13+", screenshots: [.orange, .black, .gray], description: "Survive and compete in battle royale matches."),
             KsignCloneAppItem(name: "Roblox", category: "Adventure", iconColor: .gray, iconSymbol: "cube.fill", rating: 4.5, reviews: "5M", size: "300 MB", age: "12+", screenshots: [.gray, .blue, .green], description: "Play millions of experiences with friends."),
@@ -253,37 +273,39 @@ struct KsignCloneStoreView: View {
     }
 
     var body: some View {
-        ZStack {
-            TabView(selection: $selectedStoreTab) {
-                KsignCloneTodayView(data: data)
-                    .tabItem { Label("Today", systemImage: "doc.text.image") }
-                    .tag(0)
+        ZStack(alignment: .bottom) {
+            // Do not nest another TabView here: its native tab bar stacked with the
+            // custom App Store bar and produced the duplicate-panel bug.
+            selectedStoreContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // The matched-geometry spring belongs to the tab bar only. Do not
+                // animate the page subtree when selection changes; this avoids
+                // old/new pages ghosting over one another.
+                .transaction { transaction in transaction.animation = nil }
 
-                KsignCloneAppsView(title: "Games", apps: data.games)
-                    .tabItem { Label("Games", systemImage: "gamecontroller.fill") }
-                    .tag(1)
-
-                KsignCloneAppsView(title: "Apps", apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps)
-                    .tabItem { Label("Apps", systemImage: "square.stack.3d.up.fill") }
-                    .tag(2)
-
-                KsignCloneArcadeView()
-                    .tabItem { Label("Arcade", systemImage: "arcade.stick") }
-                    .tag(3)
-
-                KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
-                    .tabItem { Label("Search", systemImage: "magnifyingglass") }
-                    .tag(4)
+            if !keyboardVisible {
+                KsignCloneFloatingTabBar(selection: $selectedStoreTab)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 8)
+                    .zIndex(20)
+                    .transition(.opacity)
             }
-            // Restore the original native five-tab navigation from the known-good source.
-            // Hide only the outer Ksign bar; this TabView owns the visible store bar.
-            .toolbar(.hidden, for: .tabBar)
+
+            // Shared visual install-confirmation sheet; placed at the root so the
+            // same animation works from Today, Games, Apps, Search and product pages.
             KsignCloneInstallPromptOverlay()
                 .zIndex(1000)
         }
         .background(Color.black.ignoresSafeArea())
+        .toolbar(.hidden, for: .tabBar)
         .preferredColorScheme(.dark)
         .onReceive(deepLinkNavigation.$pubgProductPageRequestID) { handlePUBGProductPageRequest($0) }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.15)) { keyboardVisible = true }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.15)) { keyboardVisible = false }
+        }
         .onAppear { handlePUBGProductPageRequest(deepLinkNavigation.pubgProductPageRequestID) }
     }
 }
@@ -394,31 +416,47 @@ private struct KsignCloneFloatingTabBar: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Capsule().fill(isSelected ? accent : Color.white).frame(width: 17, height: 2.7)
                     Capsule().fill(isSelected ? accent : Color.white).frame(width: 18, height: 2.7)
-                    RoundedRectangle(cornerRadius: 2, style: .continuous)
-                        .fill(isSelected ? accent.opacity(0.95) : Color.white)
-                        .frame(width: 17, height: 10)
+                    RoundedRectangle(cornerRadius: 2.2, style: .continuous)
+                        .fill(isSelected ? accent : Color.white)
+                        .frame(width: 18, height: 14)
                 }
-                .offset(y: 3)
+                .offset(y: 4)
             }
             .frame(width: 41, height: 36)
         case "arcade-custom":
+            let tint = selection == 3 ? accent : Color.white
             ZStack {
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .stroke(Color.white, lineWidth: 3.2)
-                    .frame(width: 45, height: 23)
-                    .offset(y: 6)
-                Capsule().fill(Color.white).frame(width: 3.2, height: 10).offset(x: -11, y: -5)
-                Circle().fill(Color.white).frame(width: 8, height: 8).offset(x: -11, y: -14)
-                HStack(spacing: 4.0) {
-                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
+                // Front bevel of the joystick base.
+                Path { path in
+                    path.move(to: CGPoint(x: 2, y: 20))
+                    path.addLine(to: CGPoint(x: 24, y: 30))
+                    path.addLine(to: CGPoint(x: 46, y: 20))
+                    path.addLine(to: CGPoint(x: 46, y: 27))
+                    path.addLine(to: CGPoint(x: 24, y: 39))
+                    path.addLine(to: CGPoint(x: 2, y: 27))
+                    path.closeSubpath()
                 }
-                .offset(x: 6, y: 1)
-                HStack(spacing: 4.0) {
-                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
+                .fill(tint)
+
+                // Raised top plate.
+                Path { path in
+                    path.move(to: CGPoint(x: 2, y: 19))
+                    path.addLine(to: CGPoint(x: 24, y: 8))
+                    path.addLine(to: CGPoint(x: 46, y: 19))
+                    path.addLine(to: CGPoint(x: 24, y: 30))
+                    path.closeSubpath()
                 }
-                .offset(x: 6, y: 10)
+                .fill(tint)
+
+                // Stick and ball sit behind the deck, like the reference glyph.
+                Capsule().fill(tint).frame(width: 3.2, height: 15).offset(y: -11)
+                Circle().fill(tint).frame(width: 12.5, height: 12.5).offset(y: -19)
+
+                // Dark controls on the top plate create the cut-out detail.
+                Circle().fill(Color.black.opacity(0.78)).frame(width: 3.8, height: 3.8).offset(x: -9, y: 1)
+                Capsule().fill(Color.black.opacity(0.78)).frame(width: 7, height: 2.8).offset(x: 8, y: 1)
             }
-            .frame(width: 47, height: 41)
+            .frame(width: 48, height: 41)
         default:
             Image(systemName: symbol)
                 .font(.system(size: symbol == "magnifyingglass" ? 37 : 38, weight: .medium))
@@ -2197,6 +2235,13 @@ struct KsignCloneSearchView: View {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return [] }
         let normalized = query.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+        if normalized.contains("pubg") {
+            // The reference store keeps the searched game first and follows it with
+            // related popular games instead of leaving a single isolated result.
+            let pubgResults = allApps.filter { $0.name.localizedCaseInsensitiveContains("PUBG MOBILE") }
+            let otherGames = data.games.filter { !$0.name.localizedCaseInsensitiveContains("PUBG MOBILE") }
+            return pubgResults + otherGames
+        }
         return allApps.filter { app in
             let nameMatch = app.name.localizedCaseInsensitiveContains(query)
             let categoryMatch = app.category.localizedCaseInsensitiveContains(query)
@@ -2571,11 +2616,45 @@ private struct KsignCloneSearchAdPreview: View {
     }
 }
 
-// Launch helper for the installed PUBG MOBILE app. The app must register this URL scheme.
+// Best-effort launcher for apps that register custom URL schemes. iOS does not
+// expose a public API for enumerating installed apps, so a target app must support
+// at least one of its documented/known schemes for direct launch to work.
 enum KsignCloneLaunchApp {
+    private static func schemes(for name: String) -> [String] {
+        let value = name.lowercased()
+        if value.contains("pubg mobile") { return ["pubgm"] }
+        if value.contains("instagram") { return ["instagram"] }
+        if value.contains("tiktok") { return ["tiktok"] }
+        if value.contains("chatgpt") { return ["chatgpt"] }
+        if value.contains("swiftgram") { return ["swiftgram"] }
+        if value.contains("cpu-x") || value.contains("cpux") { return ["cpux", "cpu-x"] }
+        if value.contains("deepseek") { return ["deepseek"] }
+        if value.contains("capcut") { return ["capcut"] }
+        if value.contains("shadow fight 2") { return ["shadowfight2"] }
+        if value.contains("subway surfers") { return ["subwaysurfers"] }
+        if value == "games" || value == "games app" { return ["games"] }
+        return []
+    }
+
+    static func supportsDirectLaunch(name: String) -> Bool {
+        !schemes(for: name).isEmpty
+    }
+
+    static func open(_ name: String, completion: @escaping (Bool) -> Void = { _ in }) {
+        let candidates = schemes(for: name)
+        guard !candidates.isEmpty else { completion(false); return }
+        for scheme in candidates {
+            guard let url = URL(string: "\(scheme)://") else { continue }
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:]) { success in completion(success) }
+                return
+            }
+        }
+        completion(false)
+    }
+
     static func openPUBG() {
-        guard let url = URL(string: "pubgm://") else { return }
-        UIApplication.shared.open(url, options: [:])
+        open("PUBG MOBILE")
     }
 }
 
@@ -2638,29 +2717,39 @@ struct KsignCloneGetButton: View {
     var appName: String = "App"
     @ObservedObject private var prompt = KsignCloneInstallPrompt.shared
     @State private var isPressed = false
+    @State private var launchFailed = false
 
-    private var isPUBG: Bool {
-        appName.localizedCaseInsensitiveContains("PUBG MOBILE")
+    private var isLaunchableApp: Bool {
+        KsignCloneLaunchApp.supportsDirectLaunch(name: appName)
     }
 
     var body: some View {
         Button(action: handleTap) {
-            Text(isPUBG ? "Open" : "Get")
+            Text(isLaunchableApp ? "Open" : "Get")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(isPUBG ? Color.white : KsignCloneTheme.accent)
+                .foregroundStyle(isLaunchableApp ? Color.white : KsignCloneTheme.accent)
                 .frame(width: width, height: 30)
-                .background(isPUBG ? Color.blue : Color(uiColor: .secondarySystemBackground), in: Capsule())
+                .background(isLaunchableApp ? Color.blue : Color(uiColor: .secondarySystemBackground), in: Capsule())
                 .scaleEffect(isPressed ? 0.94 : 1)
                 .animation(.spring(response: 0.22, dampingFraction: 0.55), value: isPressed)
         }
         .buttonStyle(.plain)
         .fixedSize()
-        .accessibilityLabel(isPUBG ? "Open PUBG MOBILE" : "Get \(appName)")
+        .accessibilityLabel(isLaunchableApp ? "Open \(appName)" : "Get \(appName)")
+        .alert("Can't Open App", isPresented: $launchFailed) {
+            Button("OK", role: .cancel) { launchFailed = false }
+        } message: {
+            Text("This app did not respond to its URL scheme. Its installed version may use a different scheme or may not support external launching.")
+        }
     }
 
     private func handleTap() {
-        if isPUBG {
-            KsignCloneLaunchApp.openPUBG()
+        if isLaunchableApp {
+            KsignCloneLaunchApp.open(appName) { success in
+                if !success {
+                    DispatchQueue.main.async { launchFailed = true }
+                }
+            }
             return
         }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
