@@ -274,8 +274,9 @@ struct KsignCloneStoreView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Do not nest another TabView here: its native tab bar stacked with the
-            // custom App Store bar and produced the duplicate-panel bug.
+            // Keep the App Store screen's root container full-height. Some parent
+            // layouts constrain a ZStack to the scroll content's height, which makes
+            // the floating tab bar appear over the middle of the feed.
             selectedStoreContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 // The matched-geometry spring belongs to the tab bar only. Do not
@@ -296,6 +297,7 @@ struct KsignCloneStoreView: View {
             KsignCloneInstallPromptOverlay()
                 .zIndex(1000)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea())
         .toolbar(.hidden, for: .tabBar)
         .preferredColorScheme(.dark)
