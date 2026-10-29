@@ -16,6 +16,7 @@ struct ExtendedTabbarView: View {
 	@StateObject var viewModel = SourcesViewModel.shared
 	
 	@State private var _isAddingPresenting = false
+	@State private var selectedRootTab = "tab.appstore"
 	
 	@FetchRequest(
 		entity: AltSource.entity(),
@@ -24,19 +25,15 @@ struct ExtendedTabbarView: View {
 	) private var _sources: FetchedResults<AltSource>
 		
 	var body: some View {
-		TabView {
+		TabView(selection: $selectedRootTab) {
 			ForEach(TabEnum.defaultTabs, id: \.hashValue) { tab in
-				Tab(tab.title, systemImage: tab.icon) {
+				Tab(tab.title, systemImage: tab.icon, value: "tab.\(tab.rawValue)") {
 					TabEnum.view(for: tab)
 				}
-				// Hide Feather's real tab bar for the App Store demo tab at the
-				// parent Tab node. Hiding it only inside the child view was not enough
-				// on every iOS 18+ TabView configuration.
-				.toolbar(tab == .appstore ? .hidden : .visible, for: .tabBar)
 			}
 			
 			ForEach(TabEnum.customizableTabs, id: \.hashValue) { tab in
-				Tab(tab.title, systemImage: tab.icon) {
+				Tab(tab.title, systemImage: tab.icon, value: "tab.\(tab.rawValue)") {
 					TabEnum.view(for: tab)
 				}
 				.customizationID("tab.\(tab.rawValue)")
@@ -46,14 +43,14 @@ struct ExtendedTabbarView: View {
 			}
 			
 			TabSection("Sources") {
-				Tab(.localized("All Repositories"), systemImage: "globe.desk") {
+				Tab(.localized("All Repositories"), systemImage: "globe.desk", value: "sources.all") {
 					NavigationStack {
 						SourceAppsView(object: Array(_sources), viewModel: viewModel)
 					}
 				}
 				
 				ForEach(_sources, id: \.identifier) { source in
-					Tab {
+					Tab(value: "source.\(source.objectID.uriRepresentation().absoluteString)") {
 						NavigationStack {
 							SourceAppsView(object: [source], viewModel: viewModel)
 						}
@@ -77,6 +74,9 @@ struct ExtendedTabbarView: View {
 		}
 		.tabViewStyle(.sidebarAdaptable)
 		.tabViewCustomization($customization)
+		// Hide only the native Ksign tab bar on the App Store tab. The custom
+		// five-item App Store bar remains visible inside KsignCloneStoreView.
+		.toolbar(selectedRootTab == "tab.appstore" ? .hidden : .visible, for: .tabBar)
 		.sheet(isPresented: $_isAddingPresenting) {
 			SourcesAddView()
 				.presentationDetents([.medium])
