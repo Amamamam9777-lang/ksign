@@ -257,15 +257,15 @@ struct KsignCloneStoreView: View {
             // Do not nest another TabView here: its native tab bar stacked with the
             // custom App Store bar and produced the duplicate-panel bug.
             selectedStoreContent
-                .id(selectedStoreTab)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                // Only the floating selection pill animates; page content swaps
-                // immediately so old/new screens cannot cross-fade or ghost.
+                // The matched-geometry spring belongs to the tab bar only. Do not
+                // animate the page subtree when selection changes; this avoids
+                // old/new pages ghosting over one another.
                 .transaction { transaction in transaction.animation = nil }
 
             if !keyboardVisible {
                 KsignCloneFloatingTabBar(selection: $selectedStoreTab)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 8)
                     .zIndex(20)
                     .transition(.opacity)
@@ -292,153 +292,151 @@ struct KsignCloneStoreView: View {
 
 private struct KsignCloneFloatingTabBar: View {
     @Binding var selection: Int
-    @State private var visualSelection = 0
-    @Namespace private var selectedPillAnimation
-    private let titles = ["Today", "Games", "Apps", "Arcade", "Search"]
-    private let accent = Color(red: 0.10, green: 0.58, blue: 1.0)
+    @Namespace private var selectionAnimation
+
+    private let tabs: [(title: String, symbol: String)] = [
+        ("Today", "today-outline"),
+        ("Games", "rocket.fill"),
+        ("Apps", "square.stack.3d.up.fill"),
+        ("Arcade", "arcade-custom"),
+        ("Search", "magnifyingglass")
+    ]
+    private let accent = Color(red: 0.18, green: 0.61, blue: 1.0)
 
     var body: some View {
         HStack(spacing: 1) {
-            ForEach(Array(titles.enumerated()), id: \.offset) { index, title in
+            ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
                 Button {
-                    // Change the displayed page without an animation transaction.
-                    // Animate only the separate visual selection state below.
-                    var transaction = Transaction()
-                    transaction.animation = nil
-                    withTransaction(transaction) { selection = index }
-                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
-                        visualSelection = index
+                    guard selection != index else { return }
+                    UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                    withAnimation(.spring(response: 0.42, dampingFraction: 0.78, blendDuration: 0.10)) {
+                        selection = index
                     }
                 } label: {
                     VStack(spacing: 5) {
-                        KsignCloneTabBarGlyph(index: index, color: visualSelection == index ? accent : .white)
-                            .frame(height: 34)
-                        Text(title)
-                            .font(.system(size: 14, weight: .medium))
+                        tabIcon(tab.symbol, isSelected: selection == index)
+                            .frame(height: 36)
+                        Text(tab.title)
+                            .font(.system(size: 14.5, weight: selection == index ? .semibold : .medium, design: .rounded))
                             .lineLimit(1)
-                            .minimumScaleFactor(0.85)
+                            .minimumScaleFactor(0.82)
                     }
-                    .foregroundStyle(visualSelection == index ? accent : Color.white)
+                    .foregroundStyle(selection == index ? accent : Color.white.opacity(0.98))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 72)
+                    .frame(height: 70)
+                    .contentShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
                     .background {
-                        if visualSelection == index {
-                            RoundedRectangle(cornerRadius: 34, style: .continuous)
-                                .fill(Color(red: 0.18, green: 0.18, blue: 0.19))
-                                .matchedGeometryEffect(id: "appstore-selected-tab-pill", in: selectedPillAnimation)
-                                .padding(.horizontal, 0)
+                        if selection == index {
+                            Capsule()
+                                .fill(Color.white.opacity(0.115))
+                                .overlay {
+                                    Capsule().stroke(Color.white.opacity(0.055), lineWidth: 0.8)
+                                }
+                                .matchedGeometryEffect(id: "appstore-tab-selection", in: selectionAnimation)
+                                .padding(.horizontal, -7)
+                                .padding(.vertical, 1)
                         }
                     }
-                    .contentShape(Rectangle())
+                    .scaleEffect(selection == index ? 1.0 : 0.985)
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(title)
+                .buttonStyle(KsignCloneGlassTabButtonStyle())
+                .accessibilityLabel(tab.title)
+                .accessibilityAddTraits(selection == index ? .isSelected : [])
             }
         }
         .padding(5)
-        // Opaque charcoal capsule, matching the older reference instead of the
-        // translucent/greenish material used by the newer incorrect version.
-        .background(Color(red: 0.075, green: 0.075, blue: 0.08), in: Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.13), lineWidth: 1))
-        .shadow(color: .black.opacity(0.38), radius: 14, x: 0, y: 5)
-        .onAppear { visualSelection = selection }
-        .onChange(of: selection) { newValue in
-            guard newValue != visualSelection else { return }
-            withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
-                visualSelection = newValue
+        .frame(height: 80)
+        .background {
+            // Layered material, dark tint, and edge highlights recreate the
+            // Liquid Glass pill from the reference while remaining readable.
+            Capsule(style: .continuous)
+                .fill(.ultraThinMaterial)
+                .environment(\.colorScheme, .dark)
+                .overlay {
+                    Capsule(style: .continuous)
+                        .fill(Color(red: 0.075, green: 0.078, blue: 0.085).opacity(0.68))
+                }
+                .overlay {
+                    Capsule(style: .continuous)
+                        .fill(LinearGradient(
+                            colors: [Color.white.opacity(0.105), Color.white.opacity(0.025), Color.black.opacity(0.12)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                }
+                .overlay {
+                    Capsule(style: .continuous)
+                        .stroke(LinearGradient(
+                            colors: [Color.white.opacity(0.28), Color.white.opacity(0.10), Color.white.opacity(0.18)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ), lineWidth: 1.15)
+                }
+                .shadow(color: .black.opacity(0.38), radius: 18, x: 0, y: 7)
+        }
+        .overlay(alignment: .top) {
+            Capsule()
+                .fill(LinearGradient(colors: [Color.white.opacity(0.22), Color.white.opacity(0.015)], startPoint: .leading, endPoint: .trailing))
+                .frame(height: 1)
+                .padding(.horizontal, 34)
+                .padding(.top, 1.5)
+                .allowsHitTesting(false)
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder
+    private func tabIcon(_ symbol: String, isSelected: Bool) -> some View {
+        switch symbol {
+        case "today-outline":
+            ZStack {
+                RoundedRectangle(cornerRadius: 5.5, style: .continuous)
+                    .stroke(isSelected ? accent : Color.white, lineWidth: 3.2)
+                    .frame(width: 25, height: 34)
+                VStack(alignment: .leading, spacing: 4) {
+                    Capsule().fill(isSelected ? accent : Color.white).frame(width: 17, height: 2.7)
+                    Capsule().fill(isSelected ? accent : Color.white).frame(width: 18, height: 2.7)
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(isSelected ? accent.opacity(0.95) : Color.white)
+                        .frame(width: 17, height: 10)
+                }
+                .offset(y: 3)
             }
+            .frame(width: 41, height: 36)
+        case "arcade-custom":
+            ZStack {
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .stroke(Color.white, lineWidth: 3.2)
+                    .frame(width: 45, height: 23)
+                    .offset(y: 6)
+                Capsule().fill(Color.white).frame(width: 3.2, height: 10).offset(x: -11, y: -5)
+                Circle().fill(Color.white).frame(width: 8, height: 8).offset(x: -11, y: -14)
+                HStack(spacing: 4.0) {
+                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
+                }
+                .offset(x: 6, y: 1)
+                HStack(spacing: 4.0) {
+                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
+                }
+                .offset(x: 6, y: 10)
+            }
+            .frame(width: 47, height: 41)
+        default:
+            Image(systemName: symbol)
+                .font(.system(size: symbol == "magnifyingglass" ? 37 : 38, weight: .medium))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(isSelected ? accent : Color.white)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }
 
-/// Hand-tuned SF-symbol-like glyphs to match the supplied reference panel.
-/// Custom drawings are used for Today and Arcade so their silhouettes don't vary
-/// with the installed SF Symbols version.
-private struct KsignCloneTabBarGlyph: View {
-    let index: Int
-    let color: Color
-
-    var body: some View {
-        Group {
-            switch index {
-            case 0:
-                todayGlyph
-            case 1:
-                Image(systemName: "rocket.fill")
-                    .font(.system(size: 31, weight: .regular))
-                    .rotationEffect(.degrees(0))
-                    .frame(width: 40, height: 34)
-            case 2:
-                Image(systemName: "square.stack.3d.up.fill")
-                    .font(.system(size: 31, weight: .regular))
-                    .frame(width: 40, height: 34)
-            case 3:
-                arcadeGlyph
-            default:
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 31, weight: .regular))
-                    .frame(width: 40, height: 34)
-            }
-        }
-        .foregroundStyle(color)
-        .frame(maxWidth: .infinity)
-    }
-
-    private var todayGlyph: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 4.5, style: .continuous)
-                .stroke(color, lineWidth: 2.7)
-                .frame(width: 25, height: 31)
-            VStack(alignment: .leading, spacing: 3) {
-                Capsule().fill(color).frame(width: 13, height: 2.2)
-                Capsule().fill(color).frame(width: 9, height: 2.2)
-                RoundedRectangle(cornerRadius: 1.3, style: .continuous)
-                    .fill(color.opacity(0.18))
-                    .overlay(RoundedRectangle(cornerRadius: 1.3).stroke(color, lineWidth: 1.4))
-                    .frame(width: 15, height: 10)
-            }
-            .offset(y: 4)
-        }
-        .frame(width: 40, height: 34)
-    }
-
-    private var arcadeGlyph: some View {
-        ZStack(alignment: .topLeading) {
-            // Slanted arcade control deck.
-            Path { path in
-                path.move(to: CGPoint(x: 3, y: 21))
-                path.addQuadCurve(to: CGPoint(x: 8, y: 17), control: CGPoint(x: 4, y: 17))
-                path.addLine(to: CGPoint(x: 33, y: 17))
-                path.addQuadCurve(to: CGPoint(x: 38, y: 21), control: CGPoint(x: 37, y: 17))
-                path.addLine(to: CGPoint(x: 35, y: 30))
-                path.addQuadCurve(to: CGPoint(x: 6, y: 30), control: CGPoint(x: 20, y: 34))
-                path.closeSubpath()
-            }
-            .fill(color)
-
-            // Joystick post and ball on the left side of the deck.
-            Capsule().fill(color)
-                .frame(width: 3.2, height: 11)
-                .offset(x: 8.5, y: 5)
-            Circle().fill(color)
-                .frame(width: 7, height: 7)
-                .offset(x: 6.6, y: 1)
-
-            // Six raised action buttons on the right.
-            HStack(spacing: 3) {
-                ForEach(0..<3, id: \.self) { _ in
-                    Circle().fill(Color(red: 0.075, green: 0.075, blue: 0.08)).frame(width: 3.3, height: 3.3)
-                }
-            }
-            .offset(x: 17, y: 20)
-            HStack(spacing: 3) {
-                ForEach(0..<3, id: \.self) { _ in
-                    Circle().fill(Color(red: 0.075, green: 0.075, blue: 0.08)).frame(width: 3.3, height: 3.3)
-                }
-            }
-            .offset(x: 17, y: 25)
-        }
-        .frame(width: 40, height: 34)
+private struct KsignCloneGlassTabButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.88 : 1)
+            .scaleEffect(configuration.isPressed ? 0.965 : 1)
+            .animation(.spring(response: 0.23, dampingFraction: 0.66), value: configuration.isPressed)
     }
 }
 
