@@ -14,14 +14,12 @@ struct TabbarView: View {
 		TabView(selection: $selectedTab) {
 			ForEach(TabEnum.defaultTabs, id: \.hashValue) { tab in
 				TabEnum.view(for: tab)
+					.toolbar(tab == .appstore ? .hidden : .visible, for: .tabBar)
 					.tabItem {
 						Label(tab.title, systemImage: tab.icon)
 					}
 					.tag(tab)
 			}
 		}
-		// Hide the OUTER Ksign tab bar only while the App Store-style screen is active.
-		// The floating App Store bar is owned by KsignCloneStoreView.
-		.toolbar(selectedTab == .appstore ? .hidden : .visible, for: .tabBar)
 	}
 }
