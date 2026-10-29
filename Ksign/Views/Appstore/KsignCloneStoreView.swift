@@ -2616,41 +2616,121 @@ private struct KsignCloneSearchAdPreview: View {
     }
 }
 
-// Best-effort launcher for apps that register custom URL schemes. iOS does not
-// expose a public API for enumerating installed apps, so a target app must support
-// at least one of its documented/known schemes for direct launch to work.
+// Best-effort launcher using schemes found in vendor/project metadata.
+// iOS cannot launch another app by bundle identifier from an ordinary app.
 enum KsignCloneLaunchApp {
-    private static func schemes(for name: String) -> [String] {
+    private struct Target {
+        let schemes: [String]
+        // Only tried as a Universal Link. With universalLinksOnly enabled this
+        // will not silently fall back to opening the website in Safari.
+        let universalLink: String?
+    }
+
+    private static func target(for name: String) -> Target? {
         let value = name.lowercased()
-        if value.contains("pubg mobile") { return ["pubgm"] }
-        if value.contains("instagram") { return ["instagram"] }
-        if value.contains("tiktok") { return ["tiktok"] }
-        if value.contains("chatgpt") { return ["chatgpt"] }
-        if value.contains("swiftgram") { return ["swiftgram"] }
-        if value.contains("cpu-x") || value.contains("cpux") { return ["cpux", "cpu-x"] }
-        if value.contains("deepseek") { return ["deepseek"] }
-        if value.contains("capcut") { return ["capcut"] }
-        if value.contains("shadow fight 2") { return ["shadowfight2"] }
-        if value.contains("subway surfers") { return ["subwaysurfers"] }
-        if value == "games" || value == "games app" { return ["games"] }
-        return []
+
+        if value.contains("pubg mobile") {
+            return Target(schemes: ["pubgm"], universalLink: nil)
+        }
+        if value.contains("instagram") {
+            return Target(schemes: ["instagram"], universalLink: "https://www.instagram.com/")
+        }
+        if value.contains("tiktok") {
+            // TikTok's own iOS SDK lists these schemes for detecting/opening TikTok.
+            return Target(schemes: ["snssdk1233", "snssdk1180"], universalLink: "https://www.tiktok.com/")
+        }
+        if value.contains("chatgpt") {
+            // Observed in the current ChatGPT iOS app bundle metadata.
+            return Target(schemes: ["chatgpt", "com.openai.chat", "openai"], universalLink: "https://chatgpt.com/")
+        }
+        if value.contains("swiftgram") {
+            // Swiftgram's source declares the app-specific scheme `sg`.
+            return Target(schemes: ["sg"], universalLink: nil)
+        }
+        if value.contains("cpu-x") || value.contains("cpux") {
+            // No reliable public iOS scheme could be verified for CPU-X.
+            return Target(schemes: [], universalLink: nil)
+        }
+        if value.contains("deepseek") {
+            // The app may accept its website as a Universal Link; iOS will
+            // only route to the app if DeepSeek has associated this domain.
+            return Target(schemes: [], universalLink: "https://chat.deepseek.com/")
+        }
+        if value.contains("capcut") {
+            // capcut:// is registered by CapCut iOS builds.
+            return Target(schemes: ["capcut"], universalLink: "https://www.capcut.com/")
+        }
+        if value.contains("shadow fight 2") {
+            // No reliable public iOS launch scheme could be verified.
+            return Target(schemes: [], universalLink: nil)
+        }
+        if value.contains("subway surfers") {
+            // No reliable public iOS launch scheme could be verified.
+            return Target(schemes: [], universalLink: nil)
+        }
+        if value == "games" || value == "games app" {
+            // Apple does not document a public scheme for launching the current Games app.
+            return Target(schemes: [], universalLink: nil)
+        }
+        return nil
     }
 
     static func supportsDirectLaunch(name: String) -> Bool {
-        !schemes(for: name).isEmpty
+        target(for: name) != nil
     }
 
     static func open(_ name: String, completion: @escaping (Bool) -> Void = { _ in }) {
-        let candidates = schemes(for: name)
-        guard !candidates.isEmpty else { completion(false); return }
-        for scheme in candidates {
-            guard let url = URL(string: "\(scheme)://") else { continue }
-            if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url, options: [:]) { success in completion(success) }
+        guard let target = target(for: name) else {
+            completion(false)
+            return
+        }
+
+        openScheme(target.schemes, at: 0, universalLink: target.universalLink, completion: completion)
+    }
+
+    private static func openScheme(
+        _ schemes: [String],
+        at index: Int,
+        universalLink: String?,
+        completion: @escaping (Bool) -> Void
+    ) {
+        guard index < schemes.count else {
+            guard let universalLink, let url = URL(string: universalLink) else {
+                completion(false)
                 return
             }
+            UIApplication.shared.open(url, options: [.universalLinksOnly: true]) { success in
+                completion(success)
+            }
+            return
         }
-        completion(false)
+
+        let scheme = schemes[index]
+        guard let url = URL(string: "\(scheme)://") else {
+            openScheme(schemes, at: index + 1, universalLink: universalLink, completion: completion)
+            return
+        }
+
+        guard UIApplication.shared.canOpenURL(url) else {
+            openScheme(schemes, at: index + 1, universalLink: universalLink, completion: completion)
+            return
+        }
+
+        UIApplication.shared.open(url, options: [:]) { success in
+            if success {
+                completion(true)
+            } else {
+                openScheme(schemes, at: index + 1, universalLink: universalLink, completion: completion)
+            }
+        }
+    }
+
+    static func failureMessage(for name: String) -> String {
+        let value = name.lowercased()
+        if value.contains("cpu-x") || value.contains("cpux") || value.contains("shadow fight 2") || value.contains("subway surfers") || value == "games" || value == "games app" {
+            return "I could not verify a public URL scheme for this app. iOS does not let ordinary apps launch another app by bundle ID. Its actual CFBundleURLSchemes must be checked in the installed app's Info.plist."
+        }
+        return "iOS could not open this app using its registered URL schemes or a Universal Link. The installed app version may use a different route."
     }
 
     static func openPUBG() {
@@ -2739,7 +2819,7 @@ struct KsignCloneGetButton: View {
         .alert("Can't Open App", isPresented: $launchFailed) {
             Button("OK", role: .cancel) { launchFailed = false }
         } message: {
-            Text("This app did not respond to its URL scheme. Its installed version may use a different scheme or may not support external launching.")
+            Text(KsignCloneLaunchApp.failureMessage(for: appName))
         }
     }
 
