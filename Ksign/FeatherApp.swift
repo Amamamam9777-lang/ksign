@@ -25,8 +25,12 @@ struct FeatherApp: App {
 			VStack {
                 ExtractHeaderView(extractManager: extractManager)
                     .transition(.move(edge: .top).combined(with: .opacity))
+                    // Keep header insert/remove animations local; animating the
+                    // entire root VStack also animated the App Store page subtree.
+                    .animation(.smooth, value: extractManager.extractItems.description)
 				DownloadHeaderView(downloadManager: downloadManager)
 					.transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.smooth, value: downloadManager.manualDownloads.description)
 				VariedTabbarView()
 					.environment(\.managedObjectContext, storage.context)
 					.transition(.move(edge: .top).combined(with: .opacity))
