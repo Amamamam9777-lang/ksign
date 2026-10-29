@@ -27,7 +27,12 @@ struct ExtendedTabbarView: View {
 		TabView {
 			ForEach(TabEnum.defaultTabs, id: \.hashValue) { tab in
 				Tab(tab.title, systemImage: tab.icon) {
-					TabEnum.view(for: tab)
+					if tab == .appstore {
+						TabEnum.view(for: tab)
+							.toolbar(.hidden, for: .tabBar)
+					} else {
+						TabEnum.view(for: tab)
+					}
 				}
 			}
 			
@@ -71,8 +76,6 @@ struct ExtendedTabbarView: View {
 			.defaultVisibility(.hidden, for: .tabBar)
 			.hidden(horizontalSizeClass == .compact)
 		}
-        // The embedded App Store clone already owns a floating tab bar.
-        .toolbar(.hidden, for: .tabBar)
 		.tabViewStyle(.sidebarAdaptable)
 		.tabViewCustomization($customization)
 		.sheet(isPresented: $_isAddingPresenting) {

@@ -13,15 +13,19 @@ struct TabbarView: View {
 	var body: some View {
 		TabView(selection: $selectedTab) {
 			ForEach(TabEnum.defaultTabs, id: \.hashValue) { tab in
-				TabEnum.view(for: tab)
-					.tabItem {
-						Label(tab.title, systemImage: tab.icon)
+				Group {
+					if tab == .appstore {
+						TabEnum.view(for: tab)
+							.toolbar(.hidden, for: .tabBar)
+					} else {
+						TabEnum.view(for: tab)
 					}
-					.tag(tab)
+				}
+				.tabItem {
+					Label(tab.title, systemImage: tab.icon)
+				}
+				.tag(tab)
 			}
 		}
-        // The App Store-style screen provides its own five-item floating bar.
-        // Hide the host KSign bar while it is active, otherwise the two bars stack.
-        .toolbar(.hidden, for: .tabBar)
 	}
 }
