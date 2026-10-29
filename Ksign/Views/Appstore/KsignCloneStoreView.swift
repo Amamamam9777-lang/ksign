@@ -222,13 +222,17 @@ final class KsignCloneStoreNavigation: ObservableObject {
 struct KsignCloneStoreView: View {
     @StateObject private var data = KsignCloneStoreData()
     @StateObject private var deepLinkNavigation = KsignCloneStoreNavigation.shared
+    // The visible selection animation and the page currently being rendered are
+    // deliberately separate. Animating a SwiftUI conditional page switch was
+    // causing the old and new scroll views to appear simultaneously on device.
     @State private var selectedStoreTab = 0
+    @State private var displayedStoreTab = 0
     @State private var showPUBGProductPage = false
     @State private var keyboardVisible = false
 
     @ViewBuilder
     private var selectedStoreContent: some View {
-        switch selectedStoreTab {
+        switch displayedStoreTab {
         case 0:
             KsignCloneTodayView(data: data)
         case 1:
@@ -242,45 +246,60 @@ struct KsignCloneStoreView: View {
         }
     }
 
+    /// Changes the visible page without an implicit transition, while the tab
+    /// bar animates its own selected capsule independently.
+    private func selectStoreTab(_ index: Int) {
+        guard (0...4).contains(index) else { return }
+        var transaction = Transaction()
+        transaction.animation = nil
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            selectedStoreTab = index
+            displayedStoreTab = index
+        }
+    }
+
     private func handlePUBGProductPageRequest(_ requestID: UInt64) {
         guard deepLinkNavigation.consumePUBGProductPageRequest(requestID) else { return }
-        selectedStoreTab = 4
+        selectStoreTab(4)
         showPUBGProductPage = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-            guard deepLinkNavigation.pubgProductPageRequestID == requestID else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            guard deepLinkNavigation.pubgProductPageRequestID == requestID,
+                  displayedStoreTab == 4 else { return }
             showPUBGProductPage = true
         }
     }
 
     var body: some View {
         ZStack {
-            // Replace the selected page immediately. The spring animation belongs
-            // to the tab selection capsule only; animating this subtree caused the
-            // previous and next pages to blend together underneath the bar.
-            selectedStoreContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .transaction { transaction in
-                    transaction.animation = nil
-                    transaction.disablesAnimations = true
-                }
+            // The tab bar is a sibling below the page, not an overlay on top of
+            // scroll content. This reserves layout space and prevents cards or
+            // titles from showing through/behind the bar while switching tabs.
+            VStack(spacing: 0) {
+                selectedStoreContent
+                    .id(displayedStoreTab)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            // Shared visual install-confirmation sheet; placed at the root so the
-            // same animation works from Today, Games, Apps, Search and product pages.
+                if !keyboardVisible {
+                    KsignCloneFloatingTabBar(
+                        selection: $selectedStoreTab,
+                        onSelect: selectStoreTab
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.top, 6)
+                    .padding(.bottom, 8)
+                    .zIndex(20)
+                    .transition(.opacity)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.ignoresSafeArea())
+
+            // Keep the install preview above both the page and the tab bar.
             KsignCloneInstallPromptOverlay()
                 .zIndex(1000)
         }
         .background(Color.black.ignoresSafeArea())
-        // Reserve space for the floating bar instead of drawing it over the page.
-        // This keeps app rows/cards from appearing through the bar during a tab switch.
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !keyboardVisible {
-                KsignCloneFloatingTabBar(selection: $selectedStoreTab)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
-                    .transition(.opacity)
-            }
-        }
         .toolbar(.hidden, for: .tabBar)
         .preferredColorScheme(.dark)
         .onReceive(deepLinkNavigation.$pubgProductPageRequestID) { handlePUBGProductPageRequest($0) }
@@ -296,7 +315,10 @@ struct KsignCloneStoreView: View {
 
 private struct KsignCloneFloatingTabBar: View {
     @Binding var selection: Int
-    @Namespace private var selectionAnimation
+    let onSelect: (Int) -> Void
+    @State private var visualSelection = 0
+    @Namespace private var selectionNamespace
+
     private let tabs: [(title: String, symbol: String)] = [
         ("Today", "doc.text.image"),
         ("Games", "rocket.fill"),
@@ -307,59 +329,57 @@ private struct KsignCloneFloatingTabBar: View {
     private let accent = Color(red: 0.10, green: 0.58, blue: 1.0)
 
     var body: some View {
-        HStack(spacing: 1) {
+        HStack(spacing: 2) {
             ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
                 Button {
-                    guard selection != index else { return }
-                    UISelectionFeedbackGenerator().selectionChanged()
-                    withAnimation(.spring(response: 0.34, dampingFraction: 0.72, blendDuration: 0.06)) {
-                        selection = index
+                    // Animate only the capsule. Page content changes in a disabled
+                    // transaction so SwiftUI cannot cross-fade/stack old pages.
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
+                        visualSelection = index
                     }
+                    onSelect(index)
                 } label: {
-                    VStack(spacing: 3) {
+                    VStack(spacing: 4) {
                         Image(systemName: tab.symbol)
-                            .font(.system(size: 22, weight: .medium))
-                            .symbolRenderingMode(.hierarchical)
-                            .frame(width: 28, height: 25)
-                            .scaleEffect(selection == index ? 1.04 : 1.0)
+                            .font(.system(size: 23, weight: .semibold))
+                            .frame(height: 26)
                         Text(tab.title)
-                            .font(.system(size: 11, weight: selection == index ? .semibold : .medium))
+                            .font(.system(size: 10.5, weight: .medium))
                             .lineLimit(1)
-                            .minimumScaleFactor(0.8)
                     }
-                    .foregroundStyle(selection == index ? accent : Color.white.opacity(0.96))
+                    .foregroundStyle(visualSelection == index ? accent : Color.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 58)
                     .background {
-                        if selection == index {
-                            RoundedRectangle(cornerRadius: 25, style: .continuous)
-                                .fill(Color.white.opacity(0.105))
-                                .matchedGeometryEffect(id: "appstore.tab.selection", in: selectionAnimation)
-                                .padding(.horizontal, 0)
+                        if visualSelection == index {
+                            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                                .fill(Color.white.opacity(0.09))
+                                .matchedGeometryEffect(id: "selected-store-tab", in: selectionNamespace)
+                                .padding(.horizontal, 1)
                         }
                     }
-                    .contentShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+                    .contentShape(Rectangle())
                 }
-                .buttonStyle(KsignCloneTabPressStyle())
+                .buttonStyle(.plain)
                 .accessibilityLabel(tab.title)
             }
         }
-        .padding(4)
+        .padding(5)
         .background(.ultraThinMaterial, in: Capsule())
         .background(Color.black.opacity(0.48), in: Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.14), lineWidth: 0.8))
-        .shadow(color: .black.opacity(0.36), radius: 14, x: 0, y: 5)
-        .animation(.spring(response: 0.34, dampingFraction: 0.72), value: selection)
+        .overlay(Capsule().stroke(Color.white.opacity(0.13), lineWidth: 0.8))
+        .shadow(color: .black.opacity(0.4), radius: 16, x: 0, y: 5)
+        .onAppear { visualSelection = selection }
+        .onChange(of: selection) { newValue in
+            // Synchronize external changes such as appstore:// without animating
+            // the content stack itself.
+            withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
+                visualSelection = newValue
+            }
+        }
     }
 }
 
-private struct KsignCloneTabPressStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
-            .animation(.spring(response: 0.20, dampingFraction: 0.58), value: configuration.isPressed)
-    }
-}
 
 struct KsignCloneInstalledAppsView: View {
     @StateObject private var store = KsignInstalledAppsStore.shared
@@ -518,7 +538,7 @@ struct KsignCloneArcadeView: View {
                             }.padding(.horizontal, 20)
                         }
                     }
-                    .padding(.bottom, 105)
+                    .padding(.bottom, 20)
                 }
             }
             .background(Color.black.ignoresSafeArea())
@@ -567,7 +587,7 @@ struct KsignCloneTodayView: View {
                         KsignCloneTodayCardView(card: card)
                     }
                 }
-                .padding(.bottom, 110)
+                .padding(.bottom, 20)
             }
             .background(Color.black.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
@@ -705,7 +725,7 @@ struct KsignCloneAppsView: View {
                     KsignCloneAppSectionView(title: title == "Games" ? "Great Games on iPhone Duo" : "Apps in Heavy Rotation",
                                              apps: apps)
                 }
-                .padding(.bottom, 110)
+                .padding(.bottom, 20)
             }
             .background(Color.black.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
@@ -1849,9 +1869,6 @@ struct KsignCloneAppDetailView: View {
         // to the single custom button on the hero artwork.
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
-        // Reserve room for the App Store-style bottom tab bar while allowing the
-        // full product page to scroll beneath it.
-        .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 84) }
     }
 
     private var shortcutsDetailBody: some View {
@@ -1985,7 +2002,6 @@ struct KsignCloneAppDetailView: View {
         .preferredColorScheme(.dark)
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
-        .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 84) }
     }
 
     private func detailInfoRow(_ title: String, value: String) -> some View {
@@ -2221,7 +2237,7 @@ struct KsignCloneSearchView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
-                .padding(.bottom, 112)
+                .padding(.bottom, 20)
             }
             .background(Color.black.ignoresSafeArea())
             .navigationTitle("Search")
