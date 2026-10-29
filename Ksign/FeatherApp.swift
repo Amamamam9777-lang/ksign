@@ -25,10 +25,8 @@ struct FeatherApp: App {
 			VStack {
                 ExtractHeaderView(extractManager: extractManager)
                     .transition(.move(edge: .top).combined(with: .opacity))
-                    .animation(.smooth, value: extractManager.extractItems.description)
 				DownloadHeaderView(downloadManager: downloadManager)
 					.transition(.move(edge: .top).combined(with: .opacity))
-					.animation(.smooth, value: downloadManager.manualDownloads.description)
 				VariedTabbarView()
 					.environment(\.managedObjectContext, storage.context)
 					.transition(.move(edge: .top).combined(with: .opacity))
