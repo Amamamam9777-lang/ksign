@@ -11,15 +11,27 @@ struct TabbarView: View {
 	@State private var selectedTab: TabEnum = .appstore
 
 	var body: some View {
-		TabView(selection: $selectedTab) {
-			ForEach(TabEnum.defaultTabs, id: \.hashValue) { tab in
-				TabEnum.view(for: tab)
-					.toolbar(tab == .appstore ? .hidden : .visible, for: .tabBar)
-					.tabItem {
-						Label(tab.title, systemImage: tab.icon)
-					}
-					.tag(tab)
-			}
-		}
-	}
+        Group {
+            if selectedTab == .appstore {
+                // Render the App Store clone as the root view so the native Ksign
+                // tab bar is not present behind/under the custom five-tab bar.
+                KsignCloneStoreView()
+            } else {
+                nativeRootTabs
+            }
+        }
+    }
+
+    private var nativeRootTabs: some View {
+        TabView(selection: $selectedTab) {
+            ForEach(TabEnum.defaultTabs, id: \.hashValue) { tab in
+                TabEnum.view(for: tab)
+                    .tabItem {
+                        Label(tab.title, systemImage: tab.icon)
+                    }
+                    .tag(tab)
+            }
+        }
+    }
+
 }

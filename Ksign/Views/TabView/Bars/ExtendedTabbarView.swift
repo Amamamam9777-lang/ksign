@@ -25,64 +25,75 @@ struct ExtendedTabbarView: View {
 	) private var _sources: FetchedResults<AltSource>
 		
 	var body: some View {
-		TabView(selection: $selectedRootTab) {
-			ForEach(TabEnum.defaultTabs, id: \.hashValue) { tab in
-				Tab(tab.title, systemImage: tab.icon, value: "tab.\(tab.rawValue)") {
-					TabEnum.view(for: tab)
-				}
-			}
-			
-			ForEach(TabEnum.customizableTabs, id: \.hashValue) { tab in
-				Tab(tab.title, systemImage: tab.icon, value: "tab.\(tab.rawValue)") {
-					TabEnum.view(for: tab)
-				}
-				.customizationID("tab.\(tab.rawValue)")
-				.defaultVisibility(.hidden, for: .tabBar)
-				.customizationBehavior(.reorderable, for: .tabBar, .sidebar)
-				.hidden(horizontalSizeClass == .compact)
-			}
-			
-			TabSection("Sources") {
-				Tab(.localized("All Repositories"), systemImage: "globe.desk", value: "sources.all") {
-					NavigationStack {
-						SourceAppsView(object: Array(_sources), viewModel: viewModel)
-					}
-				}
-				
-				ForEach(_sources, id: \.identifier) { source in
-					Tab(value: "source.\(source.objectID.uriRepresentation().absoluteString)") {
-						NavigationStack {
-							SourceAppsView(object: [source], viewModel: viewModel)
-						}
-					} label: {
-						_icon(source.name ?? .localized("Unknown"), iconUrl: source.iconURL)
-					}
-					.swipeActions {
-						Button(String.localized("Delete"), systemImage: "trash", role: .destructive) {
-							Storage.shared.deleteSource(for: source)
-						}
-					}
-				}
-			}
-			.sectionActions {
-				Button(.localized("Add Source"), systemImage: "plus") {
-					_isAddingPresenting = true
-				}
-			}
-			.defaultVisibility(.hidden, for: .tabBar)
-			.hidden(horizontalSizeClass == .compact)
-		}
-		.tabViewStyle(.sidebarAdaptable)
-		.tabViewCustomization($customization)
-		// Hide only the native Ksign tab bar on the App Store tab. The custom
-		// five-item App Store bar remains visible inside KsignCloneStoreView.
-		.toolbar(selectedRootTab == "tab.appstore" ? .hidden : .visible, for: .tabBar)
-		.sheet(isPresented: $_isAddingPresenting) {
-			SourcesAddView()
-				.presentationDetents([.medium])
-		}
-	}
-	
+        Group {
+            // The App Store-style experience owns its own five-tab navigation.
+            // Do not keep the native Ksign TabView mounted underneath it: toolbar
+            // visibility preferences on a child view are not reliable for an
+            // iOS 18 sidebar-adaptable TabView and were the source of the duplicate bar.
+            if selectedRootTab == "tab.appstore" {
+                KsignCloneStoreView()
+            } else {
+                nativeRootTabs
+            }
+        }
+        .sheet(isPresented: $_isAddingPresenting) {
+            SourcesAddView()
+                .presentationDetents([.medium])
+        }
+    }
+
+    private var nativeRootTabs: some View {
+        TabView(selection: $selectedRootTab) {
+            ForEach(TabEnum.defaultTabs, id: \.hashValue) { tab in
+                Tab(tab.title, systemImage: tab.icon, value: "tab.\(tab.rawValue)") {
+                    TabEnum.view(for: tab)
+                }
+            }
+
+            ForEach(TabEnum.customizableTabs, id: \.hashValue) { tab in
+                Tab(tab.title, systemImage: tab.icon, value: "tab.\(tab.rawValue)") {
+                    TabEnum.view(for: tab)
+                }
+                .customizationID("tab.\(tab.rawValue)")
+                .defaultVisibility(.hidden, for: .tabBar)
+                .customizationBehavior(.reorderable, for: .tabBar, .sidebar)
+                .hidden(horizontalSizeClass == .compact)
+            }
+
+            TabSection("Sources") {
+                Tab(.localized("All Repositories"), systemImage: "globe.desk", value: "sources.all") {
+                    NavigationStack {
+                        SourceAppsView(object: Array(_sources), viewModel: viewModel)
+                    }
+                }
+
+                ForEach(_sources, id: \.identifier) { source in
+                    Tab(value: "source.\(source.objectID.uriRepresentation().absoluteString)") {
+                        NavigationStack {
+                            SourceAppsView(object: [source], viewModel: viewModel)
+                        }
+                    } label: {
+                        _icon(source.name ?? .localized("Unknown"), iconUrl: source.iconURL)
+                    }
+                    .swipeActions {
+                        Button(String.localized("Delete"), systemImage: "trash", role: .destructive) {
+                            Storage.shared.deleteSource(for: source)
+                        }
+                    }
+                }
+            }
+            .sectionActions {
+                Button(.localized("Add Source"), systemImage: "plus") {
+                    _isAddingPresenting = true
+                }
+            }
+            .defaultVisibility(.hidden, for: .tabBar)
+            .hidden(horizontalSizeClass == .compact)
+        }
+        .tabViewStyle(.sidebarAdaptable)
+        .tabViewCustomization($customization)
+    }
+
 	@ViewBuilder
 	private func _icon(_ title: String, iconUrl: URL?) -> some View {
 		Label {
