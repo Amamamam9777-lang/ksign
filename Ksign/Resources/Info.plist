@@ -223,5 +223,17 @@
 			</dict>
 		</dict>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>capcut</string>
+		<string>chatgpt</string>
+		<string>com.openai.chat</string>
+		<string>instagram</string>
+		<string>openai</string>
+		<string>pubgm</string>
+		<string>sg</string>
+		<string>snssdk1180</string>
+		<string>snssdk1233</string>
+	</array>
 </dict>
 </plist>
