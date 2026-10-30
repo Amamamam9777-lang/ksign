@@ -402,21 +402,48 @@ private struct KsignCloneFloatingTabBar: View {
             }
             .frame(width: 41, height: 36)
         case "arcade-custom":
+            // Apple Arcade-style joystick: angled solid platform, stem, knob, and two buttons.
             ZStack {
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .stroke(Color.white, lineWidth: 3.2)
-                    .frame(width: 45, height: 23)
-                    .offset(y: 6)
-                Capsule().fill(Color.white).frame(width: 3.2, height: 10).offset(x: -11, y: -5)
-                Circle().fill(Color.white).frame(width: 8, height: 8).offset(x: -11, y: -14)
-                HStack(spacing: 4.0) {
-                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
+                // Front/lower edge gives the platform a subtle 3D thickness.
+                Path { path in
+                    path.move(to: CGPoint(x: 2, y: 23))
+                    path.addLine(to: CGPoint(x: 23.5, y: 34))
+                    path.addLine(to: CGPoint(x: 45, y: 23))
+                    path.addLine(to: CGPoint(x: 23.5, y: 15))
+                    path.closeSubpath()
                 }
-                .offset(x: 6, y: 1)
-                HStack(spacing: 4.0) {
-                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
+                .fill(Color.white.opacity(0.78))
+                .offset(y: 3)
+
+                // Main diamond-shaped joystick base, matching the reference glyph.
+                Path { path in
+                    path.move(to: CGPoint(x: 23.5, y: 8))
+                    path.addLine(to: CGPoint(x: 45, y: 19))
+                    path.addLine(to: CGPoint(x: 23.5, y: 31))
+                    path.addLine(to: CGPoint(x: 2, y: 19))
+                    path.closeSubpath()
                 }
-                .offset(x: 6, y: 10)
+                .fill(Color.white)
+
+                // Joystick stem and round knob.
+                Capsule()
+                    .fill(Color.white)
+                    .frame(width: 3.8, height: 14)
+                    .offset(x: 0, y: -9)
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 9, height: 9)
+                    .offset(x: 0, y: -17)
+
+                // Two dark buttons sit on the white platform.
+                Circle()
+                    .fill(Color.black.opacity(0.82))
+                    .frame(width: 4.2, height: 4.2)
+                    .offset(x: -10, y: 5)
+                Circle()
+                    .fill(Color.black.opacity(0.82))
+                    .frame(width: 4.2, height: 4.2)
+                    .offset(x: 10, y: 5)
             }
             .frame(width: 47, height: 41)
         default:
