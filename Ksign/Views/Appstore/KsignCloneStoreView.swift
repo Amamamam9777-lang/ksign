@@ -17,49 +17,89 @@ import Combine
 import UIKit
 
 
-// A small template-rendered glyph used by the REAL native TabView tab item.
-// Keeping the native TabView and its selection/navigation untouched avoids
-// reintroducing the previous floating-tab-bar layout bug.
-private enum KsignCloneArcadeTabGlyph {
-    static let image: UIImage = {
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 30, height: 30))
-        let rendered = renderer.image { rendererContext in
+// Reference-matched, template-rendered artwork for the REAL native TabView tab bar.
+// Only tab-item artwork is changed here; the native TabView, selection, layout,
+// content hierarchy, and animations remain untouched.
+private enum KsignCloneTabBarGlyphs {
+    private static func symbol(_ name: String, pointSize: CGFloat = 30) -> UIImage {
+        let configuration = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
+        return (UIImage(systemName: name, withConfiguration: configuration) ?? UIImage())
+            .withRenderingMode(.alwaysTemplate)
+    }
+
+    static let today: UIImage = {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 36, height: 36))
+        let image = renderer.image { _ in
+            UIColor.white.setStroke()
+            UIColor.white.setFill()
+
+            // Upright rounded document outline.
+            let page = UIBezierPath(roundedRect: CGRect(x: 5.6, y: 1.8, width: 24.8, height: 32.0),
+                                    cornerRadius: 4.0)
+            page.lineWidth = 2.6
+            page.stroke()
+
+            // Two short lines near the top of the page.
+            let firstLine = UIBezierPath(roundedRect: CGRect(x: 10.0, y: 8.0, width: 16.0, height: 2.3),
+                                         cornerRadius: 1.15)
+            firstLine.fill()
+            let secondLine = UIBezierPath(roundedRect: CGRect(x: 10.0, y: 12.5, width: 10.0, height: 2.3),
+                                          cornerRadius: 1.15)
+            secondLine.fill()
+
+            // Solid lower content block, matching the reference glyph.
+            let contentBlock = UIBezierPath(roundedRect: CGRect(x: 9.8, y: 17.0, width: 16.4, height: 12.4),
+                                            cornerRadius: 1.5)
+            contentBlock.fill()
+        }
+        return image.withRenderingMode(.alwaysTemplate)
+    }()
+
+    // The reference uses the familiar solid rocket and stacked-layer glyphs.
+    static let games = symbol("rocket.fill", pointSize: 31)
+    static let apps = symbol("square.stack.3d.up.fill", pointSize: 30)
+
+    static let arcade: UIImage = {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 36, height: 36))
+        let image = renderer.image { rendererContext in
             let context = rendererContext.cgContext
-            context.setFillColor(UIColor.white.cgColor)
+            UIColor.white.setFill()
 
-            // Joystick stem and round handle.
-            UIBezierPath(roundedRect: CGRect(x: 13.65, y: 5.8, width: 2.7, height: 10.0),
-                         cornerRadius: 1.35).fill()
-            UIBezierPath(ovalIn: CGRect(x: 11.8, y: 1.2, width: 6.4, height: 6.4)).fill()
+            // Joystick ball and stem.
+            UIBezierPath(ovalIn: CGRect(x: 14.3, y: 1.0, width: 7.4, height: 7.4)).fill()
+            UIBezierPath(roundedRect: CGRect(x: 16.65, y: 7.5, width: 2.7, height: 9.5),
+                         cornerRadius: 1.3).fill()
 
-            // Lower bevel of the diamond-shaped arcade platform.
-            let side = UIBezierPath()
-            side.move(to: CGPoint(x: 2.3, y: 16.0))
-            side.addLine(to: CGPoint(x: 15.0, y: 22.6))
-            side.addLine(to: CGPoint(x: 27.7, y: 16.0))
-            side.addLine(to: CGPoint(x: 27.7, y: 20.2))
-            side.addLine(to: CGPoint(x: 15.0, y: 27.0))
-            side.addLine(to: CGPoint(x: 2.3, y: 20.2))
-            side.close()
-            side.fill()
+            // Lower front bevel of the diamond-shaped cabinet.
+            let bevel = UIBezierPath()
+            bevel.move(to: CGPoint(x: 2.0, y: 17.8))
+            bevel.addLine(to: CGPoint(x: 18.0, y: 25.4))
+            bevel.addLine(to: CGPoint(x: 34.0, y: 17.8))
+            bevel.addLine(to: CGPoint(x: 34.0, y: 22.0))
+            bevel.addQuadCurve(to: CGPoint(x: 18.0, y: 30.8), controlPoint: CGPoint(x: 26.0, y: 27.0))
+            bevel.addQuadCurve(to: CGPoint(x: 2.0, y: 22.0), controlPoint: CGPoint(x: 10.0, y: 27.0))
+            bevel.close()
+            bevel.fill()
 
-            // Bright upper surface.
+            // Bright diamond top surface.
             let top = UIBezierPath()
-            top.move(to: CGPoint(x: 2.3, y: 16.0))
-            top.addLine(to: CGPoint(x: 15.0, y: 9.2))
-            top.addLine(to: CGPoint(x: 27.7, y: 16.0))
-            top.addLine(to: CGPoint(x: 15.0, y: 22.6))
+            top.move(to: CGPoint(x: 2.0, y: 17.8))
+            top.addLine(to: CGPoint(x: 18.0, y: 10.0))
+            top.addLine(to: CGPoint(x: 34.0, y: 17.8))
+            top.addLine(to: CGPoint(x: 18.0, y: 25.4))
             top.close()
             top.fill()
 
-            // Two recessed dark buttons are transparent in this template image.
+            // Two recessed circular controls; clear pixels let the dark bar show through.
             context.setBlendMode(.clear)
-            context.fillEllipse(in: CGRect(x: 8.8, y: 16.0, width: 2.7, height: 2.7))
-            context.fillEllipse(in: CGRect(x: 18.5, y: 16.0, width: 2.7, height: 2.7))
+            context.fillEllipse(in: CGRect(x: 8.5, y: 16.5, width: 3.0, height: 3.0))
+            context.fillEllipse(in: CGRect(x: 24.5, y: 16.5, width: 3.0, height: 3.0))
             context.setBlendMode(.normal)
         }
-        return rendered.withRenderingMode(.alwaysTemplate)
+        return image.withRenderingMode(.alwaysTemplate)
     }()
+
+    static let search = symbol("magnifyingglass", pointSize: 32)
 }
 
 // Neutral charcoal palette matching the Apple Account sheet in the reference.
@@ -302,30 +342,23 @@ struct KsignCloneStoreView: View {
         ZStack {
             TabView(selection: $selectedStoreTab) {
                 KsignCloneTodayView(data: data)
-                    .tabItem { Label("Today", systemImage: "doc.text.image") }
+                    .tabItem { Label { Text("Today") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.today).renderingMode(.template) } }
                     .tag(0)
 
                 KsignCloneAppsView(title: "Games", apps: data.games)
-                    .tabItem { Label("Games", systemImage: "gamecontroller.fill") }
+                    .tabItem { Label { Text("Games") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.games).renderingMode(.template) } }
                     .tag(1)
 
                 KsignCloneAppsView(title: "Apps", apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps)
-                    .tabItem { Label("Apps", systemImage: "square.stack.3d.up.fill") }
+                    .tabItem { Label { Text("Apps") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.apps).renderingMode(.template) } }
                     .tag(2)
 
                 KsignCloneArcadeView()
-                    .tabItem {
-                        Label {
-                            Text("Arcade")
-                        } icon: {
-                            Image(uiImage: KsignCloneArcadeTabGlyph.image)
-                                .renderingMode(.template)
-                        }
-                    }
+                    .tabItem { Label { Text("Arcade") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.arcade).renderingMode(.template) } }
                     .tag(3)
 
                 KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
-                    .tabItem { Label("Search", systemImage: "magnifyingglass") }
+                    .tabItem { Label { Text("Search") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.search).renderingMode(.template) } }
                     .tag(4)
             }
             // Restore the original native five-tab navigation from the known-good source.
