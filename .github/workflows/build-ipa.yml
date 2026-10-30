@@ -17,6 +17,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Cache Xcode build data
+        uses: irgaly/xcode-cache@v1
+        with:
+          key: xcode-cache-${{ runner.os }}-${{ github.workflow }}-${{ github.sha }}
+          restore-keys: |
+            xcode-cache-${{ runner.os }}-${{ github.workflow }}-
+
       - name: Build IPA
         run: make
 
