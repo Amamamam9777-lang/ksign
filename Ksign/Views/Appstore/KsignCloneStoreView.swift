@@ -471,46 +471,63 @@ private struct KsignCloneFloatingTabBar: View {
 
     @ViewBuilder
     private func tabIcon(_ symbol: String, isSelected: Bool) -> some View {
+        let iconColor = isSelected ? accent : Color.white
         switch symbol {
         case "today-outline":
             ZStack {
                 RoundedRectangle(cornerRadius: 5.5, style: .continuous)
-                    .stroke(isSelected ? accent : Color.white, lineWidth: 3.2)
+                    .stroke(iconColor, lineWidth: 3.0)
                     .frame(width: 25, height: 34)
                 VStack(alignment: .leading, spacing: 4) {
-                    Capsule().fill(isSelected ? accent : Color.white).frame(width: 17, height: 2.7)
-                    Capsule().fill(isSelected ? accent : Color.white).frame(width: 18, height: 2.7)
+                    Capsule().fill(iconColor).frame(width: 17, height: 2.7)
+                    Capsule().fill(iconColor).frame(width: 18, height: 2.7)
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
-                        .fill(isSelected ? accent.opacity(0.95) : Color.white)
+                        .fill(iconColor)
                         .frame(width: 17, height: 10)
                 }
                 .offset(y: 3)
             }
-            .frame(width: 41, height: 36)
+            .frame(width: 36, height: 36)
         case "arcade-custom":
+            // Compact, centered joystick-on-diamond glyph matching the reference.
             ZStack {
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .stroke(Color.white, lineWidth: 3.2)
-                    .frame(width: 45, height: 23)
-                    .offset(y: 6)
-                Capsule().fill(Color.white).frame(width: 3.2, height: 10).offset(x: -11, y: -5)
-                Circle().fill(Color.white).frame(width: 8, height: 8).offset(x: -11, y: -14)
-                HStack(spacing: 4.0) {
-                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
+                // Front bevel gives the platform its layered, three-dimensional edge.
+                Path { path in
+                    path.move(to: CGPoint(x: 2, y: 19))
+                    path.addLine(to: CGPoint(x: 18, y: 27))
+                    path.addLine(to: CGPoint(x: 34, y: 19))
+                    path.addLine(to: CGPoint(x: 34, y: 23))
+                    path.addLine(to: CGPoint(x: 18, y: 31))
+                    path.addLine(to: CGPoint(x: 2, y: 23))
+                    path.closeSubpath()
                 }
-                .offset(x: 6, y: 1)
-                HStack(spacing: 4.0) {
-                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
+                .fill(iconColor)
+                // Top surface.
+                Path { path in
+                    path.move(to: CGPoint(x: 2, y: 18))
+                    path.addLine(to: CGPoint(x: 18, y: 10))
+                    path.addLine(to: CGPoint(x: 34, y: 18))
+                    path.addLine(to: CGPoint(x: 18, y: 26))
+                    path.closeSubpath()
                 }
-                .offset(x: 6, y: 10)
+                .fill(iconColor)
+                // Joystick stem and ball.
+                Capsule().fill(iconColor).frame(width: 2.8, height: 10).offset(x: 0, y: -9)
+                Circle().fill(iconColor).frame(width: 7.5, height: 7.5).offset(x: 0, y: -15.5)
+                // Two dark inset buttons.
+                HStack(spacing: 12) {
+                    Circle().fill(Color.black.opacity(0.62)).frame(width: 3.1, height: 3.1)
+                    Circle().fill(Color.black.opacity(0.62)).frame(width: 3.1, height: 3.1)
+                }
+                .offset(y: 1)
             }
-            .frame(width: 47, height: 41)
+            .frame(width: 36, height: 36)
         default:
             Image(systemName: symbol)
-                .font(.system(size: symbol == "magnifyingglass" ? 37 : 38, weight: .medium))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(isSelected ? accent : Color.white)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .font(.system(size: symbol == "magnifyingglass" ? 35 : 34, weight: .regular))
+                .symbolRenderingMode(.monochrome)
+                .foregroundStyle(iconColor)
+                .frame(width: 36, height: 36)
         }
     }
 }
