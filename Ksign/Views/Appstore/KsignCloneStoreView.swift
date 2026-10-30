@@ -16,6 +16,52 @@ import SwiftUI
 import Combine
 import UIKit
 
+
+// A small template-rendered glyph used by the REAL native TabView tab item.
+// Keeping the native TabView and its selection/navigation untouched avoids
+// reintroducing the previous floating-tab-bar layout bug.
+private enum KsignCloneArcadeTabGlyph {
+    static let image: UIImage = {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 30, height: 30))
+        let rendered = renderer.image { rendererContext in
+            let context = rendererContext.cgContext
+            context.setFillColor(UIColor.white.cgColor)
+
+            // Joystick stem and round handle.
+            UIBezierPath(roundedRect: CGRect(x: 13.65, y: 5.8, width: 2.7, height: 10.0),
+                         cornerRadius: 1.35).fill()
+            UIBezierPath(ovalIn: CGRect(x: 11.8, y: 1.2, width: 6.4, height: 6.4)).fill()
+
+            // Lower bevel of the diamond-shaped arcade platform.
+            let side = UIBezierPath()
+            side.move(to: CGPoint(x: 2.3, y: 16.0))
+            side.addLine(to: CGPoint(x: 15.0, y: 22.6))
+            side.addLine(to: CGPoint(x: 27.7, y: 16.0))
+            side.addLine(to: CGPoint(x: 27.7, y: 20.2))
+            side.addLine(to: CGPoint(x: 15.0, y: 27.0))
+            side.addLine(to: CGPoint(x: 2.3, y: 20.2))
+            side.close()
+            side.fill()
+
+            // Bright upper surface.
+            let top = UIBezierPath()
+            top.move(to: CGPoint(x: 2.3, y: 16.0))
+            top.addLine(to: CGPoint(x: 15.0, y: 9.2))
+            top.addLine(to: CGPoint(x: 27.7, y: 16.0))
+            top.addLine(to: CGPoint(x: 15.0, y: 22.6))
+            top.close()
+            top.fill()
+
+            // Two recessed dark buttons are transparent in this template image.
+            context.setBlendMode(.clear)
+            context.fillEllipse(in: CGRect(x: 8.8, y: 16.0, width: 2.7, height: 2.7))
+            context.fillEllipse(in: CGRect(x: 18.5, y: 16.0, width: 2.7, height: 2.7))
+            context.setBlendMode(.normal)
+        }
+        return rendered.withRenderingMode(.alwaysTemplate)
+    }()
+}
+
 // Neutral charcoal palette matching the Apple Account sheet in the reference.
 private enum KsignCloneTheme {
     static let accountBackground = Color(red: 0.105, green: 0.105, blue: 0.115) // #1B1B1D
@@ -268,7 +314,14 @@ struct KsignCloneStoreView: View {
                     .tag(2)
 
                 KsignCloneArcadeView()
-                    .tabItem { Label("Arcade", systemImage: "arcade.stick") }
+                    .tabItem {
+                        Label {
+                            Text("Arcade")
+                        } icon: {
+                            Image(uiImage: KsignCloneArcadeTabGlyph.image)
+                                .renderingMode(.template)
+                        }
+                    }
                     .tag(3)
 
                 KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
@@ -402,48 +455,21 @@ private struct KsignCloneFloatingTabBar: View {
             }
             .frame(width: 41, height: 36)
         case "arcade-custom":
-            // Apple Arcade-style joystick: angled solid platform, stem, knob, and two buttons.
             ZStack {
-                // Front/lower edge gives the platform a subtle 3D thickness.
-                Path { path in
-                    path.move(to: CGPoint(x: 2, y: 23))
-                    path.addLine(to: CGPoint(x: 23.5, y: 34))
-                    path.addLine(to: CGPoint(x: 45, y: 23))
-                    path.addLine(to: CGPoint(x: 23.5, y: 15))
-                    path.closeSubpath()
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .stroke(Color.white, lineWidth: 3.2)
+                    .frame(width: 45, height: 23)
+                    .offset(y: 6)
+                Capsule().fill(Color.white).frame(width: 3.2, height: 10).offset(x: -11, y: -5)
+                Circle().fill(Color.white).frame(width: 8, height: 8).offset(x: -11, y: -14)
+                HStack(spacing: 4.0) {
+                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
                 }
-                .fill(Color.white.opacity(0.78))
-                .offset(y: 3)
-
-                // Main diamond-shaped joystick base, matching the reference glyph.
-                Path { path in
-                    path.move(to: CGPoint(x: 23.5, y: 8))
-                    path.addLine(to: CGPoint(x: 45, y: 19))
-                    path.addLine(to: CGPoint(x: 23.5, y: 31))
-                    path.addLine(to: CGPoint(x: 2, y: 19))
-                    path.closeSubpath()
+                .offset(x: 6, y: 1)
+                HStack(spacing: 4.0) {
+                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
                 }
-                .fill(Color.white)
-
-                // Joystick stem and round knob.
-                Capsule()
-                    .fill(Color.white)
-                    .frame(width: 3.8, height: 14)
-                    .offset(x: 0, y: -9)
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 9, height: 9)
-                    .offset(x: 0, y: -17)
-
-                // Two dark buttons sit on the white platform.
-                Circle()
-                    .fill(Color.black.opacity(0.82))
-                    .frame(width: 4.2, height: 4.2)
-                    .offset(x: -10, y: 5)
-                Circle()
-                    .fill(Color.black.opacity(0.82))
-                    .frame(width: 4.2, height: 4.2)
-                    .offset(x: 10, y: 5)
+                .offset(x: 6, y: 10)
             }
             .frame(width: 47, height: 41)
         default:
