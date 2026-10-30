@@ -33,11 +33,6 @@ struct FeatherApp: App {
                     .animation(.smooth, value: downloadManager.manualDownloads.description)
 				VariedTabbarView()
 					.environment(\.managedObjectContext, storage.context)
-                    // The App Store clone uses a custom bottom-aligned bar. Make its
-                    // host occupy all remaining WindowGroup height; otherwise the
-                    // ZStack's bottom alignment is calculated inside its content-sized
-                    // VStack slot and the bar floats above the actual screen bottom.
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 					.transition(.move(edge: .top).combined(with: .opacity))
 			}
             .onOpenURL(perform: _handleURL)
