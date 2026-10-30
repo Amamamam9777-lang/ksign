@@ -2743,10 +2743,10 @@ private struct KsignCloneInstallPromptOverlay: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundStyle(.white)
                                     .lineLimit(1)
-                                Text("App Store · Preview")
+                                Text("App Store · Demo preview")
                                     .font(.system(size: 11))
                                     .foregroundStyle(.secondary)
-                                Text("Account: demonstration only")
+                                Text("Visual preview only · No app will be installed")
                                     .font(.system(size: 10))
                                     .foregroundStyle(.secondary)
                                     .lineLimit(1)
@@ -2759,15 +2759,15 @@ private struct KsignCloneInstallPromptOverlay: View {
                             HStack(spacing: 11) {
                                 ZStack {
                                     Circle().fill(Color.blue).frame(width: 32, height: 32)
-                                    Image(systemName: prompt.isConfirming ? "checkmark" : "faceid")
+                                    Image(systemName: prompt.isConfirming ? "checkmark" : "arrow.down.circle.fill")
                                         .font(.system(size: 17, weight: .semibold))
                                         .foregroundStyle(.white)
                                 }
                                 VStack(alignment: .leading, spacing: 3) {
-                                    Text(prompt.isConfirming ? "Confirming…" : "Confirm with Side Button")
+                                    Text(prompt.isConfirming ? "Finishing preview…" : "Continue")
                                         .font(.system(size: 13, weight: .semibold))
                                         .foregroundStyle(.white)
-                                    Text(prompt.isConfirming ? "Please wait" : "Double-click the side button to continue")
+                                    Text(prompt.isConfirming ? "Please wait" : "Preview action · No payment required")
                                         .font(.system(size: 10, weight: .regular))
                                         .foregroundStyle(.white.opacity(0.65))
                                 }
@@ -2790,10 +2790,22 @@ private struct KsignCloneInstallPromptOverlay: View {
                     .padding(16)
                     .frame(maxWidth: .infinity)
                     .frame(height: 238)
+                    // Translucent Liquid-Glass-style surface; keep the existing overlay layout
+                    // so the known-good bottom tab bar and navigation are untouched.
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .background(Color(red: 0.105, green: 0.105, blue: 0.115), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.13), lineWidth: 0.8))
-                    .shadow(color: .black.opacity(0.36), radius: 24, x: 0, y: -5)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
+                            .fill(LinearGradient(
+                                colors: [Color.white.opacity(0.13), Color.white.opacity(0.035), Color.black.opacity(0.12)],
+                                startPoint: .topLeading, endPoint: .bottomTrailing
+                            ))
+                            .allowsHitTesting(false)
+                    }
+                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(LinearGradient(
+                        colors: [Color.white.opacity(0.36), Color.white.opacity(0.10), Color.white.opacity(0.18)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ), lineWidth: 0.9))
+                    .shadow(color: .black.opacity(0.34), radius: 24, x: 0, y: -5)
                     .padding(.horizontal, 8)
                     .padding(.bottom, max(proxy.safeAreaInsets.bottom, 10) + 8)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
