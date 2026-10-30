@@ -2692,23 +2692,25 @@ private struct KsignCloneInstallPromptOverlay: View {
         GeometryReader { proxy in
             if let appName = prompt.presentedAppName {
                 ZStack(alignment: .bottom) {
-                    Color.black.opacity(0.70)
+                    // Dim and softly blur the App Store page behind the preview.
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .overlay(Color.black.opacity(0.58))
                         .ignoresSafeArea()
+                        .contentShape(Rectangle())
                         .onTapGesture { prompt.dismiss() }
                         .transition(.opacity)
 
                     VStack {
                         HStack {
                             Spacer()
-                            if !prompt.isConfirming {
-                                Text("Double-Click to Install")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(.white.opacity(0.96))
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Color(white: 0.19), in: Capsule())
-                                    .overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 0.7))
-                            }
+                            Text("Double-Click to Install")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.white.opacity(0.96))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(.ultraThinMaterial, in: Capsule())
+                                .overlay(Capsule().stroke(Color.white.opacity(0.16), lineWidth: 0.7))
                         }
                         .padding(.horizontal, 18)
                         .padding(.top, max(proxy.safeAreaInsets.top, 20) + 8)
@@ -2717,102 +2719,131 @@ private struct KsignCloneInstallPromptOverlay: View {
                     .allowsHitTesting(false)
 
                     VStack(spacing: 0) {
-                        HStack(spacing: 10) {
+                        HStack {
                             Text("App Store")
-                                .font(.system(size: 17, weight: .semibold))
+                                .font(.system(size: 19, weight: .semibold))
                                 .foregroundStyle(.white)
                             Spacer()
                             Button { prompt.dismiss() } label: {
                                 Image(systemName: "xmark")
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(.white.opacity(0.9))
-                                    .frame(width: 30, height: 30)
-                                    .background(Color.white.opacity(0.09), in: Circle())
+                                    .foregroundStyle(.white.opacity(0.92))
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.white.opacity(0.10), in: Circle())
+                                    .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 0.7))
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Close install preview")
+                            .accessibilityLabel("Close demo preview")
                         }
-
-                        Divider().overlay(Color.white.opacity(0.09)).padding(.top, 12)
+                        .padding(.bottom, 15)
 
                         HStack(spacing: 12) {
                             KsignCloneAppIcon(name: appName, fallbackColor: .blue,
-                                              fallbackSymbol: "app.fill", size: 54, cornerRadius: 12)
+                                              fallbackSymbol: "app.fill", size: 58, cornerRadius: 13)
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(appName)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(.white)
-                                    .lineLimit(1)
-                                Text("App Store · Demo preview")
+                                HStack(spacing: 6) {
+                                    Text(appName)
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                        .lineLimit(1)
+                                    Text("12+")
+                                        .font(.system(size: 9, weight: .medium))
+                                        .foregroundStyle(.white.opacity(0.72))
+                                        .padding(.horizontal, 5)
+                                        .padding(.vertical, 2)
+                                        .overlay(Capsule().stroke(Color.white.opacity(0.28), lineWidth: 0.7))
+                                }
+                                Text("App Store preview")
                                     .font(.system(size: 11))
-                                    .foregroundStyle(.secondary)
-                                Text("Visual preview only · No app will be installed")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
+                                    .foregroundStyle(.white.opacity(0.68))
+                                Text("In-App Purchases")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.white.opacity(0.55))
                             }
                             Spacer(minLength: 0)
                         }
-                        .padding(.vertical, 15)
+                        .padding(12)
+                        .background(Color.white.opacity(0.075),
+                                    in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous)
+                            .stroke(Color.white.opacity(0.10), lineWidth: 0.7))
+
+                        HStack(spacing: 8) {
+                            Image(systemName: "person.crop.circle.fill")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.white.opacity(0.55))
+                            Text("Demo account")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.white.opacity(0.62))
+                            Spacer()
+                            Text("Preview only")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(.white.opacity(0.45))
+                        }
+                        .padding(.top, 13)
+                        .padding(.horizontal, 3)
 
                         Button { prompt.confirmVisualDemo() } label: {
-                            HStack(spacing: 11) {
+                            VStack(spacing: 8) {
                                 ZStack {
-                                    Circle().fill(Color.blue).frame(width: 32, height: 32)
-                                    Image(systemName: prompt.isConfirming ? "checkmark" : "arrow.down.circle.fill")
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .foregroundStyle(.white)
+                                    Circle()
+                                        .stroke(Color.blue.opacity(0.30), lineWidth: 2)
+                                        .frame(width: 42, height: 42)
+                                    Circle()
+                                        .trim(from: 0.08, to: prompt.isConfirming ? 0.92 : 0.78)
+                                        .stroke(Color.blue, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                                        .frame(width: 42, height: 42)
+                                        .rotationEffect(.degrees(prompt.isConfirming ? 250 : -90))
+                                        .animation(.easeInOut(duration: 0.55), value: prompt.isConfirming)
+                                    Image(systemName: prompt.isConfirming ? "checkmark" : "arrow.down")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(.blue)
                                 }
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(prompt.isConfirming ? "Finishing preview…" : "Continue")
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundStyle(.white)
-                                    Text(prompt.isConfirming ? "Please wait" : "Preview action · No payment required")
-                                        .font(.system(size: 10, weight: .regular))
-                                        .foregroundStyle(.white.opacity(0.65))
-                                }
-                                Spacer(minLength: 0)
-                                if prompt.isConfirming {
-                                    ProgressView().tint(.white)
-                                } else {
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundStyle(.white.opacity(0.45))
-                                }
+                                Text(prompt.isConfirming ? "Preview complete" : "Confirm preview")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(.white.opacity(0.92))
+                                Text("Visual demonstration · No installation or payment")
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(.white.opacity(0.48))
                             }
-                            .padding(11)
-                            .background(Color.white.opacity(0.065), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 18)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .disabled(prompt.isConfirming)
                     }
-                    .padding(16)
+                    .padding(.horizontal, 18)
+                    .padding(.top, 17)
+                    .padding(.bottom, 20)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 238)
-                    // Translucent Liquid-Glass-style surface; keep the existing overlay layout
-                    // so the known-good bottom tab bar and navigation are untouched.
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 28, style: .continuous)
-                            .fill(LinearGradient(
-                                colors: [Color.white.opacity(0.13), Color.white.opacity(0.035), Color.black.opacity(0.12)],
-                                startPoint: .topLeading, endPoint: .bottomTrailing
-                            ))
-                            .allowsHitTesting(false)
+                    .background {
+                        RoundedRectangle(cornerRadius: 30, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                            .environment(\.colorScheme, .dark)
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                                    .fill(LinearGradient(
+                                        colors: [Color.white.opacity(0.17), Color.white.opacity(0.045), Color.black.opacity(0.16)],
+                                        startPoint: .topLeading, endPoint: .bottomTrailing
+                                    ))
+                            }
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                                    .stroke(LinearGradient(
+                                        colors: [Color.white.opacity(0.42), Color.white.opacity(0.10), Color.white.opacity(0.20)],
+                                        startPoint: .topLeading, endPoint: .bottomTrailing
+                                    ), lineWidth: 0.9)
+                            }
                     }
-                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(LinearGradient(
-                        colors: [Color.white.opacity(0.36), Color.white.opacity(0.10), Color.white.opacity(0.18)],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    ), lineWidth: 0.9))
-                    .shadow(color: .black.opacity(0.34), radius: 24, x: 0, y: -5)
-                    .padding(.horizontal, 8)
-                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 10) + 8)
+                    .shadow(color: .black.opacity(0.42), radius: 28, x: 0, y: -7)
+                    .padding(.horizontal, 9)
+                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 10) + 7)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 .ignoresSafeArea()
-                .animation(.spring(response: 0.38, dampingFraction: 0.86), value: prompt.presentedAppName)
-                .animation(.easeInOut(duration: 0.18), value: prompt.isConfirming)
+                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: prompt.presentedAppName)
+                .animation(.easeInOut(duration: 0.2), value: prompt.isConfirming)
             }
         }
         .allowsHitTesting(prompt.presentedAppName != nil)
