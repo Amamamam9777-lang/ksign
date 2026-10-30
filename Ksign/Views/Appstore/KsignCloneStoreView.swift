@@ -16,92 +16,6 @@ import SwiftUI
 import Combine
 import UIKit
 
-
-// Reference-matched, template-rendered artwork for the REAL native TabView tab bar.
-// Only tab-item artwork is changed here; the native TabView, selection, layout,
-// content hierarchy, and animations remain untouched.
-private enum KsignCloneTabBarGlyphs {
-    private static func symbol(_ name: String, pointSize: CGFloat = 30) -> UIImage {
-        let configuration = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
-        return (UIImage(systemName: name, withConfiguration: configuration) ?? UIImage())
-            .withRenderingMode(.alwaysTemplate)
-    }
-
-    static let today: UIImage = {
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 36, height: 36))
-        let image = renderer.image { _ in
-            UIColor.white.setStroke()
-            UIColor.white.setFill()
-
-            // Upright rounded document outline.
-            let page = UIBezierPath(roundedRect: CGRect(x: 5.6, y: 1.8, width: 24.8, height: 32.0),
-                                    cornerRadius: 4.0)
-            page.lineWidth = 2.6
-            page.stroke()
-
-            // Two short lines near the top of the page.
-            let firstLine = UIBezierPath(roundedRect: CGRect(x: 10.0, y: 8.0, width: 16.0, height: 2.3),
-                                         cornerRadius: 1.15)
-            firstLine.fill()
-            let secondLine = UIBezierPath(roundedRect: CGRect(x: 10.0, y: 12.5, width: 10.0, height: 2.3),
-                                          cornerRadius: 1.15)
-            secondLine.fill()
-
-            // Solid lower content block, matching the reference glyph.
-            let contentBlock = UIBezierPath(roundedRect: CGRect(x: 9.8, y: 17.0, width: 16.4, height: 12.4),
-                                            cornerRadius: 1.5)
-            contentBlock.fill()
-        }
-        return image.withRenderingMode(.alwaysTemplate)
-    }()
-
-    // The reference uses the familiar solid rocket and stacked-layer glyphs.
-    static let games = symbol("rocket.fill", pointSize: 31)
-    static let apps = symbol("square.stack.3d.up.fill", pointSize: 30)
-
-    static let arcade: UIImage = {
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 36, height: 36))
-        let image = renderer.image { rendererContext in
-            let context = rendererContext.cgContext
-            UIColor.white.setFill()
-
-            // Joystick ball and stem.
-            UIBezierPath(ovalIn: CGRect(x: 14.3, y: 1.0, width: 7.4, height: 7.4)).fill()
-            UIBezierPath(roundedRect: CGRect(x: 16.65, y: 7.5, width: 2.7, height: 9.5),
-                         cornerRadius: 1.3).fill()
-
-            // Lower front bevel of the diamond-shaped cabinet.
-            let bevel = UIBezierPath()
-            bevel.move(to: CGPoint(x: 2.0, y: 17.8))
-            bevel.addLine(to: CGPoint(x: 18.0, y: 25.4))
-            bevel.addLine(to: CGPoint(x: 34.0, y: 17.8))
-            bevel.addLine(to: CGPoint(x: 34.0, y: 22.0))
-            bevel.addQuadCurve(to: CGPoint(x: 18.0, y: 30.8), controlPoint: CGPoint(x: 26.0, y: 27.0))
-            bevel.addQuadCurve(to: CGPoint(x: 2.0, y: 22.0), controlPoint: CGPoint(x: 10.0, y: 27.0))
-            bevel.close()
-            bevel.fill()
-
-            // Bright diamond top surface.
-            let top = UIBezierPath()
-            top.move(to: CGPoint(x: 2.0, y: 17.8))
-            top.addLine(to: CGPoint(x: 18.0, y: 10.0))
-            top.addLine(to: CGPoint(x: 34.0, y: 17.8))
-            top.addLine(to: CGPoint(x: 18.0, y: 25.4))
-            top.close()
-            top.fill()
-
-            // Two recessed circular controls; clear pixels let the dark bar show through.
-            context.setBlendMode(.clear)
-            context.fillEllipse(in: CGRect(x: 8.5, y: 16.5, width: 3.0, height: 3.0))
-            context.fillEllipse(in: CGRect(x: 24.5, y: 16.5, width: 3.0, height: 3.0))
-            context.setBlendMode(.normal)
-        }
-        return image.withRenderingMode(.alwaysTemplate)
-    }()
-
-    static let search = symbol("magnifyingglass", pointSize: 32)
-}
-
 // Neutral charcoal palette matching the Apple Account sheet in the reference.
 private enum KsignCloneTheme {
     static let accountBackground = Color(red: 0.105, green: 0.105, blue: 0.115) // #1B1B1D
@@ -342,23 +256,38 @@ struct KsignCloneStoreView: View {
         ZStack {
             TabView(selection: $selectedStoreTab) {
                 KsignCloneTodayView(data: data)
-                    .tabItem { Label { Text("Today") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.today).renderingMode(.template) } }
+                    .tabItem {
+                        Image("KsignTabToday").renderingMode(.template)
+                        Text("Today")
+                    }
                     .tag(0)
 
                 KsignCloneAppsView(title: "Games", apps: data.games)
-                    .tabItem { Label { Text("Games") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.games).renderingMode(.template) } }
+                    .tabItem {
+                        Image("KsignTabGames").renderingMode(.template)
+                        Text("Games")
+                    }
                     .tag(1)
 
                 KsignCloneAppsView(title: "Apps", apps: (data.games.first(where: { $0.name == "PUBG MOBILE" }).map { [$0] } ?? []) + data.featuredApps)
-                    .tabItem { Label { Text("Apps") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.apps).renderingMode(.template) } }
+                    .tabItem {
+                        Image("KsignTabApps").renderingMode(.template)
+                        Text("Apps")
+                    }
                     .tag(2)
 
                 KsignCloneArcadeView()
-                    .tabItem { Label { Text("Arcade") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.arcade).renderingMode(.template) } }
+                    .tabItem {
+                        Image("KsignTabArcade").renderingMode(.template)
+                        Text("Arcade")
+                    }
                     .tag(3)
 
                 KsignCloneSearchView(data: data, showPUBGProductPage: $showPUBGProductPage)
-                    .tabItem { Label { Text("Search") } icon: { Image(uiImage: KsignCloneTabBarGlyphs.search).renderingMode(.template) } }
+                    .tabItem {
+                        Image("KsignTabSearch").renderingMode(.template)
+                        Text("Search")
+                    }
                     .tag(4)
             }
             // Restore the original native five-tab navigation from the known-good source.
@@ -471,63 +400,46 @@ private struct KsignCloneFloatingTabBar: View {
 
     @ViewBuilder
     private func tabIcon(_ symbol: String, isSelected: Bool) -> some View {
-        let iconColor = isSelected ? accent : Color.white
         switch symbol {
         case "today-outline":
             ZStack {
                 RoundedRectangle(cornerRadius: 5.5, style: .continuous)
-                    .stroke(iconColor, lineWidth: 3.0)
+                    .stroke(isSelected ? accent : Color.white, lineWidth: 3.2)
                     .frame(width: 25, height: 34)
                 VStack(alignment: .leading, spacing: 4) {
-                    Capsule().fill(iconColor).frame(width: 17, height: 2.7)
-                    Capsule().fill(iconColor).frame(width: 18, height: 2.7)
+                    Capsule().fill(isSelected ? accent : Color.white).frame(width: 17, height: 2.7)
+                    Capsule().fill(isSelected ? accent : Color.white).frame(width: 18, height: 2.7)
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
-                        .fill(iconColor)
+                        .fill(isSelected ? accent.opacity(0.95) : Color.white)
                         .frame(width: 17, height: 10)
                 }
                 .offset(y: 3)
             }
-            .frame(width: 36, height: 36)
+            .frame(width: 41, height: 36)
         case "arcade-custom":
-            // Compact, centered joystick-on-diamond glyph matching the reference.
             ZStack {
-                // Front bevel gives the platform its layered, three-dimensional edge.
-                Path { path in
-                    path.move(to: CGPoint(x: 2, y: 19))
-                    path.addLine(to: CGPoint(x: 18, y: 27))
-                    path.addLine(to: CGPoint(x: 34, y: 19))
-                    path.addLine(to: CGPoint(x: 34, y: 23))
-                    path.addLine(to: CGPoint(x: 18, y: 31))
-                    path.addLine(to: CGPoint(x: 2, y: 23))
-                    path.closeSubpath()
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .stroke(Color.white, lineWidth: 3.2)
+                    .frame(width: 45, height: 23)
+                    .offset(y: 6)
+                Capsule().fill(Color.white).frame(width: 3.2, height: 10).offset(x: -11, y: -5)
+                Circle().fill(Color.white).frame(width: 8, height: 8).offset(x: -11, y: -14)
+                HStack(spacing: 4.0) {
+                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
                 }
-                .fill(iconColor)
-                // Top surface.
-                Path { path in
-                    path.move(to: CGPoint(x: 2, y: 18))
-                    path.addLine(to: CGPoint(x: 18, y: 10))
-                    path.addLine(to: CGPoint(x: 34, y: 18))
-                    path.addLine(to: CGPoint(x: 18, y: 26))
-                    path.closeSubpath()
+                .offset(x: 6, y: 1)
+                HStack(spacing: 4.0) {
+                    ForEach(0..<4, id: \.self) { _ in Circle().fill(Color.white).frame(width: 4.8, height: 4.8) }
                 }
-                .fill(iconColor)
-                // Joystick stem and ball.
-                Capsule().fill(iconColor).frame(width: 2.8, height: 10).offset(x: 0, y: -9)
-                Circle().fill(iconColor).frame(width: 7.5, height: 7.5).offset(x: 0, y: -15.5)
-                // Two dark inset buttons.
-                HStack(spacing: 12) {
-                    Circle().fill(Color.black.opacity(0.62)).frame(width: 3.1, height: 3.1)
-                    Circle().fill(Color.black.opacity(0.62)).frame(width: 3.1, height: 3.1)
-                }
-                .offset(y: 1)
+                .offset(x: 6, y: 10)
             }
-            .frame(width: 36, height: 36)
+            .frame(width: 47, height: 41)
         default:
             Image(systemName: symbol)
-                .font(.system(size: symbol == "magnifyingglass" ? 35 : 34, weight: .regular))
-                .symbolRenderingMode(.monochrome)
-                .foregroundStyle(iconColor)
-                .frame(width: 36, height: 36)
+                .font(.system(size: symbol == "magnifyingglass" ? 37 : 38, weight: .medium))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(isSelected ? accent : Color.white)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }
