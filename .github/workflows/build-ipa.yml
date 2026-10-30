@@ -17,12 +17,15 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache Xcode build data
-        uses: irgaly/xcode-cache@v1
+      - name: Cache Swift Packages
+        uses: actions/cache@v4
         with:
-          key: xcode-cache-${{ runner.os }}-${{ github.workflow }}-${{ github.sha }}
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/org.swift.swiftpm
+          key: swiftpm-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
           restore-keys: |
-            xcode-cache-${{ runner.os }}-${{ github.workflow }}-
+            swiftpm-${{ runner.os }}-
 
       - name: Build IPA
         run: make
