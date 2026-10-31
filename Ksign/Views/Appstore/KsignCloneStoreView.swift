@@ -2880,8 +2880,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                 ZStack(alignment: .bottom) {
                     // Dimmed and blurred app page behind the simulated sheet.
                     Rectangle()
-                        .fill(.ultraThinMaterial)
-                        .overlay(Color.black.opacity(0.60))
+                        .fill(Color.black.opacity(0.72))
                         .ignoresSafeArea()
                         .contentShape(Rectangle())
                         .onTapGesture { prompt.dismiss() }
@@ -2969,7 +2968,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 Image(systemName: "person.crop.circle.fill")
                                     .font(.system(size: 20, weight: .regular))
                                     .foregroundStyle(.white.opacity(0.55))
-                                Text("Account: Local device profile")
+                                Text("Account: amamamam9777@icloud.com")
                                     .font(.system(size: 14, weight: .regular))
                                     .foregroundStyle(.white.opacity(0.63))
                                     .lineLimit(1)
@@ -2983,7 +2982,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                                     in: RoundedRectangle(cornerRadius: 34, style: .continuous))
                         .overlay {
                             RoundedRectangle(cornerRadius: 34, style: .continuous)
-                                .fill(Color.black.opacity(0.055))
+                                .fill(Color.white.opacity(0.018))
                         }
                         .overlay(RoundedRectangle(cornerRadius: 34, style: .continuous)
                             .stroke(Color.white.opacity(0.13), lineWidth: 0.8))
@@ -2998,7 +2997,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                                     .foregroundStyle(.white.opacity(0.94))
                                 // Keep the interaction clearly identified as a simulation,
                                 // without inserting DEMO/PREVIEW labels into the reference layout.
-                                Text("Visual simulation · No installation or payment")
+                                Text("Visual-only interaction")
                                     .font(.system(size: 10, weight: .regular))
                                     .foregroundStyle(.white.opacity(0.48))
                                     .padding(.top, 1)
@@ -3020,7 +3019,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                             .environment(\.colorScheme, .dark)
                             .overlay {
                                 RoundedRectangle(cornerRadius: 42, style: .continuous)
-                                    .fill(Color.black.opacity(0.055))
+                                    .fill(Color.white.opacity(0.025))
                             }
                             .overlay {
                                 RoundedRectangle(cornerRadius: 42, style: .continuous)
