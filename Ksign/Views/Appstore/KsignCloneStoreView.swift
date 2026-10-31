@@ -185,6 +185,34 @@ class KsignCloneStoreData: ObservableObject {
             KsignCloneAppItem(name: "Plants vs. Zombies 2", category: "Strategy", iconColor: .green, iconSymbol: "leaf.fill", rating: 4.6, reviews: "500K", size: "1.5 GB", age: "9+", screenshots: [.green, .purple, .yellow], description: "Defend your garden from waves of zombies."),
         ]
 
+        // Additional App Store-style catalogue entries used by Search and category shelves.
+        featuredApps += [
+            KsignCloneAppItem(name: "Apple Music", category: "Music", iconColor: .red, iconSymbol: "music.note", rating: 4.8, reviews: "1M", size: "120 MB", age: "12+", screenshots: [.red, .pink, .black], description: "Listen to songs, albums, and curated playlists."),
+            KsignCloneAppItem(name: "Apple TV", category: "Entertainment", iconColor: .black, iconSymbol: "play.tv.fill", rating: 4.6, reviews: "400K", size: "90 MB", age: "12+", screenshots: [.black, .gray, .blue], description: "Watch original series, films, and live sports."),
+            KsignCloneAppItem(name: "Google Translate", category: "Reference", iconColor: .blue, iconSymbol: "translate", rating: 4.7, reviews: "1M", size: "180 MB", age: "4+", screenshots: [.blue, .white, .green], description: "Translate text, speech, and images."),
+            KsignCloneAppItem(name: "Waze Navigation & Live Traffic", category: "Navigation", iconColor: .blue, iconSymbol: "car.fill", rating: 4.8, reviews: "2M", size: "170 MB", age: "4+", screenshots: [.blue, .yellow, .white], description: "Get live traffic updates and driving directions."),
+            KsignCloneAppItem(name: "Microsoft Outlook", category: "Productivity", iconColor: .blue, iconSymbol: "envelope.fill", rating: 4.7, reviews: "1M", size: "320 MB", age: "4+", screenshots: [.blue, .cyan, .white], description: "Manage email, calendars, and contacts."),
+            KsignCloneAppItem(name: "Pinterest Shuffles", category: "Graphics & Design", iconColor: .pink, iconSymbol: "square.stack.3d.up.fill", rating: 4.5, reviews: "80K", size: "160 MB", age: "12+", screenshots: [.pink, .purple, .orange], description: "Create collages and visual moodboards."),
+            KsignCloneAppItem(name: "Canva: AI Photo & Video Editor", category: "Graphics & Design", iconColor: .purple, iconSymbol: "paintpalette.fill", rating: 4.8, reviews: "3M", size: "210 MB", age: "4+", screenshots: [.purple, .blue, .pink], description: "Design presentations, posters, and social posts."),
+            KsignCloneAppItem(name: "Duolingo ABC", category: "Education", iconColor: .green, iconSymbol: "book.fill", rating: 4.7, reviews: "100K", size: "180 MB", age: "4+", screenshots: [.green, .yellow, .blue], description: "Build reading and language skills."),
+            KsignCloneAppItem(name: "Twitch: Live Game Streaming", category: "Entertainment", iconColor: .purple, iconSymbol: "dot.radiowaves.left.and.right", rating: 4.7, reviews: "2M", size: "190 MB", age: "17+", screenshots: [.purple, .black, .pink], description: "Watch live streams and gaming creators."),
+            KsignCloneAppItem(name: "Reddit", category: "News", iconColor: .orange, iconSymbol: "bubble.left.and.bubble.right.fill", rating: 4.7, reviews: "3M", size: "190 MB", age: "17+", screenshots: [.orange, .black, .white], description: "Discover communities and conversations."),
+        ]
+
+        games += [
+            KsignCloneAppItem(name: "Clash of Clans", category: "Strategy", iconColor: .orange, iconSymbol: "shield.fill", rating: 4.7, reviews: "2M", size: "350 MB", age: "9+", screenshots: [.orange, .green, .blue], description: "Build a village and lead your clan."),
+            KsignCloneAppItem(name: "Honkai Impact 3rd", category: "Action", iconColor: .purple, iconSymbol: "sparkles", rating: 4.5, reviews: "300K", size: "3.5 GB", age: "12+", screenshots: [.purple, .pink, .blue], description: "Lead a squad of heroes in action combat."),
+            KsignCloneAppItem(name: "Mobile Legends: Bang Bang", category: "Strategy", iconColor: .blue, iconSymbol: "shield.lefthalf.filled", rating: 4.5, reviews: "1M", size: "2.1 GB", age: "12+", screenshots: [.blue, .purple, .yellow], description: "Team up in fast-paced multiplayer battles."),
+            KsignCloneAppItem(name: "Terraria", category: "Adventure", iconColor: .green, iconSymbol: "tree.fill", rating: 4.7, reviews: "100K", size: "250 MB", age: "9+", screenshots: [.green, .brown, .blue], description: "Dig, fight, explore, and build your world."),
+            KsignCloneAppItem(name: "Geometry Dash", category: "Music", iconColor: .purple, iconSymbol: "waveform", rating: 4.5, reviews: "300K", size: "150 MB", age: "9+", screenshots: [.purple, .cyan, .black], description: "Jump and fly through rhythm-based levels."),
+            KsignCloneAppItem(name: "Hay Day", category: "Simulation", iconColor: .green, iconSymbol: "leaf.fill", rating: 4.6, reviews: "1M", size: "400 MB", age: "4+", screenshots: [.green, .yellow, .blue], description: "Grow a farm and trade with your neighbours."),
+            KsignCloneAppItem(name: "Plants vs. Zombies", category: "Strategy", iconColor: .green, iconSymbol: "leaf.fill", rating: 4.7, reviews: "500K", size: "120 MB", age: "9+", screenshots: [.green, .purple, .yellow], description: "Defend your garden from silly zombies."),
+            KsignCloneAppItem(name: "Brawlhalla", category: "Action", iconColor: .blue, iconSymbol: "figure.martial.arts", rating: 4.4, reviews: "200K", size: "900 MB", age: "9+", screenshots: [.blue, .orange, .purple], description: "Fight in platform battles with friends."),
+            KsignCloneAppItem(name: "Real Racing 3", category: "Racing", iconColor: .black, iconSymbol: "car.side.fill", rating: 4.6, reviews: "500K", size: "3 GB", age: "4+", screenshots: [.black, .red, .gray], description: "Race licensed cars on real-world circuits."),
+            KsignCloneAppItem(name: "Temple Run 2", category: "Adventure", iconColor: .orange, iconSymbol: "figure.run", rating: 4.5, reviews: "1M", size: "250 MB", age: "9+", screenshots: [.orange, .green, .brown], description: "Escape through ancient temples and forests."),
+            KsignCloneAppItem(name: "Cut the Rope", category: "Puzzle", iconColor: .green, iconSymbol: "scissors", rating: 4.6, reviews: "300K", size: "180 MB", age: "4+", screenshots: [.green, .yellow, .blue], description: "Solve physics puzzles and feed Om Nom.")
+        ]
+
         todayCards = [
             KsignCloneTodayCardItem(category: "WHAT WE’RE PLAYING", title: "Hit the Streets in\nNeverness to Everness", subtitle: "This urban adventure’s full of hidden wonders.", appName: "NTE: Neverness to Everness", imageColor: .teal, overlayPosition: .bottomLeading),
             KsignCloneTodayCardItem(category: "NEW GAMES WE LOVE", title: "Crushed in Time", subtitle: "Walk the frog, explore, and more.", appName: "Township", imageColor: .green, overlayPosition: .bottomLeading),
@@ -1068,7 +1096,7 @@ struct KsignCloneAppBanner: View {
     }
     private var cacheKey: String {
         let nameKey = name.lowercased().unicodeScalars.map { String($0.value, radix: 16) }.joined(separator: "-")
-        return "banner-v3-" + nameKey + (preferBundledPUBGHeroArtwork ? "-hero" : "-search")
+        return "banner-v4-" + nameKey + (preferBundledPUBGHeroArtwork ? "-hero" : "-search")
     }
 
     // Bundled PUBG MOBILE yellow promotional banner supplied for this build.
@@ -1768,7 +1796,7 @@ struct KsignCloneAppBanner: View {
             if let image {
                 // The bundled PUBG artwork is already composed for the tall hero ratio.
                 // Other app banners keep the usual fill-and-crop behavior.
-                Image(uiImage: image).resizable().scaledToFill()
+                Image(uiImage: image).resizable().interpolation(.high).scaledToFill()
             } else {
                 ZStack {
                     Rectangle().fill(fallbackColor)
@@ -1807,8 +1835,10 @@ struct KsignCloneAppBanner: View {
             let result = response.results.first { $0.trackName?.localizedCaseInsensitiveCompare(name) == .orderedSame } ?? response.results.first
             // Prefer iPad screenshots where available; otherwise use the app's first App Store screenshot.
             guard let screenshot = result?.ipadScreenshotUrls?.first ?? result?.screenshotUrls?.first else { return }
-            let (imageData, _) = try await URLSession.shared.data(from: screenshot)
-            guard let downloaded = UIImage(data: imageData) else { return }
+            var imageRequest = URLRequest(url: screenshot)
+            imageRequest.cachePolicy = .returnCacheDataElseLoad
+            let (imageData, _) = try await URLSession.shared.data(for: imageRequest)
+            guard let downloaded = UIImage(data: imageData), downloaded.size.width >= 600 || downloaded.size.height >= 600 else { return }
             try? imageData.write(to: cacheFile, options: .atomic)
             image = downloaded
         } catch { /* Leave fallback visible; retry on a later visit. */ }
@@ -3031,7 +3061,8 @@ private struct KsignCloneInstallPromptOverlay: View {
                                     Text("Account:")
                                         .foregroundStyle(Color(red: 0.66, green: 0.66, blue: 0.69))
                                     Text("amamamam9777@icloud.com")
-                                        .foregroundStyle(Color(red: 0.66, green: 0.66, blue: 0.69))
+                                        .foregroundColor(Color(red: 0.66, green: 0.66, blue: 0.69))
+                                        .tint(Color(red: 0.66, green: 0.66, blue: 0.69))
                                 }
                                 .font(.system(size: 12.5, weight: .regular))
                                 .lineLimit(1)
@@ -3056,7 +3087,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 Text("Confirm with Side Button")
                                     .font(.system(size: 15, weight: .regular))
                                     .foregroundStyle(.white.opacity(0.96))
-                                Text("Preview only")
+                                Text(" ")
                                     .font(.system(size: 8, weight: .medium))
                                     .tracking(0.25)
                                     .foregroundStyle(.white.opacity(0.34))
@@ -3079,7 +3110,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                             KsignCloneFrostedMaterial(style: .systemUltraThinMaterialDark)
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 // A darker tint without making the surface cloudy or opaque.
-                                .fill(Color.black.opacity(0.36))
+                                .fill(Color.black.opacity(0.42))
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 .fill(LinearGradient(
                                     colors: [Color.white.opacity(0.052), Color.white.opacity(0.012), Color.black.opacity(0.065)],
@@ -3089,7 +3120,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                         .clipShape(RoundedRectangle(cornerRadius: 42, style: .continuous))
                         // Use a deeper black tint while reducing the glass layer opacity
                         // so more of the dimmed page remains visible through the sheet.
-                        .opacity(0.83)
+                        .opacity(0.76)
                         .overlay {
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 .stroke(LinearGradient(
@@ -3101,7 +3132,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                     .shadow(color: .black.opacity(0.40), radius: 26, x: 0, y: -6)
                     .padding(.horizontal, 9)
                     // Move the compact sheet down slightly; it now sits closer to the bottom tab bar.
-                    .padding(.bottom, proxy.size.height * 0.10)
+                    .padding(.bottom, proxy.size.height * 0.075)
                     .offset(y: prompt.isVisible ? 0 : proxy.size.height * 0.72)
                     .opacity(prompt.isVisible ? 1 : 0)
                     .scaleEffect(prompt.isVisible ? 1 : 0.985, anchor: .bottom)
