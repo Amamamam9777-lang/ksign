@@ -3029,10 +3029,11 @@ private struct KsignCloneInstallPromptOverlay: View {
                                     .foregroundStyle(.white.opacity(0.58))
                                 HStack(spacing: 4) {
                                     Text("Account:")
+                                        .foregroundStyle(Color(red: 0.66, green: 0.66, blue: 0.69))
                                     Text("amamamam9777@icloud.com")
+                                        .foregroundStyle(Color(red: 0.66, green: 0.66, blue: 0.69))
                                 }
                                 .font(.system(size: 12.5, weight: .regular))
-                                .foregroundStyle(Color(red: 0.66, green: 0.66, blue: 0.69))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.72)
                                 Spacer(minLength: 0)
@@ -3060,6 +3061,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                                     .tracking(0.25)
                                     .foregroundStyle(.white.opacity(0.34))
                             }
+                            .scaleEffect(0.90, anchor: .center)
                             .frame(maxWidth: .infinity)
                             .padding(.top, 12)
                             .contentShape(Rectangle())
@@ -3077,7 +3079,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                             KsignCloneFrostedMaterial(style: .systemUltraThinMaterialDark)
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 // A darker tint without making the surface cloudy or opaque.
-                                .fill(Color.black.opacity(0.25))
+                                .fill(Color.black.opacity(0.36))
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 .fill(LinearGradient(
                                     colors: [Color.white.opacity(0.052), Color.white.opacity(0.012), Color.black.opacity(0.065)],
@@ -3085,9 +3087,9 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 ))
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 42, style: .continuous))
-                        // Keep the outer glass tint slightly darker, while lowering its
-                        // composite opacity by 8% so the page underneath reads through.
-                        .opacity(0.92)
+                        // Use a deeper black tint while reducing the glass layer opacity
+                        // so more of the dimmed page remains visible through the sheet.
+                        .opacity(0.83)
                         .overlay {
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 .stroke(LinearGradient(
