@@ -2829,17 +2829,59 @@ struct KsignCloneGetButton: View {
     }
 }
 
+private struct KsignCloneInstallMetadata {
+    let age: String
+    let developer: String
+
+    static func details(for appName: String) -> KsignCloneInstallMetadata {
+        let name = appName.lowercased()
+        if name.contains("roblox") { return .init(age: "13+", developer: "Roblox Corporation") }
+        if name.contains("pubg") { return .init(age: "13+", developer: "Level Infinite") }
+        if name.contains("brawl stars") { return .init(age: "9+", developer: "Supercell") }
+        if name.contains("chatgpt") { return .init(age: "12+", developer: "OpenAI") }
+        if name.contains("tiktok") { return .init(age: "13+", developer: "TikTok Ltd.") }
+        if name.contains("instagram") { return .init(age: "13+", developer: "Instagram, Inc.") }
+        if name.contains("youtube") { return .init(age: "13+", developer: "Google LLC") }
+        if name.contains("subway surfers") { return .init(age: "9+", developer: "Sybo Games ApS") }
+        if name.contains("minecraft") { return .init(age: "9+", developer: "Mojang") }
+        if name.contains("safari") || name.contains("files") || name.contains("camera") || name.contains("apple support") {
+            return .init(age: "4+", developer: "Apple")
+        }
+        return .init(age: "12+", developer: "App information")
+    }
+}
+
+private struct KsignCloneSideButtonGlyph: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color(red: 0.02, green: 0.55, blue: 1.0), lineWidth: 3)
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .stroke(Color(red: 0.02, green: 0.55, blue: 1.0), lineWidth: 2.6)
+                .frame(width: 22, height: 39)
+                .offset(x: -8)
+            Image(systemName: "arrow.left")
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundStyle(Color(red: 0.02, green: 0.55, blue: 1.0))
+                .offset(x: 12)
+        }
+        .frame(width: 74, height: 74)
+        .accessibilityHidden(true)
+    }
+}
+
 private struct KsignCloneInstallPromptOverlay: View {
     @ObservedObject private var prompt = KsignCloneInstallPrompt.shared
 
     var body: some View {
         GeometryReader { proxy in
             if let appName = prompt.presentedAppName {
+                let metadata = KsignCloneInstallMetadata.details(for: appName)
                 ZStack(alignment: .bottom) {
-                    // Dim and softly blur the App Store page behind the preview.
+                    // Dimmed and blurred app page behind the simulated sheet.
                     Rectangle()
                         .fill(.ultraThinMaterial)
-                        .overlay(Color.black.opacity(0.58))
+                        .overlay(Color.black.opacity(0.60))
                         .ignoresSafeArea()
                         .contentShape(Rectangle())
                         .onTapGesture { prompt.dismiss() }
@@ -2848,13 +2890,13 @@ private struct KsignCloneInstallPromptOverlay: View {
                     VStack {
                         HStack {
                             Spacer()
-                            Text("APP PREVIEW")
-                                .font(.system(size: 10, weight: .semibold))
+                            Text("Double-Click to Install")
+                                .font(.system(size: 14, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.96))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
+                                .padding(.horizontal, 17)
+                                .padding(.vertical, 10)
                                 .background(.ultraThinMaterial, in: Capsule())
-                                .overlay(Capsule().stroke(Color.white.opacity(0.16), lineWidth: 0.7))
+                                .overlay(Capsule().stroke(Color.white.opacity(0.16), lineWidth: 0.8))
                         }
                         .padding(.horizontal, 18)
                         .padding(.top, max(proxy.safeAreaInsets.top, 20) + 8)
@@ -2863,148 +2905,145 @@ private struct KsignCloneInstallPromptOverlay: View {
                     .allowsHitTesting(false)
 
                     VStack(spacing: 0) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("App Store")
-                                    .font(.system(size: 22, weight: .semibold))
-                                Text("VISUAL PREVIEW")
-                                    .font(.system(size: 8, weight: .bold))
-                                    .tracking(1.1)
-                                    .foregroundStyle(.white.opacity(0.50))
-                            }
+                        HStack(alignment: .center) {
+                            Text("App Store")
+                                .font(.system(size: 27, weight: .semibold))
+                                .tracking(-0.45)
                                 .foregroundStyle(.white)
                             Spacer()
                             Button { prompt.dismiss() } label: {
                                 Image(systemName: "xmark")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(.white.opacity(0.92))
-                                    .frame(width: 48, height: 48)
-                                    .background(Color.white.opacity(0.10), in: Circle())
-                                    .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 0.7))
+                                    .font(.system(size: 22, weight: .medium))
+                                    .foregroundStyle(.white.opacity(0.95))
+                                    .frame(width: 62, height: 62)
+                                    .background(.ultraThinMaterial, in: Circle())
+                                    .overlay(Circle().fill(Color.white.opacity(0.035)))
+                                    .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 0.8))
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Close demo preview")
+                            .accessibilityLabel("Close simulation")
                         }
-                        .padding(.bottom, 15)
+                        .padding(.bottom, 18)
 
+                        // App identity and account are arranged in one continuous card,
+                        // matching the proportions of the supplied reference screenshot.
                         VStack(spacing: 0) {
-                            HStack(spacing: 14) {
+                            HStack(alignment: .center, spacing: 15) {
                                 KsignCloneAppIcon(name: appName, fallbackColor: .blue,
                                                   fallbackSymbol: "app.fill", size: 66, cornerRadius: 15)
                                 VStack(alignment: .leading, spacing: 4) {
-                                    HStack(spacing: 6) {
+                                    HStack(spacing: 7) {
                                         Text(appName)
-                                            .font(.system(size: 15, weight: .semibold))
+                                            .font(.system(size: 18, weight: .medium))
                                             .foregroundStyle(.white)
                                             .lineLimit(1)
-                                        Text("DEMO")
-                                            .font(.system(size: 8, weight: .bold))
-                                            .tracking(0.4)
-                                            .foregroundStyle(.white.opacity(0.70))
+                                            .minimumScaleFactor(0.78)
+                                        Text(metadata.age)
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundStyle(.white.opacity(0.72))
                                             .padding(.horizontal, 6)
-                                            .padding(.vertical, 3)
-                                            .overlay(Capsule().stroke(Color.white.opacity(0.26), lineWidth: 0.7))
+                                            .padding(.vertical, 2)
+                                            .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.white.opacity(0.34), lineWidth: 0.8))
                                     }
-                                    Text("App listing preview")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(.white.opacity(0.68))
-                                    Text("Sample content · Not connected to Apple")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white.opacity(0.55))
+                                    Text(metadata.developer)
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundStyle(.white.opacity(0.64))
+                                        .lineLimit(1)
+                                    Text("Offers In-App Purchases")
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundStyle(.white.opacity(0.64))
+                                        .lineLimit(1)
                                 }
                                 Spacer(minLength: 0)
                             }
-                            .padding(15)
+                            .padding(.horizontal, 18)
+                            .padding(.top, 18)
+                            .padding(.bottom, 19)
 
                             Rectangle()
-                                .fill(Color.white.opacity(0.085))
-                                .frame(height: 0.7)
-                                .padding(.horizontal, 15)
+                                .fill(Color.white.opacity(0.075))
+                                .frame(height: 0.8)
+                                .padding(.horizontal, 18)
 
-                            HStack(spacing: 8) {
+                            HStack(spacing: 9) {
                                 Image(systemName: "person.crop.circle.fill")
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(.white.opacity(0.58))
-                                Text("Account: Local preview profile")
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(.white.opacity(0.67))
-                                Spacer(minLength: 2)
-                                Text("DEMO")
-                                    .font(.system(size: 9, weight: .semibold))
-                                    .foregroundStyle(.white.opacity(0.45))
+                                    .font(.system(size: 20, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.55))
+                                Text("Account: Local device profile")
+                                    .font(.system(size: 14, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.63))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
+                                Spacer(minLength: 0)
                             }
-                            .padding(.horizontal, 15)
-                            .padding(.vertical, 13)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 17)
                         }
-                        .background(Color.white.opacity(0.075),
-                                    in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(Color.white.opacity(0.10), lineWidth: 0.7))
+                        .background(.ultraThinMaterial,
+                                    in: RoundedRectangle(cornerRadius: 34, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 34, style: .continuous)
+                                .fill(Color.black.opacity(0.055))
+                        }
+                        .overlay(RoundedRectangle(cornerRadius: 34, style: .continuous)
+                            .stroke(Color.white.opacity(0.13), lineWidth: 0.8))
 
                         Button { prompt.confirmVisualDemo() } label: {
-                            VStack(spacing: 8) {
-                                ZStack {
-                                    Circle()
-                                        .stroke(Color.blue.opacity(0.30), lineWidth: 2)
-                                        .frame(width: 42, height: 42)
-                                    Circle()
-                                        .trim(from: 0.08, to: prompt.isConfirming ? 0.92 : 0.78)
-                                        .stroke(Color.blue, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                                        .frame(width: 42, height: 42)
-                                        .rotationEffect(.degrees(prompt.isConfirming ? 250 : -90))
-                                        .animation(.easeInOut(duration: 0.55), value: prompt.isConfirming)
-                                    Image(systemName: prompt.isConfirming ? "checkmark" : "arrow.down")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundStyle(.blue)
-                                }
-                                Text(prompt.isConfirming ? "Preview complete" : "View app preview")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundStyle(.white.opacity(0.92))
-                                Text("Visual demo only · No installation or payment")
-                                    .font(.system(size: 9))
+                            VStack(spacing: 10) {
+                                KsignCloneSideButtonGlyph()
+                                    .scaleEffect(prompt.isConfirming ? 0.94 : 1)
+                                    .animation(.spring(response: 0.25, dampingFraction: 0.55), value: prompt.isConfirming)
+                                Text("Confirm with Side Button")
+                                    .font(.system(size: 17, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.94))
+                                // Keep the interaction clearly identified as a simulation,
+                                // without inserting DEMO/PREVIEW labels into the reference layout.
+                                Text("Visual simulation · No installation or payment")
+                                    .font(.system(size: 10, weight: .regular))
                                     .foregroundStyle(.white.opacity(0.48))
+                                    .padding(.top, 1)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.top, 18)
+                            .padding(.top, 24)
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .disabled(prompt.isConfirming)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 17)
-                    .padding(.bottom, 20)
+                    .padding(.horizontal, 17)
+                    .padding(.top, 22)
+                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 9) + 11)
                     .frame(maxWidth: .infinity)
                     .background {
-                        RoundedRectangle(cornerRadius: 30, style: .continuous)
+                        RoundedRectangle(cornerRadius: 42, style: .continuous)
                             .fill(.ultraThinMaterial)
                             .environment(\.colorScheme, .dark)
                             .overlay {
-                                RoundedRectangle(cornerRadius: 30, style: .continuous)
-                                    .fill(Color.black.opacity(0.24))
+                                RoundedRectangle(cornerRadius: 42, style: .continuous)
+                                    .fill(Color.black.opacity(0.055))
                             }
                             .overlay {
-                                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                                RoundedRectangle(cornerRadius: 42, style: .continuous)
                                     .fill(LinearGradient(
-                                        colors: [Color.white.opacity(0.12), Color.white.opacity(0.035), Color.black.opacity(0.10)],
+                                        colors: [Color.white.opacity(0.075), Color.white.opacity(0.018), Color.black.opacity(0.035)],
                                         startPoint: .topLeading, endPoint: .bottomTrailing
                                     ))
                             }
                             .overlay {
-                                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                                RoundedRectangle(cornerRadius: 42, style: .continuous)
                                     .stroke(LinearGradient(
-                                        colors: [Color.white.opacity(0.42), Color.white.opacity(0.10), Color.white.opacity(0.20)],
+                                        colors: [Color.white.opacity(0.28), Color.white.opacity(0.075), Color.white.opacity(0.16)],
                                         startPoint: .topLeading, endPoint: .bottomTrailing
                                     ), lineWidth: 0.9)
                             }
                     }
-                    .shadow(color: .black.opacity(0.42), radius: 28, x: 0, y: -7)
+                    .shadow(color: .black.opacity(0.46), radius: 30, x: 0, y: -8)
                     .padding(.horizontal, 9)
-                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 10) + 7)
+                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 5) + 4)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 .ignoresSafeArea()
-                .animation(.spring(response: 0.42, dampingFraction: 0.88), value: prompt.presentedAppName)
+                .animation(.spring(response: 0.44, dampingFraction: 0.88), value: prompt.presentedAppName)
                 .animation(.easeInOut(duration: 0.2), value: prompt.isConfirming)
             }
         }
