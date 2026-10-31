@@ -297,10 +297,9 @@ struct KsignCloneStoreView: View {
                     }
                     .tag(4)
             }
-            // Keep the native five-tab navigation and nudge it slightly lower so
-            // the tab captions sit closer to the bottom edge, as in the reference.
+            // Restore the original native five-tab navigation from the known-good source.
+            // Hide only the outer Ksign bar; this TabView owns the visible store bar.
             .toolbar(.hidden, for: .tabBar)
-            .padding(.bottom, -5)
             KsignCloneInstallPromptOverlay()
                 .zIndex(1000)
         }
@@ -1049,6 +1048,9 @@ struct KsignCloneAppBanner: View {
     let fallbackSymbol: String
     let width: CGFloat
     let height: CGFloat
+    // Search-result banners use the app's own App Store screenshots. The bundled
+    // yellow PUBG artwork remains reserved for the existing product-page hero.
+    var preferBundledPUBGHeroArtwork: Bool = true
     @State private var image: UIImage?
 
     private struct SearchResponse: Decodable { let results: [AppResult] }
@@ -1064,7 +1066,10 @@ struct KsignCloneAppBanner: View {
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }
-    private var cacheKey: String { "banner-v2-" + name.lowercased().unicodeScalars.map { String($0.value, radix: 16) }.joined(separator: "-") }
+    private var cacheKey: String {
+        let nameKey = name.lowercased().unicodeScalars.map { String($0.value, radix: 16) }.joined(separator: "-")
+        return "banner-v3-" + nameKey + (preferBundledPUBGHeroArtwork ? "-hero" : "-search")
+    }
 
     // Bundled PUBG MOBILE yellow promotional banner supplied for this build.
     // Kept in the Swift source so no Xcode asset-catalog/project-file edits are required.
@@ -1779,7 +1784,8 @@ struct KsignCloneAppBanner: View {
     @MainActor private func loadBanner() async {
         // For PUBG MOBILE, always prefer the supplied yellow promo image over any
         // App Store event screenshot. Save it in the app cache for subsequent visits.
-        if name.localizedCaseInsensitiveContains("PUBG MOBILE"),
+        if preferBundledPUBGHeroArtwork,
+           name.localizedCaseInsensitiveContains("PUBG MOBILE"),
            let bannerData = Data(base64Encoded: Self.pubgBannerBase64),
            let bundledBanner = UIImage(data: bannerData) {
             if !FileManager.default.fileExists(atPath: cacheFile.path) {
@@ -2473,6 +2479,20 @@ struct KsignCloneSearchView: View {
                         KsignCloneSmallAppRow(app: app)
                     }.buttonStyle(.plain)
                 }
+
+                // Search results get a wide screenshot banner for the same app.
+                // This deliberately bypasses the special yellow PUBG product-page hero.
+                KsignCloneAppBanner(
+                    name: app.name,
+                    fallbackColor: app.iconColor,
+                    fallbackSymbol: app.iconSymbol,
+                    width: UIScreen.main.bounds.width - 40,
+                    height: min(UIScreen.main.bounds.width * 0.47, 178),
+                    preferBundledPUBGHeroArtwork: false
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .padding(.bottom, 3)
+
                 Divider().overlay(Color.white.opacity(0.09))
             }
         }
@@ -2930,8 +2950,6 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 .foregroundStyle(.white.opacity(0.97))
                                 .padding(.horizontal, 17)
                                 .padding(.vertical, 10)
-                                .background(Color.black.opacity(0.42), in: Capsule())
-                                .overlay(Capsule().stroke(Color.white.opacity(0.19), lineWidth: 0.8))
                             Capsule()
                                 .fill(Color.white.opacity(0.96))
                                 .frame(width: 3, height: 66)
@@ -3009,11 +3027,14 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 Image(systemName: "person.crop.circle.fill")
                                     .font(.system(size: 19, weight: .regular))
                                     .foregroundStyle(.white.opacity(0.58))
-                                Text("Account: amamamam9777@icloud.com")
-                                    .font(.system(size: 12.5, weight: .regular))
-                                    .foregroundStyle(.white.opacity(0.68))
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.72)
+                                HStack(spacing: 4) {
+                                    Text("Account:")
+                                    Text("amamamam9777@icloud.com")
+                                }
+                                .font(.system(size: 12.5, weight: .regular))
+                                .foregroundStyle(Color(red: 0.66, green: 0.66, blue: 0.69))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.72)
                                 Spacer(minLength: 0)
                             }
                             .padding(.horizontal, 16)
@@ -3054,21 +3075,23 @@ private struct KsignCloneInstallPromptOverlay: View {
                         ZStack {
                             // Frost is confined to the panel itself, never applied to the full page.
                             KsignCloneFrostedMaterial(style: .systemUltraThinMaterialDark)
-                            // Keep the outer sheet near-black while allowing a little
-                            // more of the page beneath it to show through (+5 points).
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
-                                .fill(Color.black.opacity(0.18))
+                                // A darker tint without making the surface cloudy or opaque.
+                                .fill(Color.black.opacity(0.25))
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 .fill(LinearGradient(
-                                    colors: [Color.white.opacity(0.045), Color.white.opacity(0.015), Color.black.opacity(0.065)],
+                                    colors: [Color.white.opacity(0.052), Color.white.opacity(0.012), Color.black.opacity(0.065)],
                                     startPoint: .topLeading, endPoint: .bottomTrailing
                                 ))
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 42, style: .continuous))
+                        // Keep the outer glass tint slightly darker, while lowering its
+                        // composite opacity by 8% so the page underneath reads through.
+                        .opacity(0.92)
                         .overlay {
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 .stroke(LinearGradient(
-                                    colors: [Color.white.opacity(0.20), Color.white.opacity(0.055), Color.white.opacity(0.11)],
+                                    colors: [Color.white.opacity(0.19), Color.white.opacity(0.05), Color.white.opacity(0.10)],
                                     startPoint: .topLeading, endPoint: .bottomTrailing
                                 ), lineWidth: 0.85)
                         }
