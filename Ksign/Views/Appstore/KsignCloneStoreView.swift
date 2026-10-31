@@ -297,9 +297,10 @@ struct KsignCloneStoreView: View {
                     }
                     .tag(4)
             }
-            // Restore the original native five-tab navigation from the known-good source.
-            // Hide only the outer Ksign bar; this TabView owns the visible store bar.
+            // Keep the native five-tab navigation and nudge it slightly lower so
+            // the tab captions sit closer to the bottom edge, as in the reference.
             .toolbar(.hidden, for: .tabBar)
+            .padding(.bottom, -5)
             KsignCloneInstallPromptOverlay()
                 .zIndex(1000)
         }
@@ -3053,11 +3054,13 @@ private struct KsignCloneInstallPromptOverlay: View {
                         ZStack {
                             // Frost is confined to the panel itself, never applied to the full page.
                             KsignCloneFrostedMaterial(style: .systemUltraThinMaterialDark)
+                            // Keep the outer sheet near-black while allowing a little
+                            // more of the page beneath it to show through (+5 points).
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
-                                .fill(Color.black.opacity(0.23))
+                                .fill(Color.black.opacity(0.18))
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 .fill(LinearGradient(
-                                    colors: [Color.white.opacity(0.075), Color.white.opacity(0.022), Color.black.opacity(0.045)],
+                                    colors: [Color.white.opacity(0.045), Color.white.opacity(0.015), Color.black.opacity(0.065)],
                                     startPoint: .topLeading, endPoint: .bottomTrailing
                                 ))
                         }
@@ -3065,7 +3068,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                         .overlay {
                             RoundedRectangle(cornerRadius: 42, style: .continuous)
                                 .stroke(LinearGradient(
-                                    colors: [Color.white.opacity(0.23), Color.white.opacity(0.065), Color.white.opacity(0.13)],
+                                    colors: [Color.white.opacity(0.20), Color.white.opacity(0.055), Color.white.opacity(0.11)],
                                     startPoint: .topLeading, endPoint: .bottomTrailing
                                 ), lineWidth: 0.85)
                         }
