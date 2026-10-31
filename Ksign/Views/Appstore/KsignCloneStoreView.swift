@@ -2762,21 +2762,37 @@ final class KsignCloneInstallPrompt: ObservableObject {
     static let shared = KsignCloneInstallPrompt()
 
     @Published var presentedAppName: String?
+    @Published var isVisible = false
     @Published var isConfirming = false
 
     private init() {}
 
     func present(appName: String) {
         isConfirming = false
-        withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
-            presentedAppName = appName
+        presentedAppName = appName
+        isVisible = false
+        // Let SwiftUI mount the sheet first, then animate it upward from below the screen.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.presentedAppName == appName else { return }
+            withAnimation(.spring(response: 0.52, dampingFraction: 0.88)) {
+                self.isVisible = true
+            }
         }
     }
 
     func dismiss() {
-        withAnimation(.spring(response: 0.34, dampingFraction: 0.9)) {
-            presentedAppName = nil
-            isConfirming = false
+        guard let closingAppName = presentedAppName else { return }
+        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        withAnimation(.spring(response: 0.44, dampingFraction: 0.9)) {
+            isVisible = false
+        }
+        // Keep the view mounted until the downward animation has completed.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.46) { [weak self] in
+            guard let self,
+                  self.presentedAppName == closingAppName,
+                  !self.isVisible else { return }
+            self.presentedAppName = nil
+            self.isConfirming = false
         }
     }
 
@@ -2852,6 +2868,8 @@ private struct KsignCloneInstallMetadata {
 }
 
 private struct KsignCloneSideButtonGlyph: View {
+    @State private var arrowShift = false
+
     var body: some View {
         ZStack {
             Circle()
@@ -2863,9 +2881,11 @@ private struct KsignCloneSideButtonGlyph: View {
             Image(systemName: "arrow.left")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color(red: 0.02, green: 0.55, blue: 1.0))
-                .offset(x: 10)
+                .offset(x: arrowShift ? 11 : 8)
+                .animation(.easeInOut(duration: 0.72).repeatForever(autoreverses: true), value: arrowShift)
         }
         .frame(width: 40, height: 40)
+        .onAppear { arrowShift = true }
         .accessibilityHidden(true)
     }
 }
@@ -2878,17 +2898,17 @@ private struct KsignCloneInstallPromptOverlay: View {
             if let appName = prompt.presentedAppName {
                 let metadata = KsignCloneInstallMetadata.details(for: appName)
                 ZStack(alignment: .bottom) {
-                    // Keep the page itself crisp and dark; only the panel is glass-like.
+                    // The product page is dimmed, but stays sharp; the glass treatment belongs to the sheet.
                     Rectangle()
-                        .fill(Color.black.opacity(0.72))
+                        .fill(Color.black.opacity(prompt.isVisible ? 0.72 : 0))
                         .ignoresSafeArea()
                         .contentShape(Rectangle())
                         .onTapGesture { prompt.dismiss() }
-                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.24), value: prompt.isVisible)
 
-                    // The install hint sits over the product page, not at the status bar.
+                    // Install hint and its slim white side marker animate in together.
                     VStack {
-                        HStack {
+                        HStack(spacing: 9) {
                             Spacer()
                             Text("Double-Click to Install")
                                 .font(.system(size: 14, weight: .medium))
@@ -2896,12 +2916,19 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 .padding(.horizontal, 17)
                                 .padding(.vertical, 10)
                                 .background(Color.black.opacity(0.42), in: Capsule())
-                                .overlay(Capsule().stroke(Color.white.opacity(0.17), lineWidth: 0.8))
+                                .overlay(Capsule().stroke(Color.white.opacity(0.19), lineWidth: 0.8))
+                            Capsule()
+                                .fill(Color.white.opacity(0.96))
+                                .frame(width: 3, height: 66)
+                                .shadow(color: .white.opacity(0.24), radius: 4, x: 0, y: 0)
                         }
-                        .padding(.horizontal, 18)
+                        .padding(.horizontal, 14)
                         Spacer(minLength: 0)
                     }
                     .padding(.top, proxy.size.height * 0.235)
+                    .opacity(prompt.isVisible ? 1 : 0)
+                    .offset(x: prompt.isVisible ? 0 : 18, y: prompt.isVisible ? 0 : -5)
+                    .animation(.easeOut(duration: 0.34).delay(0.08), value: prompt.isVisible)
                     .allowsHitTesting(false)
 
                     VStack(spacing: 0) {
@@ -2911,6 +2938,12 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 .tracking(-0.4)
                                 .foregroundStyle(.white)
                             Spacer()
+                            // Keep a small, clear indication that this is a UI demo rather than Apple's system sheet.
+                            Text("DEMO")
+                                .font(.system(size: 7, weight: .semibold))
+                                .tracking(1.0)
+                                .foregroundStyle(.white.opacity(0.48))
+                                .padding(.trailing, 7)
                             Button { prompt.dismiss() } label: {
                                 Image(systemName: "xmark")
                                     .font(.system(size: 21, weight: .medium))
@@ -2920,11 +2953,11 @@ private struct KsignCloneInstallPromptOverlay: View {
                                     .overlay(Circle().stroke(Color.white.opacity(0.13), lineWidth: 0.8))
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Close visual simulation")
+                            .accessibilityLabel("Close demo")
                         }
                         .padding(.bottom, 8)
 
-                        // The inner app/account card stays charcoal and opaque like the reference.
+                        // The inner app/account card remains a distinct charcoal surface.
                         VStack(spacing: 0) {
                             HStack(alignment: .center, spacing: 13) {
                                 KsignCloneAppIcon(name: appName, fallbackColor: .blue,
@@ -2992,11 +3025,6 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 Text("Confirm with Side Button")
                                     .font(.system(size: 15, weight: .regular))
                                     .foregroundStyle(.white.opacity(0.96))
-                                // Retain a discreet disclosure: this screen is not an iOS system prompt.
-                                Text("Visual simulation")
-                                    .font(.system(size: 8, weight: .regular))
-                                    .foregroundStyle(.white.opacity(0.45))
-                                    .padding(.top, 1)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.top, 12)
@@ -3007,16 +3035,16 @@ private struct KsignCloneInstallPromptOverlay: View {
                     }
                     .padding(.horizontal, 17)
                     .padding(.top, 11)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 12)
                     .frame(maxWidth: .infinity)
                     .background {
                         RoundedRectangle(cornerRadius: 42, style: .continuous)
-                            // Translucent tint instead of ultraThinMaterial: no muddy blur.
-                            .fill(Color.black.opacity(0.36))
+                            // Slightly richer tint on the OUTER glass only; no heavy blur/material layer.
+                            .fill(Color.black.opacity(0.42))
                             .overlay {
                                 RoundedRectangle(cornerRadius: 42, style: .continuous)
                                     .fill(LinearGradient(
-                                        colors: [Color.white.opacity(0.055), Color.white.opacity(0.012), Color.black.opacity(0.025)],
+                                        colors: [Color.white.opacity(0.065), Color.white.opacity(0.016), Color.black.opacity(0.035)],
                                         startPoint: .topLeading, endPoint: .bottomTrailing
                                     ))
                             }
@@ -3030,19 +3058,19 @@ private struct KsignCloneInstallPromptOverlay: View {
                     }
                     .shadow(color: .black.opacity(0.40), radius: 26, x: 0, y: -6)
                     .padding(.horizontal, 9)
-                    // Float the compact sheet above the bottom edge, as in the reference.
-                    .padding(.bottom, proxy.size.height * 0.14)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    // Move the compact sheet down slightly; it now sits closer to the bottom tab bar.
+                    .padding(.bottom, proxy.size.height * 0.10)
+                    .offset(y: prompt.isVisible ? 0 : proxy.size.height * 0.72)
+                    .opacity(prompt.isVisible ? 1 : 0)
+                    .scaleEffect(prompt.isVisible ? 1 : 0.985, anchor: .bottom)
+                    .animation(.spring(response: 0.52, dampingFraction: 0.88), value: prompt.isVisible)
                 }
                 .ignoresSafeArea()
-                .animation(.spring(response: 0.44, dampingFraction: 0.88), value: prompt.presentedAppName)
-                .animation(.easeInOut(duration: 0.2), value: prompt.isConfirming)
             }
         }
         .allowsHitTesting(prompt.presentedAppName != nil)
     }
 }
-
 struct KsignCloneAccountIcon: View {
     var body: some View {
         Circle()
