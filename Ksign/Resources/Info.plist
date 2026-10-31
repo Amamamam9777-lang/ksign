@@ -223,6 +223,8 @@
 			</dict>
 		</dict>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>KSign uses the camera when you tap Open for the Camera preview.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>capcut</string>
@@ -232,6 +234,8 @@
 		<string>deepseek</string>
 		<string>games</string>
 		<string>instagram</string>
+		<string>applesupport</string>
+		<string>youtube</string>
 		<string>pubgm</string>
 		<string>shadowfight2</string>
 		<string>subwaysurfers</string>
