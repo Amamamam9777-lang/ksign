@@ -2855,17 +2855,17 @@ private struct KsignCloneSideButtonGlyph: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color(red: 0.02, green: 0.55, blue: 1.0), lineWidth: 3)
+                .stroke(Color(red: 0.02, green: 0.55, blue: 1.0), lineWidth: 2.2)
             RoundedRectangle(cornerRadius: 4, style: .continuous)
-                .stroke(Color(red: 0.02, green: 0.55, blue: 1.0), lineWidth: 2.6)
-                .frame(width: 22, height: 39)
-                .offset(x: -8)
+                .stroke(Color(red: 0.02, green: 0.55, blue: 1.0), lineWidth: 2.0)
+                .frame(width: 17, height: 28)
+                .offset(x: -6)
             Image(systemName: "arrow.left")
-                .font(.system(size: 24, weight: .semibold))
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Color(red: 0.02, green: 0.55, blue: 1.0))
-                .offset(x: 12)
+                .offset(x: 10)
         }
-        .frame(width: 74, height: 74)
+        .frame(width: 40, height: 40)
         .accessibilityHidden(true)
     }
 }
@@ -2878,7 +2878,7 @@ private struct KsignCloneInstallPromptOverlay: View {
             if let appName = prompt.presentedAppName {
                 let metadata = KsignCloneInstallMetadata.details(for: appName)
                 ZStack(alignment: .bottom) {
-                    // Dimmed and blurred app page behind the simulated sheet.
+                    // Keep the page itself crisp and dark; only the panel is glass-like.
                     Rectangle()
                         .fill(Color.black.opacity(0.72))
                         .ignoresSafeArea()
@@ -2886,159 +2886,152 @@ private struct KsignCloneInstallPromptOverlay: View {
                         .onTapGesture { prompt.dismiss() }
                         .transition(.opacity)
 
+                    // The install hint sits over the product page, not at the status bar.
                     VStack {
                         HStack {
                             Spacer()
                             Text("Double-Click to Install")
                                 .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.96))
+                                .foregroundStyle(.white.opacity(0.97))
                                 .padding(.horizontal, 17)
                                 .padding(.vertical, 10)
-                                .background(.ultraThinMaterial, in: Capsule())
-                                .overlay(Capsule().stroke(Color.white.opacity(0.16), lineWidth: 0.8))
+                                .background(Color.black.opacity(0.42), in: Capsule())
+                                .overlay(Capsule().stroke(Color.white.opacity(0.17), lineWidth: 0.8))
                         }
                         .padding(.horizontal, 18)
-                        .padding(.top, max(proxy.safeAreaInsets.top, 20) + 8)
-                        Spacer()
+                        Spacer(minLength: 0)
                     }
+                    .padding(.top, proxy.size.height * 0.235)
                     .allowsHitTesting(false)
 
                     VStack(spacing: 0) {
                         HStack(alignment: .center) {
                             Text("App Store")
-                                .font(.system(size: 27, weight: .semibold))
-                                .tracking(-0.45)
+                                .font(.system(size: 24, weight: .semibold))
+                                .tracking(-0.4)
                                 .foregroundStyle(.white)
                             Spacer()
                             Button { prompt.dismiss() } label: {
                                 Image(systemName: "xmark")
-                                    .font(.system(size: 22, weight: .medium))
-                                    .foregroundStyle(.white.opacity(0.95))
-                                    .frame(width: 62, height: 62)
-                                    .background(.ultraThinMaterial, in: Circle())
-                                    .overlay(Circle().fill(Color.white.opacity(0.035)))
-                                    .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 0.8))
+                                    .font(.system(size: 21, weight: .medium))
+                                    .foregroundStyle(.white.opacity(0.96))
+                                    .frame(width: 56, height: 56)
+                                    .background(Color.white.opacity(0.075), in: Circle())
+                                    .overlay(Circle().stroke(Color.white.opacity(0.13), lineWidth: 0.8))
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Close simulation")
+                            .accessibilityLabel("Close visual simulation")
                         }
-                        .padding(.bottom, 18)
+                        .padding(.bottom, 8)
 
-                        // App identity and account are arranged in one continuous card,
-                        // matching the proportions of the supplied reference screenshot.
+                        // The inner app/account card stays charcoal and opaque like the reference.
                         VStack(spacing: 0) {
-                            HStack(alignment: .center, spacing: 15) {
+                            HStack(alignment: .center, spacing: 13) {
                                 KsignCloneAppIcon(name: appName, fallbackColor: .blue,
-                                                  fallbackSymbol: "app.fill", size: 66, cornerRadius: 15)
-                                VStack(alignment: .leading, spacing: 4) {
-                                    HStack(spacing: 7) {
+                                                  fallbackSymbol: "app.fill", size: 56, cornerRadius: 13)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    HStack(spacing: 6) {
                                         Text(appName)
-                                            .font(.system(size: 18, weight: .medium))
+                                            .font(.system(size: 15, weight: .medium))
                                             .foregroundStyle(.white)
                                             .lineLimit(1)
-                                            .minimumScaleFactor(0.78)
+                                            .minimumScaleFactor(0.76)
                                         Text(metadata.age)
-                                            .font(.system(size: 11, weight: .medium))
-                                            .foregroundStyle(.white.opacity(0.72))
-                                            .padding(.horizontal, 6)
+                                            .font(.system(size: 10, weight: .medium))
+                                            .foregroundStyle(.white.opacity(0.74))
+                                            .padding(.horizontal, 5)
                                             .padding(.vertical, 2)
                                             .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.white.opacity(0.34), lineWidth: 0.8))
                                     }
                                     Text(metadata.developer)
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundStyle(.white.opacity(0.64))
+                                        .font(.system(size: 12.5, weight: .regular))
+                                        .foregroundStyle(.white.opacity(0.66))
                                         .lineLimit(1)
                                     Text("Offers In-App Purchases")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundStyle(.white.opacity(0.64))
+                                        .font(.system(size: 12.5, weight: .regular))
+                                        .foregroundStyle(.white.opacity(0.66))
                                         .lineLimit(1)
                                 }
                                 Spacer(minLength: 0)
                             }
-                            .padding(.horizontal, 18)
-                            .padding(.top, 18)
-                            .padding(.bottom, 19)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 13)
+                            .padding(.bottom, 13)
 
                             Rectangle()
                                 .fill(Color.white.opacity(0.075))
                                 .frame(height: 0.8)
-                                .padding(.horizontal, 18)
+                                .padding(.horizontal, 16)
 
-                            HStack(spacing: 9) {
+                            HStack(spacing: 8) {
                                 Image(systemName: "person.crop.circle.fill")
-                                    .font(.system(size: 20, weight: .regular))
-                                    .foregroundStyle(.white.opacity(0.55))
+                                    .font(.system(size: 19, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.58))
                                 Text("Account: amamamam9777@icloud.com")
-                                    .font(.system(size: 14, weight: .regular))
-                                    .foregroundStyle(.white.opacity(0.63))
+                                    .font(.system(size: 12.5, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.68))
                                     .lineLimit(1)
-                                    .minimumScaleFactor(0.8)
+                                    .minimumScaleFactor(0.72)
                                 Spacer(minLength: 0)
                             }
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 17)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
                         }
-                        .background(.ultraThinMaterial,
-                                    in: RoundedRectangle(cornerRadius: 34, style: .continuous))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 34, style: .continuous)
-                                .fill(Color.white.opacity(0.018))
-                        }
-                        .overlay(RoundedRectangle(cornerRadius: 34, style: .continuous)
-                            .stroke(Color.white.opacity(0.13), lineWidth: 0.8))
+                        .background(
+                            Color(red: 0.17, green: 0.17, blue: 0.18),
+                            in: RoundedRectangle(cornerRadius: 32, style: .continuous)
+                        )
+                        .overlay(RoundedRectangle(cornerRadius: 32, style: .continuous)
+                            .stroke(Color.white.opacity(0.105), lineWidth: 0.8))
 
                         Button { prompt.confirmVisualDemo() } label: {
-                            VStack(spacing: 10) {
+                            VStack(spacing: 7) {
                                 KsignCloneSideButtonGlyph()
                                     .scaleEffect(prompt.isConfirming ? 0.94 : 1)
                                     .animation(.spring(response: 0.25, dampingFraction: 0.55), value: prompt.isConfirming)
                                 Text("Confirm with Side Button")
-                                    .font(.system(size: 17, weight: .regular))
-                                    .foregroundStyle(.white.opacity(0.94))
-                                // Keep the interaction clearly identified as a simulation,
-                                // without inserting DEMO/PREVIEW labels into the reference layout.
-                                Text("Visual-only interaction")
-                                    .font(.system(size: 10, weight: .regular))
-                                    .foregroundStyle(.white.opacity(0.48))
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.96))
+                                // Retain a discreet disclosure: this screen is not an iOS system prompt.
+                                Text("Visual simulation")
+                                    .font(.system(size: 8, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.45))
                                     .padding(.top, 1)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.top, 24)
+                            .padding(.top, 12)
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .disabled(prompt.isConfirming)
                     }
                     .padding(.horizontal, 17)
-                    .padding(.top, 22)
-                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 9) + 11)
+                    .padding(.top, 11)
+                    .padding(.bottom, 8)
                     .frame(maxWidth: .infinity)
                     .background {
                         RoundedRectangle(cornerRadius: 42, style: .continuous)
-                            .fill(.ultraThinMaterial)
-                            .environment(\.colorScheme, .dark)
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 42, style: .continuous)
-                                    .fill(Color.white.opacity(0.025))
-                            }
+                            // Translucent tint instead of ultraThinMaterial: no muddy blur.
+                            .fill(Color.black.opacity(0.36))
                             .overlay {
                                 RoundedRectangle(cornerRadius: 42, style: .continuous)
                                     .fill(LinearGradient(
-                                        colors: [Color.white.opacity(0.075), Color.white.opacity(0.018), Color.black.opacity(0.035)],
+                                        colors: [Color.white.opacity(0.055), Color.white.opacity(0.012), Color.black.opacity(0.025)],
                                         startPoint: .topLeading, endPoint: .bottomTrailing
                                     ))
                             }
                             .overlay {
                                 RoundedRectangle(cornerRadius: 42, style: .continuous)
                                     .stroke(LinearGradient(
-                                        colors: [Color.white.opacity(0.28), Color.white.opacity(0.075), Color.white.opacity(0.16)],
+                                        colors: [Color.white.opacity(0.22), Color.white.opacity(0.055), Color.white.opacity(0.12)],
                                         startPoint: .topLeading, endPoint: .bottomTrailing
-                                    ), lineWidth: 0.9)
+                                    ), lineWidth: 0.85)
                             }
                     }
-                    .shadow(color: .black.opacity(0.46), radius: 30, x: 0, y: -8)
+                    .shadow(color: .black.opacity(0.40), radius: 26, x: 0, y: -6)
                     .padding(.horizontal, 9)
-                    .padding(.bottom, max(proxy.safeAreaInsets.bottom, 5) + 4)
+                    // Float the compact sheet above the bottom edge, as in the reference.
+                    .padding(.bottom, proxy.size.height * 0.14)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 .ignoresSafeArea()
