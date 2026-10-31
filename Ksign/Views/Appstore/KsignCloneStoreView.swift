@@ -2890,6 +2890,20 @@ private struct KsignCloneSideButtonGlyph: View {
     }
 }
 
+// A restrained UIKit blur used only inside the outer install-preview sheet.
+// The product page remains sharp; only the glass panel receives this frost.
+private struct KsignCloneFrostedMaterial: UIViewRepresentable {
+    var style: UIBlurEffect.Style = .systemUltraThinMaterialDark
+
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        UIVisualEffectView(effect: UIBlurEffect(style: style))
+    }
+
+    func updateUIView(_ view: UIVisualEffectView, context: Context) {
+        if view.effect == nil { view.effect = UIBlurEffect(style: style) }
+    }
+}
+
 private struct KsignCloneInstallPromptOverlay: View {
     @ObservedObject private var prompt = KsignCloneInstallPrompt.shared
 
@@ -2900,11 +2914,11 @@ private struct KsignCloneInstallPromptOverlay: View {
                 ZStack(alignment: .bottom) {
                     // The product page is dimmed, but stays sharp; the glass treatment belongs to the sheet.
                     Rectangle()
-                        .fill(Color.black.opacity(prompt.isVisible ? 0.72 : 0))
+                        .fill(Color.black.opacity(prompt.isVisible ? 0.78 : 0))
                         .ignoresSafeArea()
                         .contentShape(Rectangle())
                         .onTapGesture { prompt.dismiss() }
-                        .animation(.easeInOut(duration: 0.24), value: prompt.isVisible)
+                        .animation(.easeInOut(duration: 0.30), value: prompt.isVisible)
 
                     // Install hint and its slim white side marker animate in together.
                     VStack {
@@ -2928,7 +2942,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                     .padding(.top, proxy.size.height * 0.235)
                     .opacity(prompt.isVisible ? 1 : 0)
                     .offset(x: prompt.isVisible ? 0 : 18, y: prompt.isVisible ? 0 : -5)
-                    .animation(.easeOut(duration: 0.34).delay(0.08), value: prompt.isVisible)
+                    .animation(.easeOut(duration: 0.38).delay(0.06), value: prompt.isVisible)
                     .allowsHitTesting(false)
 
                     VStack(spacing: 0) {
@@ -2938,12 +2952,6 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 .tracking(-0.4)
                                 .foregroundStyle(.white)
                             Spacer()
-                            // Keep a small, clear indication that this is a UI demo rather than Apple's system sheet.
-                            Text("DEMO")
-                                .font(.system(size: 7, weight: .semibold))
-                                .tracking(1.0)
-                                .foregroundStyle(.white.opacity(0.48))
-                                .padding(.trailing, 7)
                             Button { prompt.dismiss() } label: {
                                 Image(systemName: "xmark")
                                     .font(.system(size: 21, weight: .medium))
@@ -3025,6 +3033,10 @@ private struct KsignCloneInstallPromptOverlay: View {
                                 Text("Confirm with Side Button")
                                     .font(.system(size: 15, weight: .regular))
                                     .foregroundStyle(.white.opacity(0.96))
+                                Text("Preview only")
+                                    .font(.system(size: 8, weight: .medium))
+                                    .tracking(0.25)
+                                    .foregroundStyle(.white.opacity(0.34))
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.top, 12)
@@ -3038,23 +3050,25 @@ private struct KsignCloneInstallPromptOverlay: View {
                     .padding(.bottom, 12)
                     .frame(maxWidth: .infinity)
                     .background {
-                        RoundedRectangle(cornerRadius: 42, style: .continuous)
-                            // Slightly richer tint on the OUTER glass only; no heavy blur/material layer.
-                            .fill(Color.black.opacity(0.42))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 42, style: .continuous)
-                                    .fill(LinearGradient(
-                                        colors: [Color.white.opacity(0.065), Color.white.opacity(0.016), Color.black.opacity(0.035)],
-                                        startPoint: .topLeading, endPoint: .bottomTrailing
-                                    ))
-                            }
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 42, style: .continuous)
-                                    .stroke(LinearGradient(
-                                        colors: [Color.white.opacity(0.22), Color.white.opacity(0.055), Color.white.opacity(0.12)],
-                                        startPoint: .topLeading, endPoint: .bottomTrailing
-                                    ), lineWidth: 0.85)
-                            }
+                        ZStack {
+                            // Frost is confined to the panel itself, never applied to the full page.
+                            KsignCloneFrostedMaterial(style: .systemUltraThinMaterialDark)
+                            RoundedRectangle(cornerRadius: 42, style: .continuous)
+                                .fill(Color.black.opacity(0.23))
+                            RoundedRectangle(cornerRadius: 42, style: .continuous)
+                                .fill(LinearGradient(
+                                    colors: [Color.white.opacity(0.075), Color.white.opacity(0.022), Color.black.opacity(0.045)],
+                                    startPoint: .topLeading, endPoint: .bottomTrailing
+                                ))
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 42, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 42, style: .continuous)
+                                .stroke(LinearGradient(
+                                    colors: [Color.white.opacity(0.23), Color.white.opacity(0.065), Color.white.opacity(0.13)],
+                                    startPoint: .topLeading, endPoint: .bottomTrailing
+                                ), lineWidth: 0.85)
+                        }
                     }
                     .shadow(color: .black.opacity(0.40), radius: 26, x: 0, y: -6)
                     .padding(.horizontal, 9)
@@ -3063,7 +3077,7 @@ private struct KsignCloneInstallPromptOverlay: View {
                     .offset(y: prompt.isVisible ? 0 : proxy.size.height * 0.72)
                     .opacity(prompt.isVisible ? 1 : 0)
                     .scaleEffect(prompt.isVisible ? 1 : 0.985, anchor: .bottom)
-                    .animation(.spring(response: 0.52, dampingFraction: 0.88), value: prompt.isVisible)
+                    .animation(.spring(response: 0.46, dampingFraction: 0.88), value: prompt.isVisible)
                 }
                 .ignoresSafeArea()
             }
